@@ -211,6 +211,19 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Color", () -> hex(c.capeColorArgb), () -> c.capeColorArgb = previousColor(c.capeColorArgb), () -> c.capeColorArgb = nextColor(c.capeColorArgb));
                 row("Show others", () -> c.capeShowOthers ? "ON" : "OFF", () -> c.capeShowOthers = !c.capeShowOthers, () -> c.capeShowOthers = !c.capeShowOthers);
             }
+            case "wings" -> {
+                row("Style", () -> wingStyleName(c.wingsStyle), () -> c.wingsStyle = Math.floorMod(c.wingsStyle - 1, 4), () -> c.wingsStyle = Math.floorMod(c.wingsStyle + 1, 4));
+                row("Scale", () -> String.format("%.2f", c.wingsScale), () -> c.wingsScale = Math.max(0.45F, c.wingsScale - 0.05F), () -> c.wingsScale = Math.min(2.25F, c.wingsScale + 0.05F));
+                row("Spread", () -> String.format("%.2f", c.wingsSpread), () -> c.wingsSpread = Math.max(0.35F, c.wingsSpread - 0.05F), () -> c.wingsSpread = Math.min(1.65F, c.wingsSpread + 0.05F));
+                row("Flap speed", () -> String.format("%.2f", c.wingsFlapSpeed), () -> c.wingsFlapSpeed = Math.max(0.10F, c.wingsFlapSpeed - 0.10F), () -> c.wingsFlapSpeed = Math.min(3.0F, c.wingsFlapSpeed + 0.10F));
+                row("Flap amount", () -> String.format("%.2f", c.wingsFlapAmount), () -> c.wingsFlapAmount = Math.max(0.0F, c.wingsFlapAmount - 0.03F), () -> c.wingsFlapAmount = Math.min(0.55F, c.wingsFlapAmount + 0.03F));
+                row("Opacity", () -> Integer.toString(c.wingsOpacity), () -> c.wingsOpacity = Math.max(30, c.wingsOpacity - 10), () -> c.wingsOpacity = Math.min(235, c.wingsOpacity + 10));
+                row("Primary", () -> hex(c.wingsPrimaryColorArgb), () -> c.wingsPrimaryColorArgb = previousColor(c.wingsPrimaryColorArgb), () -> c.wingsPrimaryColorArgb = nextColor(c.wingsPrimaryColorArgb));
+                row("Secondary", () -> hex(c.wingsSecondaryColorArgb), () -> c.wingsSecondaryColorArgb = previousColor(c.wingsSecondaryColorArgb), () -> c.wingsSecondaryColorArgb = nextColor(c.wingsSecondaryColorArgb));
+                row("Glow", () -> c.wingsGlow ? "ON" : "OFF", () -> c.wingsGlow = !c.wingsGlow, () -> c.wingsGlow = !c.wingsGlow);
+                row("Rainbow", () -> c.wingsRainbow ? "ON" : "OFF", () -> c.wingsRainbow = !c.wingsRainbow, () -> c.wingsRainbow = !c.wingsRainbow);
+                row("Show others", () -> c.wingsShowOthers ? "ON" : "OFF", () -> c.wingsShowOthers = !c.wingsShowOthers, () -> c.wingsShowOthers = !c.wingsShowOthers);
+            }
             case "drop_protection" -> {
                 row("Confirm window", () -> c.dropProtectionWindowMs + " ms", () -> c.dropProtectionWindowMs = Math.max(700L, c.dropProtectionWindowMs - 100L), () -> c.dropProtectionWindowMs = Math.min(5000L, c.dropProtectionWindowMs + 100L));
                 row("Protect armor", () -> c.protectArmor ? "ON" : "OFF", () -> c.protectArmor = !c.protectArmor, () -> c.protectArmor = !c.protectArmor);
@@ -422,6 +435,12 @@ public final class ModuleSettingsScreen extends Screen {
             case "projectile_prediction" -> { c.projectileColorArgb = 0xFF41C7FF; c.projectileLineWidth = 2F; c.projectileSteps = 72; }
             case "baby_mode" -> { c.babyScale = 0.65F; c.babyModeOthers = false; }
             case "cape" -> { c.capeColorArgb = 0xFF8B5CF6; c.capeWidth = 0.64F; c.capeHeight = 1.05F; c.capeLineWidth = 2F; c.capeShowOthers = false; }
+            case "wings" -> {
+                c.wingsStyle = 0; c.wingsScale = 1.0F; c.wingsSpread = 0.95F;
+                c.wingsFlapSpeed = 1.0F; c.wingsFlapAmount = 0.16F; c.wingsOpacity = 145;
+                c.wingsPrimaryColorArgb = 0xFF8B5CF6; c.wingsSecondaryColorArgb = 0xFF41C7FF;
+                c.wingsRainbow = false; c.wingsGlow = true; c.wingsShowOthers = false;
+            }
             case "drop_protection" -> { c.dropProtectionWindowMs = 1800L; c.protectArmor = true; c.protectTools = true; c.protectTotems = true; c.protectNamedItems = true; }
             case "auto_gg" -> { c.autoGgMessage = "gg"; c.autoGgCooldownMs = 15000L; }
             case "item_color" -> {
@@ -516,6 +535,15 @@ public final class ModuleSettingsScreen extends Screen {
         String[] values = {"gg", "GG", "good game", "gg wp"};
         for (int i = 0; i < values.length; i++) if (values[i].equalsIgnoreCase(current)) return values[(i + values.length - 1) % values.length];
         return values[0];
+    }
+
+    private static String wingStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 1 -> "DEMON";
+            case 2 -> "CRYSTAL";
+            case 3 -> "DRAGON";
+            default -> "ANGEL";
+        };
     }
 
     private static String crosshairStyleName(int style) {
