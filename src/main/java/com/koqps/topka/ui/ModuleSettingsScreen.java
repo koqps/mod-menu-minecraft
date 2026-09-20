@@ -133,7 +133,12 @@ public final class ModuleSettingsScreen extends Screen {
             }
             case "ambience" -> row("Time", () -> timeName(c.ambienceTime), () -> c.ambienceTime = previousTime(c.ambienceTime), () -> c.ambienceTime = nextTime(c.ambienceTime));
             case "hit_color" -> row("Hit color", () -> hex(c.hitColorArgb), () -> c.hitColorArgb = withAlpha(previousColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF), () -> c.hitColorArgb = withAlpha(nextColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF));
-            case "targeting" -> row("Target color", () -> hex(c.targetColorArgb), () -> c.targetColorArgb = previousColor(c.targetColorArgb), () -> c.targetColorArgb = nextColor(c.targetColorArgb));
+            case "targeting" -> {
+                row("Style", () -> switch (c.targetMode) { case 0 -> "BOX"; case 1 -> "RING"; default -> "BOTH"; }, () -> c.targetMode = Math.floorMod(c.targetMode - 1, 3), () -> c.targetMode = Math.floorMod(c.targetMode + 1, 3));
+                row("Target color", () -> hex(c.targetColorArgb), () -> c.targetColorArgb = previousColor(c.targetColorArgb), () -> c.targetColorArgb = nextColor(c.targetColorArgb));
+                row("Pulse", () -> c.targetPulse ? "ON" : "OFF", () -> c.targetPulse = !c.targetPulse, () -> c.targetPulse = !c.targetPulse);
+                row("Ring padding", () -> String.format("%.2f", c.targetPadding), () -> c.targetPadding = Math.max(0F, c.targetPadding - 0.02F), () -> c.targetPadding = Math.min(0.75F, c.targetPadding + 0.02F));
+            }
             case "sprint" -> row("Stop while using item", () -> c.sprintStopWhileUsingItem ? "ON" : "OFF", () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem, () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem);
             case "health_tags" -> {
                 row("Display style", () -> c.healthTagHearts ? "HEARTS" : "NUMERIC", () -> c.healthTagHearts = !c.healthTagHearts, () -> c.healthTagHearts = !c.healthTagHearts);
@@ -318,7 +323,7 @@ public final class ModuleSettingsScreen extends Screen {
             case "swing_animations" -> { c.swingMode = 0; c.swingStrength = 1F; }
             case "ambience" -> c.ambienceTime = 6000L;
             case "hit_color" -> c.hitColorArgb = 0xB28B5CF6;
-            case "targeting" -> c.targetColorArgb = 0xFFFF5C77;
+            case "targeting" -> { c.targetColorArgb = 0xFFFF5C77; c.targetMode = 2; c.targetPulse = true; c.targetPadding = 0.12F; }
             case "sprint" -> c.sprintStopWhileUsingItem = true;
             case "health_tags" -> { c.healthTagHearts = true; c.healthTagMaxDistance = 48D; }
             case "projectile_prediction" -> { c.projectileColorArgb = 0xFF41C7FF; c.projectileLineWidth = 2F; c.projectileSteps = 72; }
