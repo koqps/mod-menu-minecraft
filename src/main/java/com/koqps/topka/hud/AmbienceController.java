@@ -1,31 +1,13 @@
 package com.koqps.topka.hud;
 
-import com.koqps.topka.TopkaClient;
-import net.minecraft.client.Minecraft;
-
+/**
+ * Custom ambience time is now supplied by ClientLevelTimeMixin through the
+ * renderer's day-time accessor. No per-tick world mutation is needed.
+ */
 public final class AmbienceController {
-    private static boolean applied;
-    private static long previousTime;
-
     private AmbienceController() { }
 
     public static void tick() {
-        Minecraft client = Minecraft.getInstance();
-        if (client.level == null) {
-            applied = false;
-            return;
-        }
-
-        boolean enabled = TopkaClient.MODULES.byId("ambience").enabled();
-        if (enabled) {
-            if (!applied) {
-                previousTime = client.level.getGameTime();
-                applied = true;
-            }
-            client.level.setTimeFromServer(Math.floorMod(TopkaClient.CONFIG.get().ambienceTime, 24000L));
-        } else if (applied) {
-            client.level.setTimeFromServer(previousTime);
-            applied = false;
-        }
+        // Intentionally empty. Kept as a stable controller hook.
     }
 }
