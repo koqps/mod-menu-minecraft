@@ -78,6 +78,8 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Color", () -> hex(c.crosshairColorArgb), () -> c.crosshairColorArgb = previousColor(c.crosshairColorArgb), () -> c.crosshairColorArgb = nextColor(c.crosshairColorArgb));
                 row("Center dot", () -> c.crosshairDot ? "ON" : "OFF", () -> c.crosshairDot = !c.crosshairDot, () -> c.crosshairDot = !c.crosshairDot);
                 row("Outline", () -> c.crosshairOutline ? "ON" : "OFF", () -> c.crosshairOutline = !c.crosshairOutline, () -> c.crosshairOutline = !c.crosshairOutline);
+                row("Dynamic spread", () -> c.crosshairDynamic ? "ON" : "OFF", () -> c.crosshairDynamic = !c.crosshairDynamic, () -> c.crosshairDynamic = !c.crosshairDynamic);
+                row("Dynamic max gap", () -> Integer.toString(c.crosshairDynamicMaxGap), () -> c.crosshairDynamicMaxGap = Math.max(2, c.crosshairDynamicMaxGap - 1), () -> c.crosshairDynamicMaxGap = Math.min(24, c.crosshairDynamicMaxGap + 1));
             }
             case "hitbox" -> {
                 row("Expansion", () -> String.format("%.2f", c.hitboxExpand), () -> c.hitboxExpand = Math.max(0F, c.hitboxExpand - 0.05F), () -> c.hitboxExpand = Math.min(1F, c.hitboxExpand + 0.05F));
@@ -293,6 +295,7 @@ public final class ModuleSettingsScreen extends Screen {
             case "crosshair" -> {
                 c.crosshairColorArgb = 0xFFFFFFFF; c.crosshairSize = 5; c.crosshairGap = 2;
                 c.crosshairThickness = 1; c.crosshairDot = false; c.crosshairOutline = true;
+                c.crosshairDynamic = false; c.crosshairDynamicMaxGap = 10;
             }
             case "hitbox" -> {
                 c.hitboxExpand = 0F; c.hitboxLineWidth = 2F; c.hitboxColorArgb = 0xFF41C7FF;
