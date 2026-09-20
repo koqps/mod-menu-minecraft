@@ -171,6 +171,19 @@ public final class ConfigManager {
         config.wingsFlapSpeed = Math.clamp(config.wingsFlapSpeed, 0.10F, 3.0F);
         config.wingsFlapAmount = Math.clamp(config.wingsFlapAmount, 0.0F, 0.55F);
         config.wingsOpacity = Math.clamp(config.wingsOpacity, 30, 235);
+        config.wingsDetail = Math.clamp(config.wingsDetail, 1, 5);
+        config.wingsDepth = Math.clamp(config.wingsDepth, 0.02F, 0.42F);
+        config.wingsBoneWidth = Math.clamp(config.wingsBoneWidth, 1.0F, 8.0F);
+
+        config.backWeaponStyle = Math.clamp(config.backWeaponStyle, 0, 3);
+        config.backWeaponScale = Math.clamp(config.backWeaponScale, 0.45F, 2.25F);
+        config.backWeaponAngle = Math.clamp(config.backWeaponAngle, -80.0F, 80.0F);
+        config.backWeaponOffsetY = Math.clamp(config.backWeaponOffsetY, -0.8F, 0.8F);
+        config.backWeaponOpacity = Math.clamp(config.backWeaponOpacity, 40, 255);
+
+        config.headCosmeticStyle = Math.clamp(config.headCosmeticStyle, 0, 3);
+        config.headCosmeticScale = Math.clamp(config.headCosmeticScale, 0.45F, 2.0F);
+        config.headCosmeticOpacity = Math.clamp(config.headCosmeticOpacity, 40, 255);
 
         config.dropProtectionWindowMs = Math.clamp(config.dropProtectionWindowMs, 700L, 5000L);
         config.autoGgCooldownMs = Math.clamp(config.autoGgCooldownMs, 5000L, 60000L);
