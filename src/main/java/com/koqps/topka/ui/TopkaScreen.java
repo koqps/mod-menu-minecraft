@@ -137,7 +137,7 @@ public final class TopkaScreen extends Screen {
         int last = Math.min(filtered.size(), first + VISIBLE_ROWS * 2);
 
         if (filtered.isEmpty()) {
-            g.centeredText(font, "No modules match "" + searchQuery + """, x + 440, y + 224, 0xFF777788);
+            g.centeredText(font, "No modules match \"" + searchQuery + "\"", x + 440, y + 224, 0xFF777788);
         } else {
             for (int i = first; i < last; i++) {
                 int visibleIndex = i - first;
