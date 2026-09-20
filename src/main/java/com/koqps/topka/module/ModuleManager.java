@@ -21,6 +21,7 @@ public final class ModuleManager {
         new Module("ambience", "Ambience", "Client-side visual time override.", "☾", Module.Category.VISUAL, false),
         new Module("baby_mode", "Baby Mode", "Purely visual player model scaling.", "♙", Module.Category.VISUAL, false),
         new Module("cape", "Cape", "Animated original cosmetic cape outline.", "▱", Module.Category.VISUAL, false),
+        new Module("wings", "Wings", "Solid animated cosmetic wings with multiple designs.", "✦", Module.Category.VISUAL, false),
 
         new Module("drop_protection", "Drop Protection", "Press Drop twice before protected items leave your hand.", "⛨", Module.Category.PLAYER, false),
 
