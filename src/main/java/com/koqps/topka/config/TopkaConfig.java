@@ -25,6 +25,8 @@ public final class TopkaConfig {
     public boolean rainbowTheme = false;
     public boolean gradientTheme = false;
     public float themeAnimationSpeed = 0.35F;
+    public float menuScale = 1.0F;
+    public int menuStyle = 0;
 
     // Combat / visuals
     public int hitColorArgb = 0xB28B5CF6;
@@ -58,11 +60,22 @@ public final class TopkaConfig {
     // Trails / jump effects
     public int trailLifetimeMs = 900;
     public float trailLineWidth = 2.2F;
+    public int trailStyle = 1;
+    public float trailHeight = 0.42F;
+    public float trailWidth = 0.72F;
+    public int trailLayers = 3;
+    public boolean trailRainbow = false;
+    public boolean trailGlow = true;
     public int jumpCircleLifetimeMs = 700;
     public float jumpCircleRadius = 1.15F;
     public float jumpCircleLineWidth = 2.0F;
+    public int jumpCircleStyle = 1;
+    public int jumpCircleLayers = 2;
+    public boolean jumpCircleRainbow = false;
     public int jumpParticleCount = 10;
     public int hitParticleCount = 12;
+    public int jumpParticleStyle = 0;
+    public int hitParticleStyle = 0;
 
     // Full bright
     public double fullBrightGamma = 12.0D;
