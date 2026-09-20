@@ -38,6 +38,9 @@ public final class TopkaConfig {
     public boolean hitboxPassive = true;
     public boolean hitboxOther = false;
     public int targetColorArgb = 0xFFFF5C77;
+    public int targetMode = 2;
+    public boolean targetPulse = true;
+    public float targetPadding = 0.12F;
     public int trailColorArgb = 0xFF8B5CF6;
     public int jumpCircleColorArgb = 0xFF41C7FF;
     public float hitboxExpand = 0.00F;
