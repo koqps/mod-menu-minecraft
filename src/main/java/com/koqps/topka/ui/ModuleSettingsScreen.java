@@ -100,6 +100,20 @@ public final class ModuleSettingsScreen extends Screen {
             case "jump_particles" -> row("Particle count", () -> Integer.toString(c.jumpParticleCount), () -> c.jumpParticleCount = Math.max(1, c.jumpParticleCount - 1), () -> c.jumpParticleCount = Math.min(32, c.jumpParticleCount + 1));
             case "hit_particles" -> row("Particle count", () -> Integer.toString(c.hitParticleCount), () -> c.hitParticleCount = Math.max(1, c.hitParticleCount - 1), () -> c.hitParticleCount = Math.min(40, c.hitParticleCount + 1));
             case "full_bright" -> row("Gamma", () -> String.format("%.1f", c.fullBrightGamma), () -> c.fullBrightGamma = Math.max(1D, c.fullBrightGamma - 1D), () -> c.fullBrightGamma = Math.min(16D, c.fullBrightGamma + 1D));
+            case "viewmodel" -> {
+                row("Main X", () -> String.format("%.2f", c.viewMainX), () -> c.viewMainX = Math.max(-1F, c.viewMainX - 0.05F), () -> c.viewMainX = Math.min(1F, c.viewMainX + 0.05F));
+                row("Main Y", () -> String.format("%.2f", c.viewMainY), () -> c.viewMainY = Math.max(-1F, c.viewMainY - 0.05F), () -> c.viewMainY = Math.min(1F, c.viewMainY + 0.05F));
+                row("Main Z", () -> String.format("%.2f", c.viewMainZ), () -> c.viewMainZ = Math.max(-1F, c.viewMainZ - 0.05F), () -> c.viewMainZ = Math.min(1F, c.viewMainZ + 0.05F));
+                row("Scale", () -> String.format("%.2f", c.viewScale), () -> c.viewScale = Math.max(0.35F, c.viewScale - 0.05F), () -> c.viewScale = Math.min(2F, c.viewScale + 0.05F));
+                row("Pitch", () -> String.format("%.0f°", c.viewPitch), () -> c.viewPitch -= 5F, () -> c.viewPitch += 5F);
+                row("Yaw", () -> String.format("%.0f°", c.viewYaw), () -> c.viewYaw -= 5F, () -> c.viewYaw += 5F);
+                row("Roll", () -> String.format("%.0f°", c.viewRoll), () -> c.viewRoll -= 5F, () -> c.viewRoll += 5F);
+            }
+            case "swing_animations" -> {
+                row("Style", () -> switch (Math.floorMod(c.swingMode, 4)) { case 0 -> "SMOOTH"; case 1 -> "SHORT"; case 2 -> "SWIPE"; default -> "OLD SCHOOL"; }, () -> c.swingMode = Math.floorMod(c.swingMode - 1, 4), () -> c.swingMode = Math.floorMod(c.swingMode + 1, 4));
+                row("Strength", () -> String.format("%.2f", c.swingStrength), () -> c.swingStrength = Math.max(0F, c.swingStrength - 0.1F), () -> c.swingStrength = Math.min(2F, c.swingStrength + 0.1F));
+            }
+            case "ambience" -> row("Time", () -> timeName(c.ambienceTime), () -> c.ambienceTime = previousTime(c.ambienceTime), () -> c.ambienceTime = nextTime(c.ambienceTime));
             case "hit_color" -> row("Hit color", () -> hex(c.hitColorArgb), () -> c.hitColorArgb = withAlpha(previousColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF), () -> c.hitColorArgb = withAlpha(nextColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF));
             case "targeting" -> row("Target color", () -> hex(c.targetColorArgb), () -> c.targetColorArgb = previousColor(c.targetColorArgb), () -> c.targetColorArgb = nextColor(c.targetColorArgb));
             case "sprint" -> row("Stop while using item", () -> c.sprintStopWhileUsingItem ? "ON" : "OFF", () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem, () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem);
@@ -196,6 +210,13 @@ public final class ModuleSettingsScreen extends Screen {
             case "jump_particles" -> c.jumpParticleCount = 10;
             case "hit_particles" -> c.hitParticleCount = 12;
             case "full_bright" -> c.fullBrightGamma = 12D;
+            case "viewmodel" -> {
+                c.viewMainX = c.viewMainY = c.viewMainZ = 0F;
+                c.viewOffX = c.viewOffY = c.viewOffZ = 0F;
+                c.viewScale = 1F; c.viewPitch = c.viewYaw = c.viewRoll = 0F;
+            }
+            case "swing_animations" -> { c.swingMode = 0; c.swingStrength = 1F; }
+            case "ambience" -> c.ambienceTime = 6000L;
             case "hit_color" -> c.hitColorArgb = 0xB28B5CF6;
             case "targeting" -> c.targetColorArgb = 0xFFFF5C77;
             case "sprint" -> c.sprintStopWhileUsingItem = true;
@@ -203,6 +224,29 @@ public final class ModuleSettingsScreen extends Screen {
         }
         TopkaClient.CONFIG.save();
         rebuildWidgets();
+    }
+
+    private static long nextTime(long current) {
+        long[] values = {1000L, 6000L, 12000L, 13000L, 18000L};
+        for (int i = 0; i < values.length; i++) if (Math.floorMod(current, 24000L) == values[i]) return values[(i + 1) % values.length];
+        return 6000L;
+    }
+
+    private static long previousTime(long current) {
+        long[] values = {1000L, 6000L, 12000L, 13000L, 18000L};
+        for (int i = 0; i < values.length; i++) if (Math.floorMod(current, 24000L) == values[i]) return values[(i + values.length - 1) % values.length];
+        return 6000L;
+    }
+
+    private static String timeName(long time) {
+        return switch ((int) Math.floorMod(time, 24000L)) {
+            case 1000 -> "MORNING";
+            case 6000 -> "NOON";
+            case 12000 -> "SUNSET";
+            case 13000 -> "NIGHT";
+            case 18000 -> "MIDNIGHT";
+            default -> Long.toString(Math.floorMod(time, 24000L));
+        };
     }
 
     private static int nextColor(int current) {
