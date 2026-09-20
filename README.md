@@ -1,4 +1,4 @@
-# Mod Menu 0.8.1
+# Mod Menu 0.9.0
 
 A polished client-side Minecraft Java mod for **Minecraft 26.3 + Fabric**, built for Java 25.
 
@@ -13,7 +13,56 @@ Mod Menu is an original visual/PvP/QoL client project. It is inspired by the pre
 - Default menu key: Right Shift
 - Config: `.minecraft/config/mod-menu.json`
 
-## 0.8.1 highlights
+## 0.9.0 highlights
+
+### Modeled cosmetic gear
+This release moves the client farther away from simple outline cosmetics and toward layered server-style modeled accessories.
+
+#### Wings
+- ANGEL now renders overlapping feather blades instead of a single broad panel.
+- DEMON uses articulated bat-style membrane sections.
+- CRYSTAL uses multiple faceted shard panels.
+- DRAGON uses layered membrane/scaled sections.
+- New controls: detail level, wing depth and structural bone width.
+- Wings remain anchored to the player's body center/body yaw to avoid the old sideways drift.
+- Glow is applied to structural bones rather than making the entire wing look like one flat translucent sheet.
+
+#### Back Weapon
+New solid non-particle cosmetic module with:
+- GREAT SWORD
+- KATANA
+- CRYSTAL BLADE
+- SCYTHE
+
+Controls:
+- scale
+- diagonal angle
+- vertical offset
+- opacity
+- primary/secondary colors
+- glow
+- rainbow
+- show on other players
+
+The weapon is attached to the back using the same body-yaw basis as the centered wings.
+
+#### Head Cosmetic
+New modeled head accessory module:
+- CROWN
+- HORNS
+- ANTLERS
+- ARCANE CREST
+
+Controls:
+- scale
+- opacity
+- primary/secondary colors
+- glow
+- rainbow
+- optional display on other players
+
+These are rendered as geometry, not particle clouds.
+
 
 ### Placement and ambience fixes
 - Wings now anchor to the center of the player's bounding box and rotate from rendered body yaw instead of head/look direction, preventing the cosmetic from sliding sideways when looking around.
@@ -212,13 +261,13 @@ The normal mod JAR is generated in:
 build\libs\
 ```
 
-Install the normal `mod-menu-0.8.1.jar`, not `mod-menu-0.7.0-sources.jar`.
+Install the normal `mod-menu-0.9.0.jar`, not `mod-menu-0.7.0-sources.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 26.3.
 2. Put Fabric API matching Minecraft 26.3 in `%appdata%\.minecraft\mods`.
-3. Put `mod-menu-0.8.1.jar` in the same folder.
+3. Put `mod-menu-0.9.0.jar` in the same folder.
 4. Remove older Mod Menu / Topka development JARs so the internal mod id is not duplicated.
 5. Launch the Fabric 26.3 profile.
 6. Press Right Shift by default.
