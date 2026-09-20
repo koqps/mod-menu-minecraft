@@ -9,6 +9,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -49,6 +51,9 @@ public final class WorldVisuals {
         }
         if (TopkaClient.MODULES.byId("jump_circles").enabled()) {
             renderJumpCircles(context, camera);
+        }
+        if (TopkaClient.MODULES.byId("projectile_trajectory").enabled()) {
+            renderProjectileTrajectory(context, camera, client);
         }
     }
 
@@ -233,6 +238,84 @@ public final class WorldVisuals {
             );
             poseStack.popPose();
         }
+    }
+
+
+    private static void renderProjectileTrajectory(LevelRenderContext context, Vec3 camera, Minecraft client) {
+        ItemStack stack = client.player.getMainHandItem();
+        if (!isSupportedProjectile(stack)) {
+            stack = client.player.getOffhandItem();
+        }
+        if (!isSupportedProjectile(stack)) return;
+
+        var cfg = TopkaClient.CONFIG.get();
+        int steps = Math.clamp(cfg.trajectorySteps, 12, 120);
+        float width = Math.clamp(cfg.trajectoryLineWidth, 1.0F, 6.0F);
+        int color = cfg.trajectoryColorArgb;
+
+        double speed = projectileSpeed(stack);
+        double gravity = projectileGravity(stack);
+        Vec3 position = client.player.getEyePosition().add(client.player.getLookAngle().scale(0.20D));
+        Vec3 velocity = client.player.getLookAngle().normalize().scale(speed);
+        List<Vec3> points = new java.util.ArrayList<>(steps + 1);
+        points.add(position);
+
+        for (int i = 0; i < steps; i++) {
+            position = position.add(velocity.scale(0.10D));
+            points.add(position);
+            velocity = new Vec3(velocity.x * 0.99D, velocity.y * 0.99D - gravity * 0.10D, velocity.z * 0.99D);
+            if (position.y < client.level.getMinY() - 4) break;
+        }
+
+        if (points.size() < 2) return;
+        PoseStack poseStack = context.poseStack();
+        poseStack.pushPose();
+        poseStack.translate(-camera.x, -camera.y, -camera.z);
+
+        context.submitNodeCollector().submitCustomGeometry(
+                poseStack,
+                RenderTypes.linesTranslucent(),
+                (pose, vertices) -> {
+                    for (int i = 1; i < points.size(); i++) {
+                        int alpha = 230 - (int) (150.0D * i / Math.max(1, points.size() - 1));
+                        emitLine(pose, vertices, points.get(i - 1), points.get(i), withAlpha(color, alpha), width);
+                    }
+                }
+        );
+        poseStack.popPose();
+
+        Vec3 end = points.get(points.size() - 1);
+        poseStack.pushPose();
+        poseStack.translate(end.x - camera.x, end.y - camera.y, end.z - camera.z);
+        context.submitNodeCollector().submitCustomGeometry(
+                poseStack,
+                RenderTypes.linesTranslucent(),
+                (pose, vertices) -> emitCircle(pose, vertices, 0.14F, 0.0D, color, width)
+        );
+        poseStack.popPose();
+    }
+
+    private static boolean isSupportedProjectile(ItemStack stack) {
+        return !stack.isEmpty() && (
+                stack.is(Items.BOW)
+                        || stack.is(Items.CROSSBOW)
+                        || stack.is(Items.TRIDENT)
+                        || stack.is(Items.SNOWBALL)
+                        || stack.is(Items.EGG)
+                        || stack.is(Items.ENDER_PEARL)
+        );
+    }
+
+    private static double projectileSpeed(ItemStack stack) {
+        if (stack.is(Items.SNOWBALL) || stack.is(Items.EGG) || stack.is(Items.ENDER_PEARL)) return 1.55D;
+        if (stack.is(Items.TRIDENT)) return 2.50D;
+        return 3.00D;
+    }
+
+    private static double projectileGravity(ItemStack stack) {
+        if (stack.is(Items.BOW) || stack.is(Items.CROSSBOW)) return 0.05D;
+        if (stack.is(Items.TRIDENT)) return 0.05D;
+        return 0.03D;
     }
 
     private static void emitCircle(PoseStack.Pose pose, VertexConsumer vertices, float radius, double y, int color, float width) {
