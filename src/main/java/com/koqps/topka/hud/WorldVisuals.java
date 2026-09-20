@@ -157,8 +157,8 @@ public final class WorldVisuals {
             double z = player.getZ();
             float radius = Math.clamp(cfg.chinaHatRadius, 0.25F, 1.25F);
             float height = Math.clamp(cfg.chinaHatHeight, 0.12F, 0.8F);
-            float lineWidth = Math.clamp(cfg.chinaHatLineWidth, 1.0F, 5.0F);
-            int color = Theme.accent();
+            float lineWidth = Math.clamp(cfg.chinaHatLineWidth, 1.0F, 7.0F);
+            int color = effectColor(cfg.chinaHatColorArgb, cfg.chinaHatRainbow, 0.0F, 245);
 
             PoseStack poseStack = context.poseStack();
             poseStack.pushPose();
@@ -168,19 +168,59 @@ public final class WorldVisuals {
                     poseStack,
                     RenderTypes.linesTranslucent(),
                     (pose, vertices) -> {
-                        for (int i = 0; i < HAT_SEGMENTS; i++) {
-                            double a0 = Math.PI * 2.0D * i / HAT_SEGMENTS;
-                            double a1 = Math.PI * 2.0D * (i + 1) / HAT_SEGMENTS;
-                            Vec3 p0 = new Vec3(Math.cos(a0) * radius, 0.0D, Math.sin(a0) * radius);
-                            Vec3 p1 = new Vec3(Math.cos(a1) * radius, 0.0D, Math.sin(a1) * radius);
-                            emitLine(pose, vertices, p0, p1, color, lineWidth);
+                        int style = Math.floorMod(cfg.chinaHatStyle, 4);
+
+                        if (style == 3) {
+                            for (int ring = 0; ring < 5; ring++) {
+                                float t = ring / 4.0F;
+                                float ringRadius = radius * (1.0F - t * 0.82F);
+                                double ringY = height * t;
+                                int ringColor = effectColor(
+                                        cfg.chinaHatColorArgb,
+                                        cfg.chinaHatRainbow,
+                                        t * 0.16F,
+                                        220 - ring * 25
+                                );
+                                emitCircle(pose, vertices, ringRadius, ringY, ringColor, lineWidth);
+                            }
+                            return;
                         }
 
-                        Vec3 apex = new Vec3(0.0D, height, 0.0D);
-                        for (int i = 0; i < HAT_SEGMENTS; i += 4) {
-                            double angle = Math.PI * 2.0D * i / HAT_SEGMENTS;
-                            Vec3 edge = new Vec3(Math.cos(angle) * radius, 0.0D, Math.sin(angle) * radius);
-                            emitLine(pose, vertices, edge, apex, color, lineWidth);
+                        emitCircle(pose, vertices, radius, 0.0D, color, lineWidth);
+
+                        if (style >= 1) {
+                            Vec3 apex = new Vec3(0.0D, height, 0.0D);
+                            int step = style == 2 ? 2 : 4;
+                            for (int i = 0; i < HAT_SEGMENTS; i += step) {
+                                double angle = Math.PI * 2.0D * i / HAT_SEGMENTS;
+                                Vec3 edge = new Vec3(Math.cos(angle) * radius, 0.0D, Math.sin(angle) * radius);
+                                int spokeColor = effectColor(
+                                        cfg.chinaHatColorArgb,
+                                        cfg.chinaHatRainbow,
+                                        i / (float) HAT_SEGMENTS,
+                                        style == 2 ? 210 : 180
+                                );
+                                emitLine(pose, vertices, edge, apex, spokeColor, Math.max(1.0F, lineWidth - 0.35F));
+                            }
+                        }
+
+                        if (style == 2) {
+                            emitCircle(
+                                    pose,
+                                    vertices,
+                                    radius * 0.82F,
+                                    height * 0.20D,
+                                    effectColor(cfg.chinaHatColorArgb, cfg.chinaHatRainbow, 0.12F, 175),
+                                    Math.max(1.0F, lineWidth - 0.5F)
+                            );
+                            emitCircle(
+                                    pose,
+                                    vertices,
+                                    radius * 0.52F,
+                                    height * 0.52D,
+                                    effectColor(cfg.chinaHatColorArgb, cfg.chinaHatRainbow, 0.24F, 145),
+                                    Math.max(1.0F, lineWidth - 0.8F)
+                            );
                         }
                     }
             );
@@ -197,8 +237,8 @@ public final class WorldVisuals {
         double y = client.player.getBoundingBox().maxY + cfg.haloHeight + bob;
         double z = client.player.getZ();
         float radius = Math.clamp(cfg.haloRadius, 0.2F, 1.0F);
-        float width = Math.clamp(cfg.haloLineWidth, 1.0F, 5.0F);
-        int color = Theme.secondary();
+        float width = Math.clamp(cfg.haloLineWidth, 1.0F, 7.0F);
+        int color = effectColor(cfg.haloColorArgb, cfg.haloRainbow, 0.0F, 240);
 
         PoseStack poseStack = context.poseStack();
         poseStack.pushPose();
@@ -207,7 +247,45 @@ public final class WorldVisuals {
         context.submitNodeCollector().submitCustomGeometry(
                 poseStack,
                 RenderTypes.linesTranslucent(),
-                (pose, vertices) -> emitCircle(pose, vertices, radius, 0.0D, color, width)
+                (pose, vertices) -> {
+                    switch (Math.floorMod(cfg.haloStyle, 4)) {
+                        case 0 -> emitCircle(pose, vertices, radius, 0.0D, color, width);
+                        case 2 -> {
+                            for (int ring = 0; ring < 3; ring++) {
+                                float r = radius * (0.78F + ring * 0.16F);
+                                double yy = (ring - 1) * 0.045D;
+                                emitCircle(
+                                        pose,
+                                        vertices,
+                                        r,
+                                        yy,
+                                        effectColor(cfg.haloColorArgb, cfg.haloRainbow, ring * 0.11F, 220 - ring * 35),
+                                        Math.max(1.0F, width - ring * 0.25F)
+                                );
+                            }
+                        }
+                        case 3 -> {
+                            double phase = System.currentTimeMillis() / 260.0D;
+                            for (int ring = 0; ring < 3; ring++) {
+                                float pulseRadius = radius * (0.86F + 0.10F * ring
+                                        + (float) Math.sin(phase + ring * 1.7D) * 0.055F);
+                                emitCircle(
+                                        pose,
+                                        vertices,
+                                        pulseRadius,
+                                        ring * 0.025D,
+                                        effectColor(cfg.haloColorArgb, cfg.haloRainbow, ring * 0.13F, 220 - ring * 42),
+                                        width
+                                );
+                            }
+                        }
+                        default -> {
+                            emitCircle(pose, vertices, radius + 0.035F, 0.0D, withAlpha(color, 65), Math.min(10.0F, width * 2.2F));
+                            emitCircle(pose, vertices, radius, 0.0D, color, width);
+                            emitCircle(pose, vertices, Math.max(0.05F, radius - 0.035F), 0.0D, withAlpha(color, 115), Math.max(1.0F, width * 0.65F));
+                        }
+                    }
+                }
         );
         poseStack.popPose();
     }
