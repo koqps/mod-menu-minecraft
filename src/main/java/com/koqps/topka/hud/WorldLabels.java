@@ -31,7 +31,7 @@ public final class WorldLabels {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.level == null || client.gui.screen() != null) return;
 
-        Vec3 camera = context.levelState().cameraRenderState.pos;
+        Vec3 camera = client.gameRenderer.mainCamera().position();
         SubmitNodeCollector collector = context.submitNodeCollector();
         PoseStack poseStack = context.poseStack();
         CameraRenderState cameraState = context.levelState().cameraRenderState;
@@ -56,11 +56,16 @@ public final class WorldLabels {
 
         List<Player> players = new ArrayList<>();
         for (Entity entity : client.level.entitiesForRendering()) {
-            if (entity instanceof Player player && player != client.player && !player.isRemoved()
+            if (entity instanceof Player player
+                    && player != client.player
+                    && !player.isRemoved()
                     && client.player.distanceToSqr(player) <= maxDistanceSqr) {
                 players.add(player);
             }
         }
+
+        // Submit farther labels first, matching the stable ordering used by
+        // other 26.3 deferred nametag renderers.
         players.sort(Comparator.comparingDouble(player -> -player.distanceToSqr(camera)));
 
         for (Player player : players) {
@@ -69,17 +74,20 @@ public final class WorldLabels {
             float ratio = Math.clamp(health / max, 0.0F, 1.0F);
             int rgb = healthColor(ratio);
 
-            String label = TopkaClient.CONFIG.get().healthTagHearts
-                    ? "❤ " + Math.round(health)
-                    : String.format("%.1f HP", health);
-            Component text = Component.literal(label)
+            // Health tags are deliberately just a compact heart strip above the
+            // player's head. No HP number and no duplicate name text.
+            Component text = Component.literal(heartStrip(ratio))
                     .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb)));
 
             poseStack.pushPose();
-            poseStack.translate(player.getX() - camera.x, player.getY() - camera.y, player.getZ() - camera.z);
+            poseStack.translate(
+                    player.getX() - camera.x,
+                    player.getY() - camera.y,
+                    player.getZ() - camera.z
+            );
             collector.submitNameTag(
                     poseStack,
-                    new Vec3(0.0D, player.getBbHeight() + 0.42D, 0.0D),
+                    new Vec3(0.0D, player.getBbHeight() + 0.54D, 0.0D),
                     0,
                     text,
                     true,
@@ -88,6 +96,16 @@ public final class WorldLabels {
             );
             poseStack.popPose();
         }
+    }
+
+    private static String heartStrip(float ratio) {
+        int total = 10;
+        int filled = Math.clamp(Math.round(ratio * total), 0, total);
+        StringBuilder out = new StringBuilder(total);
+        for (int i = 0; i < total; i++) {
+            out.append(i < filled ? '♥' : '♡');
+        }
+        return out.toString();
     }
 
     private static void submitWaypoints(
