@@ -229,15 +229,27 @@ public final class WorldVisuals {
                 context.submitNodeCollector().submitCustomGeometry(
                         poseStack,
                         RenderTypes.debugQuads(),
-                        (pose, vertices) -> emitConeShell(
-                                pose,
-                                vertices,
-                                radius,
-                                height,
-                                cfg.chinaHatColorArgb,
-                                cfg.chinaHatRainbow,
-                                cfg.chinaHatStyle == 2 ? 112 : 76
-                        )
+                        (pose, vertices) -> {
+                            emitConeShell(
+                                    pose,
+                                    vertices,
+                                    radius,
+                                    height,
+                                    cfg.chinaHatColorArgb,
+                                    cfg.chinaHatRainbow,
+                                    cfg.chinaHatStyle == 2 ? 118 : 82
+                            );
+                            emitAnnulus(
+                                    pose,
+                                    vertices,
+                                    radius * 0.42F,
+                                    radius * 1.10F,
+                                    -0.006D,
+                                    cfg.chinaHatColorArgb,
+                                    cfg.chinaHatRainbow,
+                                    cfg.chinaHatStyle == 2 ? 106 : 70
+                            );
+                        }
                 );
             }
             poseStack.popPose();
@@ -592,39 +604,97 @@ public final class WorldVisuals {
             var cfg = TopkaClient.CONFIG.get();
             float width = Math.clamp(cfg.capeWidth, 0.30F, 1.20F);
             float height = Math.clamp(cfg.capeHeight, 0.45F, 1.60F);
-            float lineWidth = Math.clamp(cfg.capeLineWidth, 1.0F, 5.0F);
-            int color = cfg.capeColorArgb;
+            float lineWidth = Math.clamp(cfg.capeLineWidth, 1.0F, 8.0F);
 
-            Vec3 look = player.getLookAngle();
-            Vec3 back = new Vec3(-look.x, 0.0D, -look.z);
-            if (back.lengthSqr() < 1.0E-5D) back = new Vec3(0.0D, 0.0D, -1.0D);
-            back = back.normalize();
-            Vec3 right = new Vec3(-back.z, 0.0D, back.x);
+            double yaw = Math.toRadians(player.getVisualRotationYInDegrees());
+            Vec3 forward = new Vec3(-Math.sin(yaw), 0.0D, Math.cos(yaw));
+            Vec3 back = forward.scale(-1.0D);
+            Vec3 right = new Vec3(Math.cos(yaw), 0.0D, Math.sin(yaw));
 
             double speed = Math.sqrt(player.getDeltaMovement().x * player.getDeltaMovement().x
                     + player.getDeltaMovement().z * player.getDeltaMovement().z);
-            double wave = Math.sin(System.currentTimeMillis() / 170.0D) * 0.04D + Math.min(0.30D, speed * 0.35D);
+            double wave = Math.sin(System.currentTimeMillis() / 170.0D) * 0.035D
+                    + Math.min(0.34D, speed * 0.38D);
 
-            Vec3 topCenter = new Vec3(player.getX(), player.getBoundingBox().maxY - 0.36D, player.getZ())
-                    .add(back.scale(0.20D));
-            Vec3 bottomCenter = topCenter.add(0.0D, -height, 0.0D).add(back.scale(0.14D + wave));
+            AABB box = player.getBoundingBox();
+            Vec3 center = new Vec3(
+                    (box.minX + box.maxX) * 0.5D,
+                    box.maxY - 0.36D,
+                    (box.minZ + box.maxZ) * 0.5D
+            );
+
+            Vec3 topCenter = center.add(back.scale(0.16D));
+            Vec3 midCenter = topCenter.add(0.0D, -height * 0.50D, 0.0D).add(back.scale(0.08D + wave * 0.45D));
+            Vec3 bottomCenter = topCenter.add(0.0D, -height, 0.0D).add(back.scale(0.15D + wave));
+
             Vec3 topLeft = topCenter.add(right.scale(-width / 2.0D));
             Vec3 topRight = topCenter.add(right.scale(width / 2.0D));
-            Vec3 bottomLeft = bottomCenter.add(right.scale(-width * 0.46D));
-            Vec3 bottomRight = bottomCenter.add(right.scale(width * 0.46D));
+            Vec3 midLeft = midCenter.add(right.scale(-width * 0.49D));
+            Vec3 midRight = midCenter.add(right.scale(width * 0.49D));
+            Vec3 bottomLeft = bottomCenter.add(right.scale(-width * 0.44D));
+            Vec3 bottomRight = bottomCenter.add(right.scale(width * 0.44D));
+
+            int primary = effectColor(cfg.capeColorArgb, cfg.capeRainbow, 0.0F, cfg.capeOpacity);
+            int secondary = effectColor(cfg.capeColorArgb, cfg.capeRainbow, 0.17F, Math.max(24, cfg.capeOpacity - 40));
 
             PoseStack poseStack = context.poseStack();
             poseStack.pushPose();
             poseStack.translate(-camera.x, -camera.y, -camera.z);
+
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.debugQuads(),
+                    (pose, vertices) -> {
+                        switch (Math.floorMod(cfg.capeStyle, 4)) {
+                            case 1 -> {
+                                // Split cloak with a narrow center gap.
+                                Vec3 centerTopL = topCenter.add(right.scale(-0.035D));
+                                Vec3 centerTopR = topCenter.add(right.scale(0.035D));
+                                Vec3 centerBottomL = bottomCenter.add(right.scale(-0.065D));
+                                Vec3 centerBottomR = bottomCenter.add(right.scale(0.065D));
+                                emitQuad(pose, vertices, topLeft, centerTopL, centerBottomL, bottomLeft, primary);
+                                emitQuad(pose, vertices, centerTopR, topRight, bottomRight, centerBottomR, secondary);
+                            }
+                            case 2 -> {
+                                // Royal cloak: broad upper panel and tapered lower panel.
+                                emitQuad(pose, vertices, topLeft, topRight, midRight, midLeft, primary);
+                                emitQuad(pose, vertices, midLeft, midRight, bottomRight, bottomLeft, secondary);
+                                Vec3 notch = bottomCenter.add(back.scale(0.045D)).add(0.0D, -0.06D, 0.0D);
+                                emitQuad(pose, vertices, bottomLeft, bottomRight, notch, notch, withAlpha(primary, Math.max(18, cfg.capeOpacity - 55)));
+                            }
+                            case 3 -> {
+                                // Energy mantle: narrower core over a wider translucent shell.
+                                Vec3 shellLeft = topCenter.add(right.scale(-width * 0.62D));
+                                Vec3 shellRight = topCenter.add(right.scale(width * 0.62D));
+                                Vec3 shellBottomLeft = bottomCenter.add(right.scale(-width * 0.54D));
+                                Vec3 shellBottomRight = bottomCenter.add(right.scale(width * 0.54D));
+                                emitQuad(pose, vertices, shellLeft, shellRight, shellBottomRight, shellBottomLeft,
+                                        withAlpha(primary, Math.max(18, cfg.capeOpacity / 2)));
+                                emitQuad(pose, vertices, topLeft, topRight, bottomRight, bottomLeft, primary);
+                            }
+                            default -> {
+                                // Fabric: two articulated panels so motion reads as cloth, not a flat rectangle.
+                                emitQuad(pose, vertices, topLeft, topRight, midRight, midLeft, primary);
+                                emitQuad(pose, vertices, midLeft, midRight, bottomRight, bottomLeft, secondary);
+                            }
+                        }
+                    }
+            );
+
             context.submitNodeCollector().submitCustomGeometry(
                     poseStack,
                     RenderTypes.linesTranslucent(),
                     (pose, vertices) -> {
-                        emitLine(pose, vertices, topLeft, topRight, color, lineWidth);
-                        emitLine(pose, vertices, topRight, bottomRight, color, lineWidth);
-                        emitLine(pose, vertices, bottomRight, bottomLeft, color, lineWidth);
-                        emitLine(pose, vertices, bottomLeft, topLeft, color, lineWidth);
-                        emitLine(pose, vertices, topCenter, bottomCenter, withAlpha(color, 170), Math.max(1.0F, lineWidth - 0.5F));
+                        int outline = effectColor(cfg.capeColorArgb, cfg.capeRainbow, 0.0F, 240);
+                        float edge = cfg.capeGlow ? Math.min(10.0F, lineWidth * 1.65F) : lineWidth;
+                        emitLine(pose, vertices, topLeft, topRight, outline, edge);
+                        emitLine(pose, vertices, topRight, midRight, outline, edge);
+                        emitLine(pose, vertices, midRight, bottomRight, outline, edge);
+                        emitLine(pose, vertices, bottomRight, bottomLeft, outline, edge);
+                        emitLine(pose, vertices, bottomLeft, midLeft, outline, edge);
+                        emitLine(pose, vertices, midLeft, topLeft, outline, edge);
+                        emitLine(pose, vertices, topLeft, midRight, withAlpha(outline, 125), Math.max(1.0F, lineWidth - 0.4F));
+                        emitLine(pose, vertices, topRight, midLeft, withAlpha(outline, 125), Math.max(1.0F, lineWidth - 0.4F));
                     }
             );
             poseStack.popPose();
@@ -640,12 +710,12 @@ public final class WorldVisuals {
             if (player == client.player && client.options.getCameraType().isFirstPerson()) continue;
             if (client.player.distanceToSqr(player) > 4096.0D) continue;
 
-            Vec3 look = player.getLookAngle();
-            Vec3 forward = new Vec3(look.x, 0.0D, look.z);
-            if (forward.lengthSqr() < 1.0E-5D) forward = new Vec3(0.0D, 0.0D, 1.0D);
-            forward = forward.normalize();
+            // Use the rendered body yaw, not head/look direction. Head yaw was
+            // the cause of the wings sliding sideways when the player looked around.
+            double yaw = Math.toRadians(player.getVisualRotationYInDegrees());
+            Vec3 forward = new Vec3(-Math.sin(yaw), 0.0D, Math.cos(yaw));
             Vec3 back = forward.scale(-1.0D);
-            Vec3 right = new Vec3(-forward.z, 0.0D, forward.x).normalize();
+            Vec3 right = new Vec3(Math.cos(yaw), 0.0D, Math.sin(yaw));
             Vec3 up = new Vec3(0.0D, 1.0D, 0.0D);
 
             float scale = Math.clamp(cfg.wingsScale, 0.45F, 2.25F);
@@ -654,8 +724,12 @@ public final class WorldVisuals {
             double phase = System.currentTimeMillis() / 1000.0D * Math.clamp(cfg.wingsFlapSpeed, 0.10F, 3.0F) * Math.PI * 2.0D;
             double flap = Math.sin(phase) * flapAmount;
 
-            Vec3 anchor = new Vec3(player.getX(), player.getBoundingBox().maxY - 0.52D, player.getZ())
-                    .add(back.scale(0.17D));
+            AABB playerBox = player.getBoundingBox();
+            Vec3 anchor = new Vec3(
+                    (playerBox.minX + playerBox.maxX) * 0.5D,
+                    playerBox.maxY - 0.56D,
+                    (playerBox.minZ + playerBox.maxZ) * 0.5D
+            ).add(back.scale(0.115D));
 
             PoseStack poseStack = context.poseStack();
             poseStack.pushPose();
