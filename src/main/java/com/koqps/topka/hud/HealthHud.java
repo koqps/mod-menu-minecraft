@@ -28,24 +28,37 @@ public final class HealthHud {
         float absorbRatio = max <= 0 ? 0 : Math.clamp(absorption / max, 0F, 1F);
 
         var cfg = TopkaClient.CONFIG.get();
-        int x = cfg.healthHudX, y = cfg.healthHudY;
-        int w = 146, h = 40;
+        int x = cfg.healthHudX;
+        int y = cfg.healthHudY;
+        int w = 146;
+        int h = 40;
+        float scale = Math.clamp(cfg.healthHudScale, 0.55F, 2.0F);
         int accent = Theme.accent();
 
-        graphics.fill(x, y, x + w, y + h, cfg.hudBackgroundArgb);
-        graphics.fill(x, y, x + 3, y + h, accent);
-        graphics.text(client.font, "HEALTH", x + 10, y + 6, cfg.mutedTextArgb, false);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
 
-        String value = String.format("%.1f", health) + (absorption > 0.05F ? "  +" + String.format("%.1f", absorption) : "");
-        graphics.text(client.font, value, x + 90, y + 6, cfg.textArgb, true);
-
-        graphics.fill(x + 10, y + 23, x + 136, y + 29, 0xFF292934);
-        graphics.fill(x + 10, y + 23, x + 10 + Math.round(126 * ratio), y + 29, accent);
-        if (absorption > 0.05F) {
-            int start = x + 10 + Math.round(126 * ratio);
-            int end = Math.min(x + 136, start + Math.round(126 * absorbRatio));
-            graphics.fill(start, y + 23, end, y + 29, 0xFFFFD166);
+        if (cfg.healthHudBackground) {
+            graphics.fill(0, 0, w, h, cfg.hudBackgroundArgb);
+            graphics.fill(0, 0, 3, h, accent);
         }
-        graphics.text(client.font, Math.round(health) + " / " + Math.round(max), x + 10, y + 32, 0xFF767688, false);
+
+        graphics.text(client.font, "HEALTH", 10, 6, cfg.mutedTextArgb, false);
+
+        String value = String.format("%.1f", health)
+                + (absorption > 0.05F ? "  +" + String.format("%.1f", absorption) : "");
+        graphics.text(client.font, value, 90, 6, cfg.textArgb, true);
+
+        graphics.fill(10, 23, 136, 29, 0xFF292934);
+        graphics.fill(10, 23, 10 + Math.round(126 * ratio), 29, accent);
+        if (absorption > 0.05F) {
+            int start = 10 + Math.round(126 * ratio);
+            int end = Math.min(136, start + Math.round(126 * absorbRatio));
+            graphics.fill(start, 23, end, 29, 0xFFFFD166);
+        }
+        graphics.text(client.font, Math.round(health) + " / " + Math.round(max), 10, 32, 0xFF767688, false);
+
+        graphics.pose().popMatrix();
     }
 }
