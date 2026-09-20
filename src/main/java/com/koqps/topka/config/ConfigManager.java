@@ -161,7 +161,9 @@ public final class ConfigManager {
 
         config.capeWidth = Math.clamp(config.capeWidth, 0.30F, 1.20F);
         config.capeHeight = Math.clamp(config.capeHeight, 0.45F, 1.60F);
-        config.capeLineWidth = Math.clamp(config.capeLineWidth, 1.0F, 5.0F);
+        config.capeLineWidth = Math.clamp(config.capeLineWidth, 1.0F, 8.0F);
+        config.capeStyle = Math.clamp(config.capeStyle, 0, 3);
+        config.capeOpacity = Math.clamp(config.capeOpacity, 30, 235);
 
         config.wingsStyle = Math.clamp(config.wingsStyle, 0, 3);
         config.wingsScale = Math.clamp(config.wingsScale, 0.45F, 2.25F);
