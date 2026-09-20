@@ -7,7 +7,8 @@
     "OverlayTextureAccessor",
     "FirstPersonViewMixin",
     "DropProtectionMixin",
-    "BabyModeMixin"
+    "BabyModeMixin",
+    "ContainerScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
