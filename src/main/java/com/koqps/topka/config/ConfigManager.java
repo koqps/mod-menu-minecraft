@@ -159,6 +159,7 @@ public final class ConfigManager {
         config.crosshairSize = Math.clamp(config.crosshairSize, 1, 16);
         config.crosshairGap = Math.clamp(config.crosshairGap, 0, 12);
         config.crosshairThickness = Math.clamp(config.crosshairThickness, 1, 6);
+        config.crosshairDynamicMaxGap = Math.clamp(config.crosshairDynamicMaxGap, 2, 24);
 
         config.menuOffsetX = Math.clamp(config.menuOffsetX, -4000, 4000);
         config.menuOffsetY = Math.clamp(config.menuOffsetY, -4000, 4000);
