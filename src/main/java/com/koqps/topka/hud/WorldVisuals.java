@@ -9,6 +9,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,9 +58,10 @@ public final class WorldVisuals {
 
         for (Entity entity : client.level.entitiesForRendering()) {
             if (entity.isRemoved() || entity == client.player || client.player.distanceToSqr(entity) > 4096.0D) continue;
+            if (!shouldRenderHitbox(entity)) continue;
 
             AABB bounds = entity.getBoundingBox().inflate(expand);
-            int color = entity instanceof Player ? cfg.hitboxColorArgb : withAlpha(cfg.hitboxColorArgb, 185);
+            int color = hitboxColor(entity);
 
             context.poseStack().pushPose();
             context.poseStack().translate(-camera.x, -camera.y, -camera.z);
@@ -72,6 +75,22 @@ public final class WorldVisuals {
             );
             context.poseStack().popPose();
         }
+    }
+
+    private static boolean shouldRenderHitbox(Entity entity) {
+        var cfg = TopkaClient.CONFIG.get();
+        if (entity instanceof Player) return cfg.hitboxPlayers;
+        if (entity instanceof Monster) return cfg.hitboxHostile;
+        if (entity instanceof LivingEntity) return cfg.hitboxPassive;
+        return cfg.hitboxOther;
+    }
+
+    private static int hitboxColor(Entity entity) {
+        var cfg = TopkaClient.CONFIG.get();
+        if (entity instanceof Player) return cfg.hitboxPlayerColorArgb;
+        if (entity instanceof Monster) return cfg.hitboxHostileColorArgb;
+        if (entity instanceof LivingEntity) return cfg.hitboxPassiveColorArgb;
+        return cfg.hitboxOtherColorArgb;
     }
 
     private static void renderTarget(LevelRenderContext context, Vec3 camera, Minecraft client) {
