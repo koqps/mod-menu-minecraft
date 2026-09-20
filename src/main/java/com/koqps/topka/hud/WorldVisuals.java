@@ -219,6 +219,10 @@ public final class WorldVisuals {
         var cfg = TopkaClient.CONFIG.get();
         long now = System.currentTimeMillis();
         long lifetime = Math.max(250L, cfg.trailLifetimeMs);
+        int layers = Math.clamp(cfg.trailLayers, 1, 6);
+        float width = Math.clamp(cfg.trailWidth, 0.10F, 2.5F);
+        float height = Math.clamp(cfg.trailHeight, 0.05F, 1.8F);
+        float lineWidth = Math.clamp(cfg.trailLineWidth, 1.0F, 12.0F);
 
         PoseStack poseStack = context.poseStack();
         poseStack.pushPose();
@@ -232,9 +236,75 @@ public final class WorldVisuals {
                         var previous = points.get(i - 1);
                         var current = points.get(i);
                         double age = Math.clamp((double) (now - current.createdAt()) / lifetime, 0.0D, 1.0D);
-                        int alpha = (int) Math.round(210.0D * (1.0D - age));
-                        int color = withAlpha(cfg.trailColorArgb, alpha);
-                        emitLine(pose, vertices, previous.position(), current.position(), color, cfg.trailLineWidth);
+                        double life = 1.0D - age;
+                        int alpha = (int) Math.round(225.0D * life);
+                        int color = effectColor(cfg.trailColorArgb, cfg.trailRainbow, i * 0.035F, alpha);
+
+                        Vec3 a = previous.position();
+                        Vec3 b = current.position();
+                        Vec3 delta = b.subtract(a);
+                        Vec3 right = new Vec3(-delta.z, 0.0D, delta.x);
+                        if (right.lengthSqr() < 1.0E-6D) right = new Vec3(1.0D, 0.0D, 0.0D);
+                        right = right.normalize();
+
+                        if (cfg.trailGlow) {
+                            emitLine(
+                                    pose,
+                                    vertices,
+                                    a.add(0.0D, height * 0.45D, 0.0D),
+                                    b.add(0.0D, height * 0.45D, 0.0D),
+                                    withAlpha(color, Math.max(22, alpha / 4)),
+                                    Math.min(14.0F, lineWidth * 2.2F)
+                            );
+                        }
+
+                        switch (cfg.trailStyle) {
+                            case 0 -> emitLine(pose, vertices, a, b, color, lineWidth);
+                            case 2 -> {
+                                double wave = Math.sin((i + now / 80.0D) * 0.48D) * height * 0.34D;
+                                Vec3 leftA = a.add(right.scale(-width * 0.50D)).add(0.0D, wave, 0.0D);
+                                Vec3 leftB = b.add(right.scale(-width * 0.50D)).add(0.0D, -wave, 0.0D);
+                                Vec3 rightA = a.add(right.scale(width * 0.50D)).add(0.0D, -wave, 0.0D);
+                                Vec3 rightB = b.add(right.scale(width * 0.50D)).add(0.0D, wave, 0.0D);
+                                emitLine(pose, vertices, leftA, leftB, color, lineWidth);
+                                emitLine(pose, vertices, rightA, rightB, color, lineWidth);
+                                emitLine(pose, vertices, leftB, b.add(0.0D, height * 0.32D, 0.0D), withAlpha(color, alpha * 3 / 4), Math.max(1.0F, lineWidth - 0.5F));
+                                emitLine(pose, vertices, rightB, b.add(0.0D, height * 0.32D, 0.0D), withAlpha(color, alpha * 3 / 4), Math.max(1.0F, lineWidth - 0.5F));
+                            }
+                            case 3 -> {
+                                for (int layer = 0; layer < layers; layer++) {
+                                    double t = layers == 1 ? 0.5D : (double) layer / (layers - 1);
+                                    double y = (t - 0.5D) * height;
+                                    float layerWidth = lineWidth + (float) ((1.0D - Math.abs(t - 0.5D) * 2.0D) * 2.0D);
+                                    emitLine(
+                                            pose,
+                                            vertices,
+                                            a.add(0.0D, y, 0.0D),
+                                            b.add(0.0D, y, 0.0D),
+                                            withAlpha(color, (int) (alpha * (0.55D + 0.45D * life))),
+                                            layerWidth
+                                    );
+                                }
+                            }
+                            default -> {
+                                // Wide layered ribbon inspired by the reference:
+                                // several translucent rails form a tall, fat wake
+                                // instead of a single hairline trail.
+                                for (int layer = 0; layer < layers; layer++) {
+                                    double t = layers == 1 ? 0.5D : (double) layer / (layers - 1);
+                                    double side = (t - 0.5D) * width;
+                                    double y = t * height;
+                                    Vec3 offset = right.scale(side).add(0.0D, y, 0.0D);
+                                    int layerAlpha = Math.max(20, (int) (alpha * (0.42D + 0.58D * (1.0D - Math.abs(t - 0.5D)))));
+                                    emitLine(pose, vertices, a.add(offset), b.add(offset), withAlpha(color, layerAlpha), lineWidth);
+                                }
+
+                                Vec3 left = right.scale(-width * 0.5D);
+                                Vec3 rightEdge = right.scale(width * 0.5D);
+                                emitLine(pose, vertices, a.add(left), b.add(left), withAlpha(color, alpha), lineWidth + 0.6F);
+                                emitLine(pose, vertices, a.add(rightEdge).add(0.0D, height, 0.0D), b.add(rightEdge).add(0.0D, height, 0.0D), withAlpha(color, alpha), lineWidth + 0.6F);
+                            }
+                        }
                     }
                 }
         );
@@ -248,12 +318,12 @@ public final class WorldVisuals {
         var cfg = TopkaClient.CONFIG.get();
         long now = System.currentTimeMillis();
         long lifetime = Math.max(250L, cfg.jumpCircleLifetimeMs);
+        int layers = Math.clamp(cfg.jumpCircleLayers, 1, 5);
 
         for (VisualEffectsController.JumpRing ring : rings) {
             double progress = Math.clamp((double) (now - ring.createdAt()) / lifetime, 0.0D, 1.0D);
             float radius = (float) (0.15D + progress * Math.max(0.2F, cfg.jumpCircleRadius));
-            int alpha = (int) Math.round(230.0D * (1.0D - progress));
-            int color = withAlpha(cfg.jumpCircleColorArgb, alpha);
+            int alpha = (int) Math.round(235.0D * (1.0D - progress));
 
             PoseStack poseStack = context.poseStack();
             poseStack.pushPose();
@@ -266,14 +336,48 @@ public final class WorldVisuals {
             context.submitNodeCollector().submitCustomGeometry(
                     poseStack,
                     RenderTypes.linesTranslucent(),
-                    (pose, vertices) -> emitCircle(
-                            pose,
-                            vertices,
-                            radius,
-                            0.0D,
-                            color,
-                            cfg.jumpCircleLineWidth
-                    )
+                    (pose, vertices) -> {
+                        switch (cfg.jumpCircleStyle) {
+                            case 0 -> emitCircle(
+                                    pose,
+                                    vertices,
+                                    radius,
+                                    0.0D,
+                                    effectColor(cfg.jumpCircleColorArgb, cfg.jumpCircleRainbow, 0.0F, alpha),
+                                    cfg.jumpCircleLineWidth
+                            );
+                            case 2 -> {
+                                for (int layer = 0; layer < layers; layer++) {
+                                    float offset = layer * 0.055F;
+                                    float ringRadius = radius * (1.0F - layer * 0.045F);
+                                    int color = effectColor(cfg.jumpCircleColorArgb, cfg.jumpCircleRainbow, layer * 0.08F, Math.max(18, alpha - layer * 24));
+                                    emitCircle(pose, vertices, ringRadius, offset, color, cfg.jumpCircleLineWidth);
+                                }
+                            }
+                            case 3 -> {
+                                for (int layer = 0; layer < layers; layer++) {
+                                    float phase = layer / (float) Math.max(1, layers - 1);
+                                    float ringRadius = radius * (0.62F + phase * 0.48F);
+                                    double y = Math.sin((progress * Math.PI * 2.0D) + phase * Math.PI) * 0.08D;
+                                    int color = effectColor(cfg.jumpCircleColorArgb, cfg.jumpCircleRainbow, phase * 0.22F, Math.max(18, alpha - layer * 18));
+                                    emitCircle(pose, vertices, ringRadius, y, color, cfg.jumpCircleLineWidth + phase);
+                                }
+                            }
+                            default -> {
+                                // Thick luminous multi-ring style closest to the
+                                // bright blue rings in the reference image.
+                                for (int layer = 0; layer < layers; layer++) {
+                                    float spread = layer * 0.045F;
+                                    int glowAlpha = Math.max(16, alpha / (2 + layer));
+                                    int coreAlpha = Math.max(30, alpha - layer * 20);
+                                    int glowColor = effectColor(cfg.jumpCircleColorArgb, cfg.jumpCircleRainbow, layer * 0.07F, glowAlpha);
+                                    int coreColor = effectColor(cfg.jumpCircleColorArgb, cfg.jumpCircleRainbow, layer * 0.07F, coreAlpha);
+                                    emitCircle(pose, vertices, radius + spread, 0.002D * layer, glowColor, Math.min(12.0F, cfg.jumpCircleLineWidth * 2.25F));
+                                    emitCircle(pose, vertices, radius + spread, 0.003D * layer, coreColor, cfg.jumpCircleLineWidth);
+                                }
+                            }
+                        }
+                    }
             );
             poseStack.popPose();
         }
@@ -483,6 +587,15 @@ public final class WorldVisuals {
                 .setColor(color)
                 .setNormal(pose, nx, ny, nz)
                 .setLineWidth(width);
+    }
+
+    private static int effectColor(int baseArgb, boolean rainbow, float offset, int alpha) {
+        int rgb = baseArgb & 0x00FFFFFF;
+        if (rainbow) {
+            float hue = (System.currentTimeMillis() / 3200.0F + offset) % 1.0F;
+            rgb = java.awt.Color.HSBtoRGB(hue, 0.72F, 1.0F) & 0x00FFFFFF;
+        }
+        return (Math.clamp(alpha, 0, 255) << 24) | rgb;
     }
 
     private static int withAlpha(int argb, int alpha) {
