@@ -8,10 +8,14 @@ public final class SprintController {
 
     public static void tick() {
         if (!TopkaClient.MODULES.byId("sprint").enabled()) return;
+
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.gui.screen() != null) return;
-        if (TopkaClient.CONFIG.get().sprintAlways && client.options.keyUp.isDown() && !client.player.isCrouching()) {
-            client.player.setSprinting(true);
-        }
+
+        var cfg = TopkaClient.CONFIG.get();
+        if (!cfg.sprintAlways || !client.options.keyUp.isDown() || client.player.isCrouching()) return;
+        if (cfg.sprintStopWhileUsingItem && client.player.isUsingItem()) return;
+
+        client.player.setSprinting(true);
     }
 }
