@@ -5,6 +5,7 @@ import com.koqps.topka.hud.AmbienceController;
 import com.koqps.topka.hud.ArmorHud;
 import com.koqps.topka.hud.AutoGgController;
 import com.koqps.topka.hud.CrosshairHud;
+import com.koqps.topka.hud.CosmeticTextures;
 import com.koqps.topka.hud.FullBrightController;
 import com.koqps.topka.hud.HealthHud;
 import com.koqps.topka.hud.HitColorController;
@@ -63,6 +64,8 @@ public final class TopkaClient implements ClientModInitializer {
                 category
         ));
 
+        ClientLifecycleEvents.CLIENT_STARTED.register(CosmeticTextures::register);
+
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             HitColorController.tick();
             HitboxController.tick();
@@ -84,6 +87,7 @@ public final class TopkaClient implements ClientModInitializer {
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             FullBrightController.restore();
             VisualEffectsController.clear();
+            CosmeticTextures.close();
             CONFIG.save();
         });
     }
