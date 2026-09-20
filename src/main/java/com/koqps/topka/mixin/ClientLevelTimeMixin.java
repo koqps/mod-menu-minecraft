@@ -9,13 +9,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Supplies client-visible day time directly to the render path. Server packets
- * are still received and cached, but custom ambience no longer fights them by
- * rewriting the world every tick, eliminating visible time flicker.
+ * Flicker-free client ambience override.
+ *
+ * Minecraft 26.3's celestial rendering reads LevelTimeAccess#getTimeOfDay,
+ * which in turn depends on dayTime(). Both accessors are provided directly on
+ * ClientLevel here so every sky consumer sees the same stable custom value.
+ * Incoming server time is still cached for instant vanilla restoration.
  */
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelTimeMixin {
-    @Inject(method = "setTimeFromServer", at = @At("HEAD"))
+    @Inject(method = "setTimeFromServer", at = @At("HEAD"), require = 1)
     private void modmenu$captureServerTime(long dayTime, CallbackInfo ci) {
         AmbienceController.onServerTime(dayTime);
     }
@@ -25,5 +28,10 @@ public abstract class ClientLevelTimeMixin {
             return Math.floorMod(TopkaClient.CONFIG.get().ambienceTime, 24000L);
         }
         return AmbienceController.serverDayTime();
+    }
+
+    public float getTimeOfDay(float partialTick) {
+        ClientLevel self = (ClientLevel) (Object) this;
+        return self.dimensionType().timeOfDay(this.dayTime());
     }
 }
