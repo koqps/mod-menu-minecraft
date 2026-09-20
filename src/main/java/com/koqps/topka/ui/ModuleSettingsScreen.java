@@ -105,18 +105,33 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Line width", () -> String.format("%.1f", c.haloLineWidth), () -> c.haloLineWidth = Math.max(1F, c.haloLineWidth - 0.25F), () -> c.haloLineWidth = Math.min(5F, c.haloLineWidth + 0.25F));
             }
             case "trails" -> {
+                row("Style", () -> trailStyleName(c.trailStyle), () -> c.trailStyle = Math.floorMod(c.trailStyle - 1, 4), () -> c.trailStyle = Math.floorMod(c.trailStyle + 1, 4));
                 row("Lifetime", () -> c.trailLifetimeMs + " ms", () -> c.trailLifetimeMs = Math.max(250, c.trailLifetimeMs - 100), () -> c.trailLifetimeMs = Math.min(3000, c.trailLifetimeMs + 100));
-                row("Line width", () -> String.format("%.1f", c.trailLineWidth), () -> c.trailLineWidth = Math.max(1F, c.trailLineWidth - 0.25F), () -> c.trailLineWidth = Math.min(6F, c.trailLineWidth + 0.25F));
+                row("Thickness", () -> String.format("%.1f", c.trailLineWidth), () -> c.trailLineWidth = Math.max(1F, c.trailLineWidth - 0.5F), () -> c.trailLineWidth = Math.min(12F, c.trailLineWidth + 0.5F));
+                row("Ribbon width", () -> String.format("%.2f", c.trailWidth), () -> c.trailWidth = Math.max(0.1F, c.trailWidth - 0.1F), () -> c.trailWidth = Math.min(2.5F, c.trailWidth + 0.1F));
+                row("Ribbon height", () -> String.format("%.2f", c.trailHeight), () -> c.trailHeight = Math.max(0.05F, c.trailHeight - 0.05F), () -> c.trailHeight = Math.min(1.8F, c.trailHeight + 0.05F));
+                row("Layers", () -> Integer.toString(c.trailLayers), () -> c.trailLayers = Math.max(1, c.trailLayers - 1), () -> c.trailLayers = Math.min(6, c.trailLayers + 1));
+                row("Glow", () -> c.trailGlow ? "ON" : "OFF", () -> c.trailGlow = !c.trailGlow, () -> c.trailGlow = !c.trailGlow);
+                row("Rainbow", () -> c.trailRainbow ? "ON" : "OFF", () -> c.trailRainbow = !c.trailRainbow, () -> c.trailRainbow = !c.trailRainbow);
                 row("Color", () -> hex(c.trailColorArgb), () -> c.trailColorArgb = previousColor(c.trailColorArgb), () -> c.trailColorArgb = nextColor(c.trailColorArgb));
             }
             case "jump_circles" -> {
-                row("Radius", () -> String.format("%.2f", c.jumpCircleRadius), () -> c.jumpCircleRadius = Math.max(0.3F, c.jumpCircleRadius - 0.1F), () -> c.jumpCircleRadius = Math.min(3F, c.jumpCircleRadius + 0.1F));
+                row("Style", () -> ringStyleName(c.jumpCircleStyle), () -> c.jumpCircleStyle = Math.floorMod(c.jumpCircleStyle - 1, 4), () -> c.jumpCircleStyle = Math.floorMod(c.jumpCircleStyle + 1, 4));
+                row("Radius", () -> String.format("%.2f", c.jumpCircleRadius), () -> c.jumpCircleRadius = Math.max(0.3F, c.jumpCircleRadius - 0.1F), () -> c.jumpCircleRadius = Math.min(4F, c.jumpCircleRadius + 0.1F));
                 row("Lifetime", () -> c.jumpCircleLifetimeMs + " ms", () -> c.jumpCircleLifetimeMs = Math.max(250, c.jumpCircleLifetimeMs - 100), () -> c.jumpCircleLifetimeMs = Math.min(2500, c.jumpCircleLifetimeMs + 100));
-                row("Line width", () -> String.format("%.1f", c.jumpCircleLineWidth), () -> c.jumpCircleLineWidth = Math.max(1F, c.jumpCircleLineWidth - 0.25F), () -> c.jumpCircleLineWidth = Math.min(6F, c.jumpCircleLineWidth + 0.25F));
+                row("Thickness", () -> String.format("%.1f", c.jumpCircleLineWidth), () -> c.jumpCircleLineWidth = Math.max(1F, c.jumpCircleLineWidth - 0.5F), () -> c.jumpCircleLineWidth = Math.min(10F, c.jumpCircleLineWidth + 0.5F));
+                row("Layers", () -> Integer.toString(c.jumpCircleLayers), () -> c.jumpCircleLayers = Math.max(1, c.jumpCircleLayers - 1), () -> c.jumpCircleLayers = Math.min(5, c.jumpCircleLayers + 1));
+                row("Rainbow", () -> c.jumpCircleRainbow ? "ON" : "OFF", () -> c.jumpCircleRainbow = !c.jumpCircleRainbow, () -> c.jumpCircleRainbow = !c.jumpCircleRainbow);
                 row("Color", () -> hex(c.jumpCircleColorArgb), () -> c.jumpCircleColorArgb = previousColor(c.jumpCircleColorArgb), () -> c.jumpCircleColorArgb = nextColor(c.jumpCircleColorArgb));
             }
-            case "jump_particles" -> row("Particle count", () -> Integer.toString(c.jumpParticleCount), () -> c.jumpParticleCount = Math.max(1, c.jumpParticleCount - 1), () -> c.jumpParticleCount = Math.min(32, c.jumpParticleCount + 1));
-            case "hit_particles" -> row("Particle count", () -> Integer.toString(c.hitParticleCount), () -> c.hitParticleCount = Math.max(1, c.hitParticleCount - 1), () -> c.hitParticleCount = Math.min(40, c.hitParticleCount + 1));
+            case "jump_particles" -> {
+                row("Type", () -> particleStyleName(c.jumpParticleStyle), () -> c.jumpParticleStyle = Math.floorMod(c.jumpParticleStyle - 1, 4), () -> c.jumpParticleStyle = Math.floorMod(c.jumpParticleStyle + 1, 4));
+                row("Particle count", () -> Integer.toString(c.jumpParticleCount), () -> c.jumpParticleCount = Math.max(1, c.jumpParticleCount - 1), () -> c.jumpParticleCount = Math.min(48, c.jumpParticleCount + 1));
+            }
+            case "hit_particles" -> {
+                row("Type", () -> particleStyleName(c.hitParticleStyle), () -> c.hitParticleStyle = Math.floorMod(c.hitParticleStyle - 1, 4), () -> c.hitParticleStyle = Math.floorMod(c.hitParticleStyle + 1, 4));
+                row("Particle count", () -> Integer.toString(c.hitParticleCount), () -> c.hitParticleCount = Math.max(1, c.hitParticleCount - 1), () -> c.hitParticleCount = Math.min(64, c.hitParticleCount + 1));
+            }
             case "full_bright" -> row("Gamma", () -> String.format("%.1f", c.fullBrightGamma), () -> c.fullBrightGamma = Math.max(1D, c.fullBrightGamma - 1D), () -> c.fullBrightGamma = Math.min(16D, c.fullBrightGamma + 1D));
             case "viewmodel" -> {
                 row("Main X", () -> String.format("%.2f", c.viewMainX), () -> c.viewMainX = Math.max(-1F, c.viewMainX - 0.05F), () -> c.viewMainX = Math.min(1F, c.viewMainX + 0.05F));
@@ -326,10 +341,17 @@ public final class ModuleSettingsScreen extends Screen {
             }
             case "china_hat" -> { c.chinaHatRadius = 0.66F; c.chinaHatHeight = 0.32F; c.chinaHatLineWidth = 2F; c.chinaHatShowOthers = false; }
             case "halo" -> { c.haloRadius = 0.46F; c.haloHeight = 0.16F; c.haloLineWidth = 2.2F; }
-            case "trails" -> { c.trailLifetimeMs = 900; c.trailLineWidth = 2.2F; c.trailColorArgb = 0xFF8B5CF6; }
-            case "jump_circles" -> { c.jumpCircleLifetimeMs = 700; c.jumpCircleRadius = 1.15F; c.jumpCircleLineWidth = 2F; c.jumpCircleColorArgb = 0xFF41C7FF; }
-            case "jump_particles" -> c.jumpParticleCount = 10;
-            case "hit_particles" -> c.hitParticleCount = 12;
+            case "trails" -> {
+                c.trailLifetimeMs = 900; c.trailLineWidth = 2.2F; c.trailColorArgb = 0xFF8B5CF6;
+                c.trailStyle = 1; c.trailHeight = 0.42F; c.trailWidth = 0.72F; c.trailLayers = 3;
+                c.trailRainbow = false; c.trailGlow = true;
+            }
+            case "jump_circles" -> {
+                c.jumpCircleLifetimeMs = 700; c.jumpCircleRadius = 1.15F; c.jumpCircleLineWidth = 2F;
+                c.jumpCircleColorArgb = 0xFF41C7FF; c.jumpCircleStyle = 1; c.jumpCircleLayers = 2; c.jumpCircleRainbow = false;
+            }
+            case "jump_particles" -> { c.jumpParticleCount = 10; c.jumpParticleStyle = 0; }
+            case "hit_particles" -> { c.hitParticleCount = 12; c.hitParticleStyle = 0; }
             case "full_bright" -> c.fullBrightGamma = 12D;
             case "viewmodel" -> {
                 c.viewMainX = c.viewMainY = c.viewMainZ = 0F;
@@ -439,6 +461,33 @@ public final class ModuleSettingsScreen extends Screen {
         String[] values = {"gg", "GG", "good game", "gg wp"};
         for (int i = 0; i < values.length; i++) if (values[i].equalsIgnoreCase(current)) return values[(i + values.length - 1) % values.length];
         return values[0];
+    }
+
+    private static String trailStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 0 -> "LINE";
+            case 1 -> "RIBBON";
+            case 2 -> "WINGS";
+            default -> "BEAM";
+        };
+    }
+
+    private static String ringStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 0 -> "SINGLE";
+            case 1 -> "GLOW";
+            case 2 -> "STACK";
+            default -> "PULSE";
+        };
+    }
+
+    private static String particleStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 1 -> "HEARTS";
+            case 2 -> "SPARKS";
+            case 3 -> "CRITS";
+            default -> "MIXED";
+        };
     }
 
     private static String hex(int argb) {
