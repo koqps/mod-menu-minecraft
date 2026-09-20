@@ -1,6 +1,7 @@
 package com.koqps.topka;
 
 import com.koqps.topka.config.ConfigManager;
+import com.koqps.topka.hud.AmbienceController;
 import com.koqps.topka.hud.ArmorHud;
 import com.koqps.topka.hud.CrosshairHud;
 import com.koqps.topka.hud.FullBrightController;
@@ -57,6 +58,7 @@ public final class TopkaClient implements ClientModInitializer {
             HitboxController.tick();
             SprintController.tick();
             FullBrightController.tick();
+            AmbienceController.tick();
             VisualEffectsController.tick();
 
             while (openMenu.consumeClick()) {
