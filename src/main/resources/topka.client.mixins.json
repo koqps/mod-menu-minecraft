@@ -8,7 +8,8 @@
     "FirstPersonViewMixin",
     "DropProtectionMixin",
     "BabyModeMixin",
-    "ContainerScreenAccessor"
+    "ContainerScreenAccessor",
+    "ClientLevelTimeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
