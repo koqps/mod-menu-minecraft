@@ -33,13 +33,22 @@ public final class PingHud {
         int y = cfg.pingHudY;
         int w = 88;
         int h = 28;
+        float scale = Math.clamp(cfg.pingHudScale, 0.55F, 2.0F);
 
-        graphics.fill(x, y, x + w, y + h, cfg.hudBackgroundArgb);
-        graphics.fill(x, y, x + 3, y + h, Theme.accent());
-        graphics.text(client.font, "PING", x + 10, y + 6, 0xFF9999AA, false);
-        graphics.text(client.font, ping + " ms", x + 48, y + 6, color, true);
-        graphics.fill(x + 10, y + 20, x + 78, y + 23, 0xFF292934);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y);
+        graphics.pose().scale(scale, scale);
+
+        if (cfg.pingHudBackground) {
+            graphics.fill(0, 0, w, h, cfg.hudBackgroundArgb);
+            graphics.fill(0, 0, 3, h, Theme.accent());
+        }
+        graphics.text(client.font, "PING", 10, 6, 0xFF9999AA, false);
+        graphics.text(client.font, ping + " ms", 48, 6, color, true);
+        graphics.fill(10, 20, 78, 23, 0xFF292934);
         int bar = Math.min(68, Math.max(3, 68 - Math.min(65, ping / 4)));
-        graphics.fill(x + 10, y + 20, x + 10 + bar, y + 23, color);
+        graphics.fill(10, 20, 10 + bar, 23, color);
+
+        graphics.pose().popMatrix();
     }
 }
