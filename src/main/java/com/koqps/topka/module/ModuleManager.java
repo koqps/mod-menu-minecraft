@@ -19,6 +19,7 @@ public final class ModuleManager {
         new Module("viewmodel", "ViewModel", "Customize first-person item position and scale.", "◇", Module.Category.VISUAL, false),
         new Module("swing_animations", "Swing Animations", "Extra visual-only first-person swing styles.", "↗", Module.Category.VISUAL, false),
         new Module("ambience", "Ambience", "Client-side visual time override.", "☾", Module.Category.VISUAL, false),
+        new Module("projectile_trajectory", "Projectile Trajectory", "Visual prediction line for common projectiles.", "⌁", Module.Category.VISUAL, false),
 
         new Module("health_display", "Health Display", "Compact health bar and numeric health.", "♥", Module.Category.HUD, true),
         new Module("armor_display", "Armor Display", "Armor icons and durability percentages.", "◆", Module.Category.HUD, true),
