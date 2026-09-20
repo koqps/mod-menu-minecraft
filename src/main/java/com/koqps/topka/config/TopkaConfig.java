@@ -1,10 +1,13 @@
 package com.koqps.topka.config;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class TopkaConfig {
     public Map<String, Boolean> modules = new HashMap<>();
+    public List<WaypointConfig> waypoints = new ArrayList<>();
 
     // Theme
     public int accentArgb = 0xFF8B5CF6;
@@ -61,6 +64,37 @@ public final class TopkaConfig {
 
     // Ambience
     public long ambienceTime = 6000L;
+
+    // Health tags
+    public boolean healthTagHearts = true;
+    public double healthTagMaxDistance = 48.0D;
+
+    // Projectile prediction
+    public int projectileColorArgb = 0xFF41C7FF;
+    public float projectileLineWidth = 2.0F;
+    public int projectileSteps = 72;
+
+    // Baby mode
+    public float babyScale = 0.65F;
+    public boolean babyModeOthers = false;
+
+    // Cape
+    public int capeColorArgb = 0xFF8B5CF6;
+    public float capeWidth = 0.64F;
+    public float capeHeight = 1.05F;
+    public float capeLineWidth = 2.0F;
+    public boolean capeShowOthers = false;
+
+    // Drop protection
+    public long dropProtectionWindowMs = 1800L;
+    public boolean protectArmor = true;
+    public boolean protectTools = true;
+    public boolean protectTotems = true;
+    public boolean protectNamedItems = true;
+
+    // Auto GG
+    public String autoGgMessage = "gg";
+    public long autoGgCooldownMs = 15000L;
 
     // HUD positions
     public int healthHudX = 12;
