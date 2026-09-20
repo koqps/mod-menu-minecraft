@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.Locale;
 
 public final class TopkaScreen extends Screen {
-    private static final int PANEL_W = 710;
-    private static final int PANEL_H = 500;
-    private static final int SIDEBAR_W = 138;
-    private static final int CARD_W = 258;
+    private static final int PANEL_W = 730;
+    private static final int PANEL_H = 520;
+    private static final int SIDEBAR_W = 148;
+    private static final int CARD_W = 264;
     private static final int CARD_H = 54;
     private static final int CARD_GAP_X = 12;
     private static final int CARD_GAP_Y = 8;
@@ -56,22 +56,26 @@ public final class TopkaScreen extends Screen {
     protected void init() {
         int x = panelX(), y = panelY();
 
-        addClickTarget(x + 15, y + 92, 108, 26, () -> setCategory(null));
-        addClickTarget(x + 15, y + 124, 108, 26, () -> setCategory(Module.Category.COMBAT));
-        addClickTarget(x + 15, y + 156, 108, 26, () -> setCategory(Module.Category.VISUAL));
-        addClickTarget(x + 15, y + 188, 108, 26, () -> setCategory(Module.Category.HUD));
-        addClickTarget(x + 15, y + 220, 108, 26, () -> setCategory(Module.Category.MOVEMENT));
+        addCategoryTarget(x, y, 0, null);
+        addCategoryTarget(x, y, 1, Module.Category.COMBAT);
+        addCategoryTarget(x, y, 2, Module.Category.VISUAL);
+        addCategoryTarget(x, y, 3, Module.Category.PLAYER);
+        addCategoryTarget(x, y, 4, Module.Category.MOVEMENT);
+        addCategoryTarget(x, y, 5, Module.Category.HUD);
+        addCategoryTarget(x, y, 6, Module.Category.WORLD);
+        addCategoryTarget(x, y, 7, Module.Category.MISC);
 
         EditBox previousSearch = this.searchBox;
         this.searchBox = new EditBox(
                 this.font,
-                x + 160,
+                x + 172,
                 y + 28,
-                330,
+                346,
                 22,
                 previousSearch,
                 Component.literal("Search modules")
         );
+        this.searchBox.setMaxLength(48);
         this.searchBox.setValue(this.searchQuery);
         this.searchBox.setResponder(value -> {
             if (!value.equals(this.searchQuery)) {
@@ -91,7 +95,7 @@ public final class TopkaScreen extends Screen {
             int visibleIndex = i - first;
             int column = visibleIndex % 2;
             int row = visibleIndex / 2;
-            int cardX = x + 160 + column * (CARD_W + CARD_GAP_X);
+            int cardX = x + 172 + column * (CARD_W + CARD_GAP_X);
             int cardY = y + 82 + row * (CARD_H + CARD_GAP_Y);
             addClickTarget(cardX, cardY, CARD_W, CARD_H, () -> {
                 module.toggle();
@@ -99,10 +103,15 @@ public final class TopkaScreen extends Screen {
             });
         }
 
-        addClickTarget(x + 160, y + 420, 118, 30, () -> minecraft.gui.setScreen(new ThemeScreen(this)));
-        addClickTarget(x + 286, y + 420, 144, 30, () -> minecraft.gui.setScreen(new HudEditorScreen(this)));
-        addClickTarget(x + 438, y + 420, 126, 30, this::resetWindowPosition);
-        addClickTarget(x + 572, y + 420, 110, 30, this::disableAll);
+        addClickTarget(x + 172, y + 426, 104, 30, () -> minecraft.gui.setScreen(new ThemeScreen(this)));
+        addClickTarget(x + 284, y + 426, 118, 30, () -> minecraft.gui.setScreen(new HudEditorScreen(this)));
+        addClickTarget(x + 410, y + 426, 118, 30, () -> minecraft.gui.setScreen(new WaypointScreen(this)));
+        addClickTarget(x + 536, y + 426, 104, 30, this::resetWindowPosition);
+        addClickTarget(x + 648, y + 426, 56, 30, this::disableAll);
+    }
+
+    private void addCategoryTarget(int x, int y, int index, Module.Category category) {
+        addClickTarget(x + 15, y + 86 + index * 29, 118, 24, () -> setCategory(category));
     }
 
     @Override
@@ -110,7 +119,7 @@ public final class TopkaScreen extends Screen {
         var cfg = TopkaClient.CONFIG.get();
         int x = panelX(), y = panelY();
 
-        g.fill(0, 0, width, height, 0x8F000000);
+        g.fill(0, 0, width, height, 0x92000000);
         g.fill(x, y, x + PANEL_W, y + PANEL_H, cfg.panelArgb);
         g.fill(x, y, x + SIDEBAR_W, y + PANEL_H, cfg.sidebarArgb);
         g.fill(x + SIDEBAR_W, y, x + SIDEBAR_W + 1, y + PANEL_H, 0xFF292934);
@@ -119,8 +128,8 @@ public final class TopkaScreen extends Screen {
         drawBrand(g, x, y);
         drawSidebar(g, mouseX, mouseY, x, y);
 
-        g.text(font, selectedCategory == null ? "MODULE LIBRARY" : selectedCategory.name(), x + 160, y + 11, 0xFFF7F7FB, true);
-        g.text(font, enabledCount() + " active", x + 500, y + 11, cfg.accentArgb, true);
+        g.text(font, selectedCategory == null ? "MODULE LIBRARY" : selectedCategory.name(), x + 172, y + 11, 0xFFF7F7FB, true);
+        g.text(font, enabledCount() + " active", x + 552, y + 11, cfg.accentArgb, true);
 
         List<Module> filtered = filteredModules();
         clampScroll(filtered);
@@ -128,13 +137,13 @@ public final class TopkaScreen extends Screen {
         int last = Math.min(filtered.size(), first + VISIBLE_ROWS * 2);
 
         if (filtered.isEmpty()) {
-            g.centeredText(font, "No modules match \"" + searchQuery + "\"", x + 422, y + 210, 0xFF777788);
+            g.centeredText(font, "No modules match "" + searchQuery + """, x + 440, y + 224, 0xFF777788);
         } else {
             for (int i = first; i < last; i++) {
                 int visibleIndex = i - first;
                 int column = visibleIndex % 2;
                 int row = visibleIndex / 2;
-                int cardX = x + 160 + column * (CARD_W + CARD_GAP_X);
+                int cardX = x + 172 + column * (CARD_W + CARD_GAP_X);
                 int cardY = y + 82 + row * (CARD_H + CARD_GAP_Y);
                 drawModuleCard(g, mouseX, mouseY, cardX, cardY, filtered.get(i));
             }
@@ -142,7 +151,7 @@ public final class TopkaScreen extends Screen {
 
         int rows = (filtered.size() + 1) / 2;
         if (rows > VISIBLE_ROWS) {
-            int trackX = x + 696;
+            int trackX = x + 716;
             int trackY = y + 82;
             int trackH = VISIBLE_ROWS * (CARD_H + CARD_GAP_Y) - CARD_GAP_Y;
             g.fill(trackX, trackY, trackX + 3, trackY + trackH, 0xFF24242E);
@@ -152,13 +161,14 @@ public final class TopkaScreen extends Screen {
             g.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, cfg.accentArgb);
         }
 
-        drawBottomButton(g, mouseX, mouseY, x + 160, y + 420, 118, "Theme Studio");
-        drawBottomButton(g, mouseX, mouseY, x + 286, y + 420, 144, "HUD Workspace");
-        drawBottomButton(g, mouseX, mouseY, x + 438, y + 420, 126, "Reset Window");
-        drawBottomButton(g, mouseX, mouseY, x + 572, y + 420, 110, "Disable All");
+        drawBottomButton(g, mouseX, mouseY, x + 172, y + 426, 104, "Theme");
+        drawBottomButton(g, mouseX, mouseY, x + 284, y + 426, 118, "HUD Workspace");
+        drawBottomButton(g, mouseX, mouseY, x + 410, y + 426, 118, "Waypoints");
+        drawBottomButton(g, mouseX, mouseY, x + 536, y + 426, 104, "Reset Window");
+        drawBottomButton(g, mouseX, mouseY, x + 648, y + 426, 56, "Off");
 
-        g.text(font, "Left click toggles • Right click opens settings • Mouse wheel scrolls", x + 160, y + 464, 0xFF686879, false);
-        g.text(font, "v0.5.0", x + 646, y + 464, 0xFF686879, true);
+        g.text(font, "Left click toggles • Right click settings • Mouse wheel scrolls", x + 172, y + 477, 0xFF686879, false);
+        g.text(font, "Mod Menu 0.5.0", x + 618, y + 477, 0xFF686879, true);
 
         if (this.searchBox != null) {
             this.searchBox.extractRenderState(g, mouseX, mouseY, delta);
@@ -171,34 +181,44 @@ public final class TopkaScreen extends Screen {
         var cfg = TopkaClient.CONFIG.get();
         g.text(font, "MOD", x + 18, y + 18, 0xFFFFFFFF, true);
         g.text(font, "MENU", x + 50, y + 18, cfg.accentArgb, true);
-        g.text(font, "VISUAL CLIENT", x + 18, y + 37, 0xFF6E6E80, false);
-        g.fill(x + 18, y + 59, x + 118, y + 60, 0xFF2B2B36);
-        g.fill(x + 18, y + 59, x + 68, y + 60, cfg.accentArgb);
+        g.text(font, "PRO CLIENT", x + 18, y + 37, 0xFF6E6E80, false);
+        g.fill(x + 18, y + 59, x + 128, y + 60, 0xFF2B2B36);
+        g.fill(x + 18, y + 59, x + 76, y + 60, cfg.accentArgb);
     }
 
     private void drawSidebar(GuiGraphicsExtractor g, int mx, int my, int x, int y) {
-        drawCategory(g, mx, my, x + 15, y + 92, "All Modules", null);
-        drawCategory(g, mx, my, x + 15, y + 124, "Combat", Module.Category.COMBAT);
-        drawCategory(g, mx, my, x + 15, y + 156, "Visual", Module.Category.VISUAL);
-        drawCategory(g, mx, my, x + 15, y + 188, "HUD", Module.Category.HUD);
-        drawCategory(g, mx, my, x + 15, y + 220, "Movement", Module.Category.MOVEMENT);
+        drawCategoryAt(g, mx, my, x, y, 0, "All Modules", null);
+        drawCategoryAt(g, mx, my, x, y, 1, "Combat", Module.Category.COMBAT);
+        drawCategoryAt(g, mx, my, x, y, 2, "Visual", Module.Category.VISUAL);
+        drawCategoryAt(g, mx, my, x, y, 3, "Player", Module.Category.PLAYER);
+        drawCategoryAt(g, mx, my, x, y, 4, "Movement", Module.Category.MOVEMENT);
+        drawCategoryAt(g, mx, my, x, y, 5, "HUD", Module.Category.HUD);
+        drawCategoryAt(g, mx, my, x, y, 6, "World", Module.Category.WORLD);
+        drawCategoryAt(g, mx, my, x, y, 7, "Misc", Module.Category.MISC);
 
         var cfg = TopkaClient.CONFIG.get();
-        g.text(font, "KEYBIND", x + 18, y + 290, 0xFF646476, false);
-        g.fill(x + 15, y + 307, x + 123, y + 337, 0xFF1B1B24);
-        g.centeredText(font, TopkaClient.openMenuKey(), x + 69, y + 317, cfg.accentArgb);
-        g.text(font, "Same key opens", x + 18, y + 347, 0xFF686879, false);
-        g.text(font, "and closes menu.", x + 18, y + 360, 0xFF686879, false);
-        g.text(font, "Rebind in Controls.", x + 18, y + 382, 0xFF686879, false);
+        g.text(font, "MENU KEY", x + 18, y + 334, 0xFF646476, false);
+        g.fill(x + 15, y + 351, x + 133, y + 381, 0xFF1B1B24);
+        g.centeredText(font, TopkaClient.openMenuKey(), x + 74, y + 361, cfg.accentArgb);
+        g.text(font, "Same key opens/closes.", x + 18, y + 391, 0xFF686879, false);
+        g.text(font, "Rebind in Controls.", x + 18, y + 406, 0xFF686879, false);
+
+        g.text(font, "TIP", x + 18, y + 448, 0xFF646476, false);
+        g.text(font, "Right-click any card", x + 18, y + 464, 0xFF686879, false);
+        g.text(font, "for full settings.", x + 18, y + 478, 0xFF686879, false);
+    }
+
+    private void drawCategoryAt(GuiGraphicsExtractor g, int mx, int my, int x, int y, int index, String label, Module.Category category) {
+        drawCategory(g, mx, my, x + 15, y + 86 + index * 29, label, category);
     }
 
     private void drawCategory(GuiGraphicsExtractor g, int mx, int my, int x, int y, String label, Module.Category category) {
         boolean selected = selectedCategory == category;
-        boolean hover = inside(mx, my, x, y, 108, 26);
+        boolean hover = inside(mx, my, x, y, 118, 24);
         int color = selected ? TopkaClient.CONFIG.get().accentArgb : 0xFFB7B7C4;
-        g.fill(x, y, x + 108, y + 26, selected ? 0xFF282435 : (hover ? 0xFF20202A : 0x00101010));
-        if (selected) g.fill(x, y, x + 3, y + 26, color);
-        g.text(font, label, x + 10, y + 9, color, selected);
+        g.fill(x, y, x + 118, y + 24, selected ? 0xFF282435 : (hover ? 0xFF20202A : 0x00101010));
+        if (selected) g.fill(x, y, x + 3, y + 24, color);
+        g.text(font, label, x + 10, y + 8, color, selected);
     }
 
     private void drawModuleCard(GuiGraphicsExtractor g, int mx, int my, int x, int y, Module module) {
@@ -215,7 +235,7 @@ public final class TopkaScreen extends Screen {
 
         g.text(font, module.name(), x + 48, y + 10, cfg.textArgb, true);
         String description = module.description();
-        if (description.length() > 37) description = description.substring(0, 36) + "…";
+        if (description.length() > 38) description = description.substring(0, 37) + "…";
         g.text(font, description, x + 48, y + 28, 0xFF858596, false);
 
         int pillX = x + CARD_W - 43;
@@ -295,7 +315,7 @@ public final class TopkaScreen extends Screen {
                 int visibleIndex = i - first;
                 int column = visibleIndex % 2;
                 int row = visibleIndex / 2;
-                int cardX = x + 160 + column * (CARD_W + CARD_GAP_X);
+                int cardX = x + 172 + column * (CARD_W + CARD_GAP_X);
                 int cardY = y + 82 + row * (CARD_H + CARD_GAP_Y);
                 if (inside(click.x(), click.y(), cardX, cardY, CARD_W, CARD_H)) {
                     minecraft.gui.setScreen(new ModuleSettingsScreen(this, filtered.get(i)));
@@ -342,7 +362,7 @@ public final class TopkaScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         int x = panelX(), y = panelY();
-        if (inside(mouseX, mouseY, x + 150, y + 70, 550, 330)) {
+        if (inside(mouseX, mouseY, x + 160, y + 70, 560, 330)) {
             List<Module> filtered = filteredModules();
             int rows = (filtered.size() + 1) / 2;
             int max = Math.max(0, rows - VISIBLE_ROWS);
