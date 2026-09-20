@@ -117,11 +117,13 @@ public final class ConfigManager {
 
         config.chinaHatRadius = Math.clamp(config.chinaHatRadius, 0.25F, 1.25F);
         config.chinaHatHeight = Math.clamp(config.chinaHatHeight, 0.12F, 0.8F);
-        config.chinaHatLineWidth = Math.clamp(config.chinaHatLineWidth, 1.0F, 5.0F);
+        config.chinaHatLineWidth = Math.clamp(config.chinaHatLineWidth, 1.0F, 7.0F);
+        config.chinaHatStyle = Math.clamp(config.chinaHatStyle, 0, 3);
 
         config.haloRadius = Math.clamp(config.haloRadius, 0.2F, 1.0F);
         config.haloHeight = Math.clamp(config.haloHeight, 0.0F, 0.7F);
-        config.haloLineWidth = Math.clamp(config.haloLineWidth, 1.0F, 5.0F);
+        config.haloLineWidth = Math.clamp(config.haloLineWidth, 1.0F, 7.0F);
+        config.haloStyle = Math.clamp(config.haloStyle, 0, 3);
 
         config.trailLifetimeMs = Math.clamp(config.trailLifetimeMs, 250, 3000);
         config.trailLineWidth = Math.clamp(config.trailLineWidth, 1.0F, 12.0F);
@@ -173,6 +175,7 @@ public final class ConfigManager {
         config.crosshairGap = Math.clamp(config.crosshairGap, 0, 12);
         config.crosshairThickness = Math.clamp(config.crosshairThickness, 1, 6);
         config.crosshairDynamicMaxGap = Math.clamp(config.crosshairDynamicMaxGap, 2, 24);
+        config.crosshairStyle = Math.clamp(config.crosshairStyle, 0, 3);
 
         config.healthHudScale = Math.clamp(config.healthHudScale, 0.55F, 2.0F);
         config.armorHudScale = Math.clamp(config.armorHudScale, 0.55F, 2.0F);
