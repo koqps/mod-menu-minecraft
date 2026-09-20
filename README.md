@@ -18,6 +18,7 @@ Mod Menu is an original visual/PvP/QoL client project. It is inspired by the pre
 ### Client menu
 - Search field is now embedded directly into the client header and uses the same drag/scale coordinate system as the rest of the window.
 - Main client UI can be resized from **0.70x to 1.35x**.
+- The same interface scale also applies to Theme Studio, module settings and the waypoint manager; HUD widgets retain their own independent scales.
 - Four menu designs:
   - Pro
   - Neon
