@@ -42,6 +42,11 @@ public final class TopkaConfig {
     public int jumpParticleCount = 10;
     public int hitParticleCount = 12;
 
+    // Projectile trajectory
+    public int trajectoryColorArgb = 0xFF50FA7B;
+    public float trajectoryLineWidth = 2.0F;
+    public int trajectorySteps = 56;
+
     // Full bright
     public double fullBrightGamma = 12.0D;
 
