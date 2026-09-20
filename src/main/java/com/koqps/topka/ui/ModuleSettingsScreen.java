@@ -114,6 +114,11 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Strength", () -> String.format("%.2f", c.swingStrength), () -> c.swingStrength = Math.max(0F, c.swingStrength - 0.1F), () -> c.swingStrength = Math.min(2F, c.swingStrength + 0.1F));
             }
             case "ambience" -> row("Time", () -> timeName(c.ambienceTime), () -> c.ambienceTime = previousTime(c.ambienceTime), () -> c.ambienceTime = nextTime(c.ambienceTime));
+            case "projectile_trajectory" -> {
+                row("Line width", () -> String.format("%.1f", c.trajectoryLineWidth), () -> c.trajectoryLineWidth = Math.max(1F, c.trajectoryLineWidth - 0.25F), () -> c.trajectoryLineWidth = Math.min(6F, c.trajectoryLineWidth + 0.25F));
+                row("Steps", () -> Integer.toString(c.trajectorySteps), () -> c.trajectorySteps = Math.max(12, c.trajectorySteps - 4), () -> c.trajectorySteps = Math.min(120, c.trajectorySteps + 4));
+                row("Color", () -> hex(c.trajectoryColorArgb), () -> c.trajectoryColorArgb = previousColor(c.trajectoryColorArgb), () -> c.trajectoryColorArgb = nextColor(c.trajectoryColorArgb));
+            }
             case "hit_color" -> row("Hit color", () -> hex(c.hitColorArgb), () -> c.hitColorArgb = withAlpha(previousColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF), () -> c.hitColorArgb = withAlpha(nextColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF));
             case "targeting" -> row("Target color", () -> hex(c.targetColorArgb), () -> c.targetColorArgb = previousColor(c.targetColorArgb), () -> c.targetColorArgb = nextColor(c.targetColorArgb));
             case "sprint" -> row("Stop while using item", () -> c.sprintStopWhileUsingItem ? "ON" : "OFF", () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem, () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem);
@@ -217,6 +222,7 @@ public final class ModuleSettingsScreen extends Screen {
             }
             case "swing_animations" -> { c.swingMode = 0; c.swingStrength = 1F; }
             case "ambience" -> c.ambienceTime = 6000L;
+            case "projectile_trajectory" -> { c.trajectoryColorArgb = 0xFF50FA7B; c.trajectoryLineWidth = 2F; c.trajectorySteps = 56; }
             case "hit_color" -> c.hitColorArgb = 0xB28B5CF6;
             case "targeting" -> c.targetColorArgb = 0xFFFF5C77;
             case "sprint" -> c.sprintStopWhileUsingItem = true;
