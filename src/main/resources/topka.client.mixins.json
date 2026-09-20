@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "com.koqps.topka.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "NoHurtCamMixin",
+    "OverlayTextureAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
