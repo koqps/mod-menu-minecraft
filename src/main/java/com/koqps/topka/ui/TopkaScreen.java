@@ -1,6 +1,7 @@
 package com.koqps.topka.ui;
 
 import com.koqps.topka.TopkaClient;
+import com.koqps.topka.hud.Theme;
 import com.koqps.topka.module.Module;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -123,13 +124,13 @@ public final class TopkaScreen extends Screen {
         g.fill(x, y, x + PANEL_W, y + PANEL_H, cfg.panelArgb);
         g.fill(x, y, x + SIDEBAR_W, y + PANEL_H, cfg.sidebarArgb);
         g.fill(x + SIDEBAR_W, y, x + SIDEBAR_W + 1, y + PANEL_H, 0xFF292934);
-        g.fill(x, y, x + PANEL_W, y + 3, cfg.accentArgb);
+        g.fill(x, y, x + PANEL_W, y + 3, Theme.accent());
 
         drawBrand(g, x, y);
         drawSidebar(g, mouseX, mouseY, x, y);
 
         g.text(font, selectedCategory == null ? "MODULE LIBRARY" : selectedCategory.name(), x + 172, y + 11, 0xFFF7F7FB, true);
-        g.text(font, enabledCount() + " active", x + 552, y + 11, cfg.accentArgb, true);
+        g.text(font, enabledCount() + " active", x + 552, y + 11, Theme.accent(), true);
 
         List<Module> filtered = filteredModules();
         clampScroll(filtered);
@@ -158,7 +159,7 @@ public final class TopkaScreen extends Screen {
             int thumbH = Math.max(24, trackH * VISIBLE_ROWS / rows);
             int maxScroll = Math.max(1, rows - VISIBLE_ROWS);
             int thumbY = trackY + (trackH - thumbH) * scrollRow / maxScroll;
-            g.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, cfg.accentArgb);
+            g.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, Theme.accent());
         }
 
         drawBottomButton(g, mouseX, mouseY, x + 172, y + 426, 104, "Theme");
@@ -180,10 +181,10 @@ public final class TopkaScreen extends Screen {
     private void drawBrand(GuiGraphicsExtractor g, int x, int y) {
         var cfg = TopkaClient.CONFIG.get();
         g.text(font, "MOD", x + 18, y + 18, 0xFFFFFFFF, true);
-        g.text(font, "MENU", x + 50, y + 18, cfg.accentArgb, true);
+        g.text(font, "MENU", x + 50, y + 18, Theme.accent(), true);
         g.text(font, "PRO CLIENT", x + 18, y + 37, 0xFF6E6E80, false);
         g.fill(x + 18, y + 59, x + 128, y + 60, 0xFF2B2B36);
-        g.fill(x + 18, y + 59, x + 76, y + 60, cfg.accentArgb);
+        g.fill(x + 18, y + 59, x + 76, y + 60, Theme.accent());
     }
 
     private void drawSidebar(GuiGraphicsExtractor g, int mx, int my, int x, int y) {
@@ -199,7 +200,7 @@ public final class TopkaScreen extends Screen {
         var cfg = TopkaClient.CONFIG.get();
         g.text(font, "MENU KEY", x + 18, y + 334, 0xFF646476, false);
         g.fill(x + 15, y + 351, x + 133, y + 381, 0xFF1B1B24);
-        g.centeredText(font, TopkaClient.openMenuKey(), x + 74, y + 361, cfg.accentArgb);
+        g.centeredText(font, TopkaClient.openMenuKey(), x + 74, y + 361, Theme.accent());
         g.text(font, "Same key opens/closes.", x + 18, y + 391, 0xFF686879, false);
         g.text(font, "Rebind in Controls.", x + 18, y + 406, 0xFF686879, false);
 
@@ -215,7 +216,7 @@ public final class TopkaScreen extends Screen {
     private void drawCategory(GuiGraphicsExtractor g, int mx, int my, int x, int y, String label, Module.Category category) {
         boolean selected = selectedCategory == category;
         boolean hover = inside(mx, my, x, y, 118, 24);
-        int color = selected ? TopkaClient.CONFIG.get().accentArgb : 0xFFB7B7C4;
+        int color = selected ? Theme.accent() : 0xFFB7B7C4;
         g.fill(x, y, x + 118, y + 24, selected ? 0xFF282435 : (hover ? 0xFF20202A : 0x00101010));
         if (selected) g.fill(x, y, x + 3, y + 24, color);
         g.text(font, label, x + 10, y + 8, color, selected);
@@ -228,10 +229,10 @@ public final class TopkaScreen extends Screen {
         if (hover) background = module.enabled() ? 0xFF29293A : 0xFF22222C;
 
         g.fill(x, y, x + CARD_W, y + CARD_H, background);
-        g.fill(x, y, x + 3, y + CARD_H, module.enabled() ? cfg.accentArgb : 0xFF383846);
+        g.fill(x, y, x + 3, y + CARD_H, module.enabled() ? Theme.accent() : 0xFF383846);
 
         g.fill(x + 12, y + 11, x + 38, y + 37, module.enabled() ? 0x332F80FF : 0x332D2D38);
-        g.centeredText(font, module.icon(), x + 25, y + 20, module.enabled() ? cfg.accentArgb : 0xFF777789);
+        g.centeredText(font, module.icon(), x + 25, y + 20, module.enabled() ? Theme.accent() : 0xFF777789);
 
         g.text(font, module.name(), x + 48, y + 10, cfg.textArgb, true);
         String description = module.description();
@@ -243,14 +244,14 @@ public final class TopkaScreen extends Screen {
         g.centeredText(font, module.enabled() ? "ON" : "OFF", pillX + 16, y + 15, module.enabled() ? 0xFF65E89A : 0xFF858592);
 
         if (hover) {
-            g.text(font, "settings ›", x + CARD_W - 67, y + 37, cfg.accentArgb, false);
+            g.text(font, "settings ›", x + CARD_W - 67, y + 37, Theme.accent(), false);
         }
     }
 
     private void drawBottomButton(GuiGraphicsExtractor g, int mx, int my, int x, int y, int w, String label) {
         boolean hover = inside(mx, my, x, y, w, 30);
         g.fill(x, y, x + w, y + 30, hover ? 0xFF30303C : 0xFF20202A);
-        g.fill(x, y + 29, x + w, y + 30, TopkaClient.CONFIG.get().accentArgb);
+        g.fill(x, y + 29, x + w, y + 30, Theme.accent());
         g.centeredText(font, label, x + w / 2, y + 10, 0xFFEDEDF4);
     }
 
