@@ -4,6 +4,7 @@ import com.koqps.topka.TopkaClient;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,7 +24,7 @@ public final class DropProtectionMixin {
     private void modmenu$protectDrop(LocalPlayer player, boolean entireStack, CallbackInfo ci) {
         if (!TopkaClient.MODULES.byId("drop_protection").enabled()) return;
 
-        ItemStack stack = player.getInventory().getSelected();
+        ItemStack stack = player.getInventory().getSelectedItem();
         if (stack.isEmpty() || !modmenu$isProtected(stack)) return;
 
         String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
@@ -58,6 +59,6 @@ public final class DropProtectionMixin {
                         || path.equals("bow") || path.equals("crossbow")
                         || path.equals("trident") || path.equals("mace"))) return true;
 
-        return TopkaClient.CONFIG.get().protectNamedItems && stack.hasCustomHoverName();
+        return TopkaClient.CONFIG.get().protectNamedItems && stack.has(DataComponents.CUSTOM_NAME);
     }
 }
