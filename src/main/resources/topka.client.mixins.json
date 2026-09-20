@@ -5,7 +5,10 @@
   "client": [
     "NoHurtCamMixin",
     "OverlayTextureAccessor",
-    "FirstPersonViewMixin"
+    "FirstPersonViewMixin",
+    "DropProtectionMixin",
+    "BabyModeMixin",
+    "ContainerScreenAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

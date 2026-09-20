@@ -13,7 +13,7 @@ import java.util.List;
 
 public final class ModuleSettingsScreen extends Screen {
     private static final int PANEL_W = 590;
-    private static final int PANEL_H = 430;
+    private static final int PANEL_H = 500;
     private static final int[] COLORS = {
             0xFF8B5CF6, 0xFF41C7FF, 0xFF50FA7B, 0xFFFF5C77,
             0xFFFFD166, 0xFFFF7AD9, 0xFFFF8A3D, 0xFFFFFFFF
@@ -55,6 +55,8 @@ public final class ModuleSettingsScreen extends Screen {
 
         if (isHudModule()) {
             addClickTarget(x + 32, y + PANEL_H - 52, 164, 28, () -> minecraft.gui.setScreen(new HudEditorScreen(this)));
+        } else if ("waypoints".equals(module.id())) {
+            addClickTarget(x + 32, y + PANEL_H - 52, 164, 28, () -> minecraft.gui.setScreen(new WaypointScreen(this)));
         }
         addClickTarget(x + PANEL_W - 196, y + PANEL_H - 52, 164, 28, this::resetModuleSettings);
     }
@@ -114,14 +116,45 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Strength", () -> String.format("%.2f", c.swingStrength), () -> c.swingStrength = Math.max(0F, c.swingStrength - 0.1F), () -> c.swingStrength = Math.min(2F, c.swingStrength + 0.1F));
             }
             case "ambience" -> row("Time", () -> timeName(c.ambienceTime), () -> c.ambienceTime = previousTime(c.ambienceTime), () -> c.ambienceTime = nextTime(c.ambienceTime));
-            case "projectile_trajectory" -> {
-                row("Line width", () -> String.format("%.1f", c.trajectoryLineWidth), () -> c.trajectoryLineWidth = Math.max(1F, c.trajectoryLineWidth - 0.25F), () -> c.trajectoryLineWidth = Math.min(6F, c.trajectoryLineWidth + 0.25F));
-                row("Steps", () -> Integer.toString(c.trajectorySteps), () -> c.trajectorySteps = Math.max(12, c.trajectorySteps - 4), () -> c.trajectorySteps = Math.min(120, c.trajectorySteps + 4));
-                row("Color", () -> hex(c.trajectoryColorArgb), () -> c.trajectoryColorArgb = previousColor(c.trajectoryColorArgb), () -> c.trajectoryColorArgb = nextColor(c.trajectoryColorArgb));
-            }
             case "hit_color" -> row("Hit color", () -> hex(c.hitColorArgb), () -> c.hitColorArgb = withAlpha(previousColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF), () -> c.hitColorArgb = withAlpha(nextColor(c.hitColorArgb), (c.hitColorArgb >>> 24) & 0xFF));
             case "targeting" -> row("Target color", () -> hex(c.targetColorArgb), () -> c.targetColorArgb = previousColor(c.targetColorArgb), () -> c.targetColorArgb = nextColor(c.targetColorArgb));
             case "sprint" -> row("Stop while using item", () -> c.sprintStopWhileUsingItem ? "ON" : "OFF", () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem, () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem);
+            case "health_tags" -> {
+                row("Display style", () -> c.healthTagHearts ? "HEARTS" : "NUMERIC", () -> c.healthTagHearts = !c.healthTagHearts, () -> c.healthTagHearts = !c.healthTagHearts);
+                row("Max distance", () -> Math.round(c.healthTagMaxDistance) + " blocks", () -> c.healthTagMaxDistance = Math.max(8D, c.healthTagMaxDistance - 4D), () -> c.healthTagMaxDistance = Math.min(128D, c.healthTagMaxDistance + 4D));
+            }
+            case "projectile_prediction" -> {
+                row("Simulation steps", () -> Integer.toString(c.projectileSteps), () -> c.projectileSteps = Math.max(16, c.projectileSteps - 8), () -> c.projectileSteps = Math.min(160, c.projectileSteps + 8));
+                row("Line width", () -> String.format("%.1f", c.projectileLineWidth), () -> c.projectileLineWidth = Math.max(1F, c.projectileLineWidth - 0.25F), () -> c.projectileLineWidth = Math.min(5F, c.projectileLineWidth + 0.25F));
+                row("Color", () -> hex(c.projectileColorArgb), () -> c.projectileColorArgb = previousColor(c.projectileColorArgb), () -> c.projectileColorArgb = nextColor(c.projectileColorArgb));
+            }
+            case "baby_mode" -> {
+                row("Model scale", () -> String.format("%.2f", c.babyScale), () -> c.babyScale = Math.max(0.35F, c.babyScale - 0.05F), () -> c.babyScale = Math.min(1F, c.babyScale + 0.05F));
+                row("Show others", () -> c.babyModeOthers ? "ON" : "OFF", () -> c.babyModeOthers = !c.babyModeOthers, () -> c.babyModeOthers = !c.babyModeOthers);
+            }
+            case "cape" -> {
+                row("Width", () -> String.format("%.2f", c.capeWidth), () -> c.capeWidth = Math.max(0.30F, c.capeWidth - 0.05F), () -> c.capeWidth = Math.min(1.20F, c.capeWidth + 0.05F));
+                row("Height", () -> String.format("%.2f", c.capeHeight), () -> c.capeHeight = Math.max(0.45F, c.capeHeight - 0.05F), () -> c.capeHeight = Math.min(1.60F, c.capeHeight + 0.05F));
+                row("Line width", () -> String.format("%.1f", c.capeLineWidth), () -> c.capeLineWidth = Math.max(1F, c.capeLineWidth - 0.25F), () -> c.capeLineWidth = Math.min(5F, c.capeLineWidth + 0.25F));
+                row("Color", () -> hex(c.capeColorArgb), () -> c.capeColorArgb = previousColor(c.capeColorArgb), () -> c.capeColorArgb = nextColor(c.capeColorArgb));
+                row("Show others", () -> c.capeShowOthers ? "ON" : "OFF", () -> c.capeShowOthers = !c.capeShowOthers, () -> c.capeShowOthers = !c.capeShowOthers);
+            }
+            case "drop_protection" -> {
+                row("Confirm window", () -> c.dropProtectionWindowMs + " ms", () -> c.dropProtectionWindowMs = Math.max(700L, c.dropProtectionWindowMs - 100L), () -> c.dropProtectionWindowMs = Math.min(5000L, c.dropProtectionWindowMs + 100L));
+                row("Protect armor", () -> c.protectArmor ? "ON" : "OFF", () -> c.protectArmor = !c.protectArmor, () -> c.protectArmor = !c.protectArmor);
+                row("Protect tools", () -> c.protectTools ? "ON" : "OFF", () -> c.protectTools = !c.protectTools, () -> c.protectTools = !c.protectTools);
+                row("Protect totems", () -> c.protectTotems ? "ON" : "OFF", () -> c.protectTotems = !c.protectTotems, () -> c.protectTotems = !c.protectTotems);
+                row("Protect named", () -> c.protectNamedItems ? "ON" : "OFF", () -> c.protectNamedItems = !c.protectNamedItems, () -> c.protectNamedItems = !c.protectNamedItems);
+            }
+            case "auto_gg" -> {
+                row("Message", () -> c.autoGgMessage, () -> c.autoGgMessage = previousGgMessage(c.autoGgMessage), () -> c.autoGgMessage = nextGgMessage(c.autoGgMessage));
+                row("Cooldown", () -> (c.autoGgCooldownMs / 1000L) + " sec", () -> c.autoGgCooldownMs = Math.max(5_000L, c.autoGgCooldownMs - 5_000L), () -> c.autoGgCooldownMs = Math.min(60_000L, c.autoGgCooldownMs + 5_000L));
+            }
+            case "item_color" -> {
+                row("Highlight color", () -> hex(c.itemHighlightColorArgb), () -> c.itemHighlightColorArgb = previousColor(c.itemHighlightColorArgb), () -> c.itemHighlightColorArgb = nextColor(c.itemHighlightColorArgb));
+                row("Tracked items", () -> Integer.toString(c.highlightedItems.size()), () -> cycleHighlightPreset(-1), () -> cycleHighlightPreset(1));
+            }
+            case "waypoints" -> row("Markers", () -> Integer.toString(c.waypoints.size()), () -> { }, () -> { });
             default -> {
                 if (isHudModule()) row("HUD position", () -> "OPEN EDITOR BELOW", () -> { }, () -> { });
             }
@@ -172,7 +205,11 @@ public final class ModuleSettingsScreen extends Screen {
             rowY += 38;
         }
 
-        if (isHudModule()) drawBottomButton(g, mouseX, mouseY, x + 32, y + PANEL_H - 52, 164, "Open HUD workspace");
+        if (isHudModule()) {
+            drawBottomButton(g, mouseX, mouseY, x + 32, y + PANEL_H - 52, 164, "Open HUD workspace");
+        } else if ("waypoints".equals(module.id())) {
+            drawBottomButton(g, mouseX, mouseY, x + 32, y + PANEL_H - 52, 164, "Manage waypoints");
+        }
         drawBottomButton(g, mouseX, mouseY, x + PANEL_W - 196, y + PANEL_H - 52, 164, "Reset module settings");
 
         g.text(font, "ESC / " + TopkaClient.openMenuKey().getString() + " to return", x + 32, y + PANEL_H - 18, 0xFF616171, false);
@@ -222,10 +259,22 @@ public final class ModuleSettingsScreen extends Screen {
             }
             case "swing_animations" -> { c.swingMode = 0; c.swingStrength = 1F; }
             case "ambience" -> c.ambienceTime = 6000L;
-            case "projectile_trajectory" -> { c.trajectoryColorArgb = 0xFF50FA7B; c.trajectoryLineWidth = 2F; c.trajectorySteps = 56; }
             case "hit_color" -> c.hitColorArgb = 0xB28B5CF6;
             case "targeting" -> c.targetColorArgb = 0xFFFF5C77;
             case "sprint" -> c.sprintStopWhileUsingItem = true;
+            case "health_tags" -> { c.healthTagHearts = true; c.healthTagMaxDistance = 48D; }
+            case "projectile_prediction" -> { c.projectileColorArgb = 0xFF41C7FF; c.projectileLineWidth = 2F; c.projectileSteps = 72; }
+            case "baby_mode" -> { c.babyScale = 0.65F; c.babyModeOthers = false; }
+            case "cape" -> { c.capeColorArgb = 0xFF8B5CF6; c.capeWidth = 0.64F; c.capeHeight = 1.05F; c.capeLineWidth = 2F; c.capeShowOthers = false; }
+            case "drop_protection" -> { c.dropProtectionWindowMs = 1800L; c.protectArmor = true; c.protectTools = true; c.protectTotems = true; c.protectNamedItems = true; }
+            case "auto_gg" -> { c.autoGgMessage = "gg"; c.autoGgCooldownMs = 15000L; }
+            case "item_color" -> {
+                c.itemHighlightColorArgb = 0xFF8B5CF6;
+                c.highlightedItems.clear();
+                c.highlightedItems.add("minecraft:totem_of_undying");
+                c.highlightedItems.add("minecraft:enchanted_golden_apple");
+                c.highlightedItems.add("minecraft:elytra");
+            }
             default -> { }
         }
         TopkaClient.CONFIG.save();
@@ -269,6 +318,44 @@ public final class ModuleSettingsScreen extends Screen {
 
     private static int withAlpha(int rgb, int alpha) {
         return (Math.clamp(alpha, 0, 255) << 24) | (rgb & 0x00FFFFFF);
+    }
+
+    private void cycleHighlightPreset(int direction) {
+        var c = TopkaClient.CONFIG.get();
+        int preset;
+        if (c.highlightedItems.contains("minecraft:netherite_sword")) preset = 2;
+        else if (c.highlightedItems.contains("minecraft:diamond")) preset = 1;
+        else preset = 0;
+        preset = Math.floorMod(preset + direction, 3);
+        c.highlightedItems.clear();
+        if (preset == 0) {
+            c.highlightedItems.add("minecraft:totem_of_undying");
+            c.highlightedItems.add("minecraft:enchanted_golden_apple");
+            c.highlightedItems.add("minecraft:elytra");
+        } else if (preset == 1) {
+            c.highlightedItems.add("minecraft:diamond");
+            c.highlightedItems.add("minecraft:emerald");
+            c.highlightedItems.add("minecraft:netherite_ingot");
+            c.highlightedItems.add("minecraft:ancient_debris");
+        } else {
+            c.highlightedItems.add("minecraft:netherite_sword");
+            c.highlightedItems.add("minecraft:netherite_pickaxe");
+            c.highlightedItems.add("minecraft:netherite_axe");
+            c.highlightedItems.add("minecraft:totem_of_undying");
+            c.highlightedItems.add("minecraft:elytra");
+        }
+    }
+
+    private static String nextGgMessage(String current) {
+        String[] values = {"gg", "GG", "good game", "gg wp"};
+        for (int i = 0; i < values.length; i++) if (values[i].equalsIgnoreCase(current)) return values[(i + 1) % values.length];
+        return values[0];
+    }
+
+    private static String previousGgMessage(String current) {
+        String[] values = {"gg", "GG", "good game", "gg wp"};
+        for (int i = 0; i < values.length; i++) if (values[i].equalsIgnoreCase(current)) return values[(i + values.length - 1) % values.length];
+        return values[0];
     }
 
     private static String hex(int argb) {

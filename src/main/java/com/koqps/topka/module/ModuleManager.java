@@ -19,15 +19,25 @@ public final class ModuleManager {
         new Module("viewmodel", "ViewModel", "Customize first-person item position and scale.", "◇", Module.Category.VISUAL, false),
         new Module("swing_animations", "Swing Animations", "Extra visual-only first-person swing styles.", "↗", Module.Category.VISUAL, false),
         new Module("ambience", "Ambience", "Client-side visual time override.", "☾", Module.Category.VISUAL, false),
-        new Module("projectile_trajectory", "Projectile Trajectory", "Visual prediction line for common projectiles.", "⌁", Module.Category.VISUAL, false),
+        new Module("baby_mode", "Baby Mode", "Purely visual player model scaling.", "♙", Module.Category.VISUAL, false),
+        new Module("cape", "Cape", "Animated original cosmetic cape outline.", "▱", Module.Category.VISUAL, false),
+
+        new Module("drop_protection", "Drop Protection", "Press Drop twice before protected items leave your hand.", "⛨", Module.Category.PLAYER, false),
 
         new Module("health_display", "Health Display", "Compact health bar and numeric health.", "♥", Module.Category.HUD, true),
+        new Module("health_tags", "Health Tags", "Shows live HP above nearby players.", "❤", Module.Category.HUD, false),
         new Module("armor_display", "Armor Display", "Armor icons and durability percentages.", "◆", Module.Category.HUD, true),
         new Module("map_display", "Location HUD", "Coordinates and facing direction.", "⌖", Module.Category.HUD, false),
         new Module("ping_display", "Ping Display", "Compact latency HUD.", "⌁", Module.Category.HUD, false),
         new Module("crosshair", "Crosshair", "Custom crosshair that replaces vanilla.", "+", Module.Category.HUD, false),
 
-        new Module("sprint", "Auto Sprint", "Client-side automatic sprint.", "»", Module.Category.MOVEMENT, true)
+        new Module("sprint", "Auto Sprint", "Client-side automatic sprint.", "»", Module.Category.MOVEMENT, true),
+
+        new Module("projectile_prediction", "Projectile Prediction", "Visual trajectory and impact preview.", "⌁", Module.Category.WORLD, false),
+        new Module("waypoints", "Waypoints", "Persistent world markers with distance labels.", "⚑", Module.Category.WORLD, false),
+
+        new Module("item_color", "Item Color", "Highlights configured valuable items in inventories.", "▣", Module.Category.MISC, false),
+        new Module("auto_gg", "Auto GG", "Rate-limited friendly message after detected wins.", "GG", Module.Category.MISC, false)
     );
 
     public List<Module> all() { return modules; }

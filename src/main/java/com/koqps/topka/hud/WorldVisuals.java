@@ -1,6 +1,7 @@
 package com.koqps.topka.hud;
 
 import com.koqps.topka.TopkaClient;
+import com.koqps.topka.config.WaypointConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
@@ -11,11 +12,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class WorldVisuals {
@@ -34,27 +38,15 @@ public final class WorldVisuals {
 
         Vec3 camera = context.levelState().cameraRenderState.pos;
 
-        if (TopkaClient.MODULES.byId("hitbox").enabled()) {
-            renderHitboxes(context, camera, client);
-        }
-        if (TopkaClient.MODULES.byId("targeting").enabled()) {
-            renderTarget(context, camera, client);
-        }
-        if (TopkaClient.MODULES.byId("china_hat").enabled()) {
-            renderChinaHats(context, camera, client);
-        }
-        if (TopkaClient.MODULES.byId("halo").enabled()) {
-            renderHalo(context, camera, client);
-        }
-        if (TopkaClient.MODULES.byId("trails").enabled()) {
-            renderTrail(context, camera);
-        }
-        if (TopkaClient.MODULES.byId("jump_circles").enabled()) {
-            renderJumpCircles(context, camera);
-        }
-        if (TopkaClient.MODULES.byId("projectile_trajectory").enabled()) {
-            renderProjectileTrajectory(context, camera, client);
-        }
+        if (TopkaClient.MODULES.byId("hitbox").enabled()) renderHitboxes(context, camera, client);
+        if (TopkaClient.MODULES.byId("targeting").enabled()) renderTarget(context, camera, client);
+        if (TopkaClient.MODULES.byId("china_hat").enabled()) renderChinaHats(context, camera, client);
+        if (TopkaClient.MODULES.byId("halo").enabled()) renderHalo(context, camera, client);
+        if (TopkaClient.MODULES.byId("trails").enabled()) renderTrail(context, camera);
+        if (TopkaClient.MODULES.byId("jump_circles").enabled()) renderJumpCircles(context, camera);
+        if (TopkaClient.MODULES.byId("projectile_prediction").enabled()) renderProjectilePrediction(context, camera, client);
+        if (TopkaClient.MODULES.byId("waypoints").enabled()) renderWaypointBeams(context, camera);
+        if (TopkaClient.MODULES.byId("cape").enabled()) renderCape(context, camera, client);
     }
 
     private static void renderHitboxes(LevelRenderContext context, Vec3 camera, Minecraft client) {
@@ -240,34 +232,10 @@ public final class WorldVisuals {
         }
     }
 
+    private static void renderWaypointBeams(LevelRenderContext context, Vec3 camera) {
+        List<WaypointConfig> waypoints = WaypointController.visibleWaypoints();
+        if (waypoints.isEmpty()) return;
 
-    private static void renderProjectileTrajectory(LevelRenderContext context, Vec3 camera, Minecraft client) {
-        ItemStack stack = client.player.getMainHandItem();
-        if (!isSupportedProjectile(stack)) {
-            stack = client.player.getOffhandItem();
-        }
-        if (!isSupportedProjectile(stack)) return;
-
-        var cfg = TopkaClient.CONFIG.get();
-        int steps = Math.clamp(cfg.trajectorySteps, 12, 120);
-        float width = Math.clamp(cfg.trajectoryLineWidth, 1.0F, 6.0F);
-        int color = cfg.trajectoryColorArgb;
-
-        double speed = projectileSpeed(stack);
-        double gravity = projectileGravity(stack);
-        Vec3 position = client.player.getEyePosition().add(client.player.getLookAngle().scale(0.20D));
-        Vec3 velocity = client.player.getLookAngle().normalize().scale(speed);
-        List<Vec3> points = new java.util.ArrayList<>(steps + 1);
-        points.add(position);
-
-        for (int i = 0; i < steps; i++) {
-            position = position.add(velocity.scale(0.10D));
-            points.add(position);
-            velocity = new Vec3(velocity.x * 0.99D, velocity.y * 0.99D - gravity * 0.10D, velocity.z * 0.99D);
-            if (position.y < client.level.getMinY() - 4) break;
-        }
-
-        if (points.size() < 2) return;
         PoseStack poseStack = context.poseStack();
         poseStack.pushPose();
         poseStack.translate(-camera.x, -camera.y, -camera.z);
@@ -276,46 +244,163 @@ public final class WorldVisuals {
                 poseStack,
                 RenderTypes.linesTranslucent(),
                 (pose, vertices) -> {
+                    for (WaypointConfig waypoint : waypoints) {
+                        int color = withAlpha(waypoint.colorArgb, 210);
+                        Vec3 base = new Vec3(waypoint.x + 0.5D, waypoint.y + 0.05D, waypoint.z + 0.5D);
+                        Vec3 top = base.add(0.0D, 10.0D, 0.0D);
+                        emitLine(pose, vertices, base, top, color, 2.0F);
+                        emitCircleAt(pose, vertices, base, 0.55F, color, 2.0F);
+                    }
+                }
+        );
+        poseStack.popPose();
+    }
+
+    private static void renderCape(LevelRenderContext context, Vec3 camera, Minecraft client) {
+        if (client.options.getCameraType().isFirstPerson() && !TopkaClient.CONFIG.get().capeShowOthers) return;
+
+        for (Entity entity : client.level.entitiesForRendering()) {
+            if (!(entity instanceof Player player) || entity.isRemoved()) continue;
+            if (player != client.player && !TopkaClient.CONFIG.get().capeShowOthers) continue;
+            if (player == client.player && client.options.getCameraType().isFirstPerson()) continue;
+            if (client.player.distanceToSqr(player) > 4096.0D) continue;
+
+            var cfg = TopkaClient.CONFIG.get();
+            float width = Math.clamp(cfg.capeWidth, 0.30F, 1.20F);
+            float height = Math.clamp(cfg.capeHeight, 0.45F, 1.60F);
+            float lineWidth = Math.clamp(cfg.capeLineWidth, 1.0F, 5.0F);
+            int color = cfg.capeColorArgb;
+
+            Vec3 look = player.getLookAngle();
+            Vec3 back = new Vec3(-look.x, 0.0D, -look.z);
+            if (back.lengthSqr() < 1.0E-5D) back = new Vec3(0.0D, 0.0D, -1.0D);
+            back = back.normalize();
+            Vec3 right = new Vec3(-back.z, 0.0D, back.x);
+
+            double speed = Math.sqrt(player.getDeltaMovement().x * player.getDeltaMovement().x
+                    + player.getDeltaMovement().z * player.getDeltaMovement().z);
+            double wave = Math.sin(System.currentTimeMillis() / 170.0D) * 0.04D + Math.min(0.30D, speed * 0.35D);
+
+            Vec3 topCenter = new Vec3(player.getX(), player.getBoundingBox().maxY - 0.36D, player.getZ())
+                    .add(back.scale(0.20D));
+            Vec3 bottomCenter = topCenter.add(0.0D, -height, 0.0D).add(back.scale(0.14D + wave));
+            Vec3 topLeft = topCenter.add(right.scale(-width / 2.0D));
+            Vec3 topRight = topCenter.add(right.scale(width / 2.0D));
+            Vec3 bottomLeft = bottomCenter.add(right.scale(-width * 0.46D));
+            Vec3 bottomRight = bottomCenter.add(right.scale(width * 0.46D));
+
+            PoseStack poseStack = context.poseStack();
+            poseStack.pushPose();
+            poseStack.translate(-camera.x, -camera.y, -camera.z);
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.linesTranslucent(),
+                    (pose, vertices) -> {
+                        emitLine(pose, vertices, topLeft, topRight, color, lineWidth);
+                        emitLine(pose, vertices, topRight, bottomRight, color, lineWidth);
+                        emitLine(pose, vertices, bottomRight, bottomLeft, color, lineWidth);
+                        emitLine(pose, vertices, bottomLeft, topLeft, color, lineWidth);
+                        emitLine(pose, vertices, topCenter, bottomCenter, withAlpha(color, 170), Math.max(1.0F, lineWidth - 0.5F));
+                    }
+            );
+            poseStack.popPose();
+        }
+    }
+
+    private static void renderProjectilePrediction(LevelRenderContext context, Vec3 camera, Minecraft client) {
+        ProjectileSpec spec = projectileSpec(client.player.getMainHandItem(), client.player);
+        if (spec == null) spec = projectileSpec(client.player.getOffhandItem(), client.player);
+        if (spec == null) return;
+
+        int steps = Math.clamp(TopkaClient.CONFIG.get().projectileSteps, 16, 160);
+        List<Vec3> points = new ArrayList<>(steps + 1);
+
+        Vec3 position = client.player.getEyePosition();
+        Vec3 velocity = client.player.getLookAngle().normalize().scale(spec.speed());
+        points.add(position);
+
+        Vec3 impact = null;
+        for (int i = 0; i < steps; i++) {
+            Vec3 next = position.add(velocity);
+            HitResult hit = client.level.clip(new ClipContext(
+                    position,
+                    next,
+                    ClipContext.Block.COLLIDER,
+                    ClipContext.Fluid.NONE,
+                    client.player
+            ));
+
+            if (hit.getType() != HitResult.Type.MISS) {
+                impact = hit.getLocation();
+                points.add(impact);
+                break;
+            }
+
+            points.add(next);
+            position = next;
+            velocity = velocity.scale(spec.drag()).add(0.0D, -spec.gravity(), 0.0D);
+            if (position.y < client.level.getMinY() - 8) break;
+        }
+
+        if (points.size() < 2) return;
+        var cfg = TopkaClient.CONFIG.get();
+        int color = cfg.projectileColorArgb;
+        float width = Math.clamp(cfg.projectileLineWidth, 1.0F, 5.0F);
+
+        PoseStack poseStack = context.poseStack();
+        poseStack.pushPose();
+        poseStack.translate(-camera.x, -camera.y, -camera.z);
+        context.submitNodeCollector().submitCustomGeometry(
+                poseStack,
+                RenderTypes.linesTranslucent(),
+                (pose, vertices) -> {
                     for (int i = 1; i < points.size(); i++) {
-                        int alpha = 230 - (int) (150.0D * i / Math.max(1, points.size() - 1));
+                        int alpha = Math.max(70, 235 - (int) (165.0D * i / points.size()));
                         emitLine(pose, vertices, points.get(i - 1), points.get(i), withAlpha(color, alpha), width);
                     }
                 }
         );
         poseStack.popPose();
 
-        Vec3 end = points.get(points.size() - 1);
-        poseStack.pushPose();
-        poseStack.translate(end.x - camera.x, end.y - camera.y, end.z - camera.z);
-        context.submitNodeCollector().submitCustomGeometry(
-                poseStack,
-                RenderTypes.linesTranslucent(),
-                (pose, vertices) -> emitCircle(pose, vertices, 0.14F, 0.0D, color, width)
-        );
-        poseStack.popPose();
+        if (impact != null) {
+            AABB marker = new AABB(
+                    impact.x - 0.09D, impact.y - 0.09D, impact.z - 0.09D,
+                    impact.x + 0.09D, impact.y + 0.09D, impact.z + 0.09D
+            );
+            context.poseStack().pushPose();
+            context.poseStack().translate(-camera.x, -camera.y, -camera.z);
+            context.submitNodeCollector().submitShapeOutline(
+                    context.poseStack(),
+                    Shapes.create(marker),
+                    RenderTypes.linesTranslucent(),
+                    color,
+                    Math.max(2.0F, width),
+                    true
+            );
+            context.poseStack().popPose();
+        }
     }
 
-    private static boolean isSupportedProjectile(ItemStack stack) {
-        return !stack.isEmpty() && (
-                stack.is(Items.BOW)
-                        || stack.is(Items.CROSSBOW)
-                        || stack.is(Items.TRIDENT)
-                        || stack.is(Items.SNOWBALL)
-                        || stack.is(Items.EGG)
-                        || stack.is(Items.ENDER_PEARL)
-        );
-    }
+    private static ProjectileSpec projectileSpec(ItemStack stack, Player player) {
+        if (stack == null || stack.isEmpty()) return null;
 
-    private static double projectileSpeed(ItemStack stack) {
-        if (stack.is(Items.SNOWBALL) || stack.is(Items.EGG) || stack.is(Items.ENDER_PEARL)) return 1.55D;
-        if (stack.is(Items.TRIDENT)) return 2.50D;
-        return 3.00D;
-    }
-
-    private static double projectileGravity(ItemStack stack) {
-        if (stack.is(Items.BOW) || stack.is(Items.CROSSBOW)) return 0.05D;
-        if (stack.is(Items.TRIDENT)) return 0.05D;
-        return 0.03D;
+        if (stack.is(Items.BOW)) {
+            if (!player.isUsingItem()) return null;
+            int useTicks = Math.max(0, 72000 - player.getUseItemRemainingTicks());
+            float draw = Math.clamp(useTicks / 20.0F, 0.0F, 1.0F);
+            draw = (draw * draw + draw * 2.0F) / 3.0F;
+            if (draw < 0.05F) return null;
+            return new ProjectileSpec(Math.min(1.0F, draw) * 3.0D, 0.05D, 0.99D);
+        }
+        if (stack.is(Items.CROSSBOW)) return new ProjectileSpec(3.15D, 0.05D, 0.99D);
+        if (stack.is(Items.TRIDENT)) return new ProjectileSpec(2.5D, 0.05D, 0.99D);
+        if (stack.is(Items.SNOWBALL) || stack.is(Items.EGG) || stack.is(Items.ENDER_PEARL)) {
+            return new ProjectileSpec(1.5D, 0.03D, 0.99D);
+        }
+        if (stack.is(Items.SPLASH_POTION) || stack.is(Items.LINGERING_POTION) || stack.is(Items.EXPERIENCE_BOTTLE)) {
+            return new ProjectileSpec(0.9D, 0.05D, 0.99D);
+        }
+        return null;
     }
 
     private static void emitCircle(PoseStack.Pose pose, VertexConsumer vertices, float radius, double y, int color, float width) {
@@ -324,6 +409,16 @@ public final class WorldVisuals {
             double a1 = Math.PI * 2.0D * (i + 1) / CIRCLE_SEGMENTS;
             Vec3 p0 = new Vec3(Math.cos(a0) * radius, y, Math.sin(a0) * radius);
             Vec3 p1 = new Vec3(Math.cos(a1) * radius, y, Math.sin(a1) * radius);
+            emitLine(pose, vertices, p0, p1, color, width);
+        }
+    }
+
+    private static void emitCircleAt(PoseStack.Pose pose, VertexConsumer vertices, Vec3 center, float radius, int color, float width) {
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++) {
+            double a0 = Math.PI * 2.0D * i / CIRCLE_SEGMENTS;
+            double a1 = Math.PI * 2.0D * (i + 1) / CIRCLE_SEGMENTS;
+            Vec3 p0 = center.add(Math.cos(a0) * radius, 0.0D, Math.sin(a0) * radius);
+            Vec3 p1 = center.add(Math.cos(a1) * radius, 0.0D, Math.sin(a1) * radius);
             emitLine(pose, vertices, p0, p1, color, width);
         }
     }
@@ -346,4 +441,6 @@ public final class WorldVisuals {
     private static int withAlpha(int argb, int alpha) {
         return (Math.clamp(alpha, 0, 255) << 24) | (argb & 0x00FFFFFF);
     }
+
+    private record ProjectileSpec(double speed, double gravity, double drag) { }
 }

@@ -3,15 +3,18 @@ package com.koqps.topka;
 import com.koqps.topka.config.ConfigManager;
 import com.koqps.topka.hud.AmbienceController;
 import com.koqps.topka.hud.ArmorHud;
+import com.koqps.topka.hud.AutoGgController;
 import com.koqps.topka.hud.CrosshairHud;
 import com.koqps.topka.hud.FullBrightController;
 import com.koqps.topka.hud.HealthHud;
 import com.koqps.topka.hud.HitColorController;
 import com.koqps.topka.hud.HitboxController;
+import com.koqps.topka.hud.ItemColorController;
 import com.koqps.topka.hud.MapHud;
 import com.koqps.topka.hud.PingHud;
 import com.koqps.topka.hud.SprintController;
 import com.koqps.topka.hud.VisualEffectsController;
+import com.koqps.topka.hud.WorldLabels;
 import com.koqps.topka.hud.WorldVisuals;
 import com.koqps.topka.module.ModuleManager;
 import com.koqps.topka.ui.TopkaScreen;
@@ -40,8 +43,12 @@ public final class TopkaClient implements ClientModInitializer {
         MapHud.register();
         PingHud.register();
         CrosshairHud.register();
+
         VisualEffectsController.register();
         WorldVisuals.register();
+        WorldLabels.register();
+        AutoGgController.register();
+        ItemColorController.register();
 
         KeyMapping.Category category = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath(MOD_ID, "main")

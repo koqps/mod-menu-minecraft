@@ -1,32 +1,66 @@
-# Mod Menu 0.4.3 — Minecraft 26.3 Fabric / Java
+# Mod Menu 0.5.0 — Minecraft 26.3 Fabric / Java
 
-This is the next Java/Fabric build of the client formerly labeled Topka New. The visible name is now **Mod Menu**.
+**Mod Menu** is an original client-side visual, HUD, PvP-feedback, and quality-of-life mod for Minecraft Java 26.3. It is inspired by the polish and convenience of modern PvP clients, but all code and visuals in this project are independently implemented.
 
-## 0.4.3 changes
-- Same rebindable key opens **and closes** the client menu.
-- Main client window is draggable by the top header.
-- Reworked HUD layout with separate draggable Health, Armor, and Map panels.
-- Theme/accent color presets affect the menu and HUD.
-- Custom hitboxes are rendered independently with configurable color and expansion.
-- Custom crosshair suppresses Minecraft's vanilla crosshair while enabled.
-- China Hat cosmetic visual (world-space wireframe conical hat).
-- Armor Display with durability percentages.
-- Map Display with coordinates and facing direction.
-- Hit flash, crosshair, hitbox, and theme colors can be cycled from the menu.
+## Toolchain
+- Minecraft Java 26.3
+- Java 25
+- Fabric Loader 0.19.5
+- Fabric API 0.161.0+26.3
+- Gradle 9.5.1 bootstrap
 
-## Build on Windows
-1. Install Java/JDK 25.
-2. Open PowerShell in this folder.
-3. Run `java -version` and confirm version 25.
-4. Run `./gradlew.bat build`.
-5. The normal mod JAR is created in `build/libs/` — do not use the `-sources.jar` file.
+## Main features
+- Same rebindable key opens and closes the menu (Right Shift by default)
+- Draggable, searchable module menu with category navigation
+- Per-module settings screens and instant config persistence
+- Theme Studio and draggable HUD workspace
+- Health, armor, coordinates, ping and custom crosshair HUDs
+- Health tags above nearby players
+- Custom hitboxes and targeting outline
+- Hit color and No Hurt Cam
+- Auto Sprint
+- China Hat, Halo / Nimb, trails, jump circles and particles
+- Hit particles
+- Full Bright and client-side ambience time
+- ViewModel and visual swing animation presets
+- Visual Baby Mode
+- Original animated cape outline
+- Projectile trajectory / impact preview
+- Persistent server/world + dimension waypoints with labels and beams
+- Protected-item double-drop confirmation
+- Rate-limited Auto GG
+
+## Build
+Install Java/JDK 25, then from PowerShell:
+
+```powershell
+.\gradlew.bat clean build
+```
+
+The normal mod JAR is created in `build/libs/`. Do **not** use the `-sources.jar`.
 
 ## Install
-Put the built Mod Menu JAR and Fabric API for Minecraft 26.3 in `%appdata%/.minecraft/mods`, then launch the Fabric 26.3 profile.
+Put the normal Mod Menu JAR and Fabric API for Minecraft 26.3 in:
 
-The default menu key is Right Shift. Rebind it in Minecraft's Controls -> Key Binds -> Mod Menu.
+```text
+%appdata%\.minecraft\mods
+```
 
-Config is stored at `.minecraft/config/mod-menu.json`.
+Launch your Fabric Loader 26.3 profile.
 
-## 0.4.3 packaging fix
-The project now uses one client-only source set so Fabric mixin classes are guaranteed to be packaged in the final JAR. This fixes the startup ClassNotFoundException for `NoHurtCamMixin`.
+## Controls
+The default menu key is **Right Shift**. Rebind it through:
+
+**Options → Controls → Key Binds → Mod Menu**
+
+The same key opens and closes the menu.
+
+## Configuration
+Settings are persisted to:
+
+```text
+.minecraft/config/mod-menu.json
+```
+
+## Verification
+GitHub Actions builds under Java 25, runs a clean Gradle build, checks that Fabric metadata, entrypoints, mixins, menus, and render classes are actually present in the normal JAR, and uploads the compiled JAR as an artifact.
