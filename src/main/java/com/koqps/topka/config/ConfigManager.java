@@ -163,6 +163,13 @@ public final class ConfigManager {
         config.capeHeight = Math.clamp(config.capeHeight, 0.45F, 1.60F);
         config.capeLineWidth = Math.clamp(config.capeLineWidth, 1.0F, 5.0F);
 
+        config.wingsStyle = Math.clamp(config.wingsStyle, 0, 3);
+        config.wingsScale = Math.clamp(config.wingsScale, 0.45F, 2.25F);
+        config.wingsSpread = Math.clamp(config.wingsSpread, 0.35F, 1.65F);
+        config.wingsFlapSpeed = Math.clamp(config.wingsFlapSpeed, 0.10F, 3.0F);
+        config.wingsFlapAmount = Math.clamp(config.wingsFlapAmount, 0.0F, 0.55F);
+        config.wingsOpacity = Math.clamp(config.wingsOpacity, 30, 235);
+
         config.dropProtectionWindowMs = Math.clamp(config.dropProtectionWindowMs, 700L, 5000L);
         config.autoGgCooldownMs = Math.clamp(config.autoGgCooldownMs, 5000L, 60000L);
         if (config.autoGgMessage == null || config.autoGgMessage.isBlank()) {
