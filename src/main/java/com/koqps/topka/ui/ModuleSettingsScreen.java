@@ -217,8 +217,11 @@ public final class ModuleSettingsScreen extends Screen {
             }
             case "wings" -> {
                 row("Style", () -> wingStyleName(c.wingsStyle), () -> c.wingsStyle = Math.floorMod(c.wingsStyle - 1, 4), () -> c.wingsStyle = Math.floorMod(c.wingsStyle + 1, 4));
+                row("Detail", () -> Integer.toString(c.wingsDetail), () -> c.wingsDetail = Math.max(1, c.wingsDetail - 1), () -> c.wingsDetail = Math.min(5, c.wingsDetail + 1));
                 row("Scale", () -> String.format("%.2f", c.wingsScale), () -> c.wingsScale = Math.max(0.45F, c.wingsScale - 0.05F), () -> c.wingsScale = Math.min(2.25F, c.wingsScale + 0.05F));
                 row("Spread", () -> String.format("%.2f", c.wingsSpread), () -> c.wingsSpread = Math.max(0.35F, c.wingsSpread - 0.05F), () -> c.wingsSpread = Math.min(1.65F, c.wingsSpread + 0.05F));
+                row("Depth", () -> String.format("%.2f", c.wingsDepth), () -> c.wingsDepth = Math.max(0.02F, c.wingsDepth - 0.02F), () -> c.wingsDepth = Math.min(0.42F, c.wingsDepth + 0.02F));
+                row("Bone width", () -> String.format("%.1f", c.wingsBoneWidth), () -> c.wingsBoneWidth = Math.max(1F, c.wingsBoneWidth - 0.25F), () -> c.wingsBoneWidth = Math.min(8F, c.wingsBoneWidth + 0.25F));
                 row("Flap speed", () -> String.format("%.2f", c.wingsFlapSpeed), () -> c.wingsFlapSpeed = Math.max(0.10F, c.wingsFlapSpeed - 0.10F), () -> c.wingsFlapSpeed = Math.min(3.0F, c.wingsFlapSpeed + 0.10F));
                 row("Flap amount", () -> String.format("%.2f", c.wingsFlapAmount), () -> c.wingsFlapAmount = Math.max(0.0F, c.wingsFlapAmount - 0.03F), () -> c.wingsFlapAmount = Math.min(0.55F, c.wingsFlapAmount + 0.03F));
                 row("Opacity", () -> Integer.toString(c.wingsOpacity), () -> c.wingsOpacity = Math.max(30, c.wingsOpacity - 10), () -> c.wingsOpacity = Math.min(235, c.wingsOpacity + 10));
@@ -227,6 +230,28 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Glow", () -> c.wingsGlow ? "ON" : "OFF", () -> c.wingsGlow = !c.wingsGlow, () -> c.wingsGlow = !c.wingsGlow);
                 row("Rainbow", () -> c.wingsRainbow ? "ON" : "OFF", () -> c.wingsRainbow = !c.wingsRainbow, () -> c.wingsRainbow = !c.wingsRainbow);
                 row("Show others", () -> c.wingsShowOthers ? "ON" : "OFF", () -> c.wingsShowOthers = !c.wingsShowOthers, () -> c.wingsShowOthers = !c.wingsShowOthers);
+            }
+            case "back_weapon" -> {
+                row("Style", () -> backWeaponStyleName(c.backWeaponStyle), () -> c.backWeaponStyle = Math.floorMod(c.backWeaponStyle - 1, 4), () -> c.backWeaponStyle = Math.floorMod(c.backWeaponStyle + 1, 4));
+                row("Scale", () -> String.format("%.2f", c.backWeaponScale), () -> c.backWeaponScale = Math.max(0.45F, c.backWeaponScale - 0.05F), () -> c.backWeaponScale = Math.min(2.25F, c.backWeaponScale + 0.05F));
+                row("Angle", () -> String.format("%.0f°", c.backWeaponAngle), () -> c.backWeaponAngle = Math.max(-80F, c.backWeaponAngle - 5F), () -> c.backWeaponAngle = Math.min(80F, c.backWeaponAngle + 5F));
+                row("Vertical offset", () -> String.format("%.2f", c.backWeaponOffsetY), () -> c.backWeaponOffsetY = Math.max(-0.8F, c.backWeaponOffsetY - 0.05F), () -> c.backWeaponOffsetY = Math.min(0.8F, c.backWeaponOffsetY + 0.05F));
+                row("Opacity", () -> Integer.toString(c.backWeaponOpacity), () -> c.backWeaponOpacity = Math.max(40, c.backWeaponOpacity - 10), () -> c.backWeaponOpacity = Math.min(255, c.backWeaponOpacity + 10));
+                row("Primary", () -> hex(c.backWeaponPrimaryArgb), () -> c.backWeaponPrimaryArgb = previousColor(c.backWeaponPrimaryArgb), () -> c.backWeaponPrimaryArgb = nextColor(c.backWeaponPrimaryArgb));
+                row("Secondary", () -> hex(c.backWeaponSecondaryArgb), () -> c.backWeaponSecondaryArgb = previousColor(c.backWeaponSecondaryArgb), () -> c.backWeaponSecondaryArgb = nextColor(c.backWeaponSecondaryArgb));
+                row("Glow", () -> c.backWeaponGlow ? "ON" : "OFF", () -> c.backWeaponGlow = !c.backWeaponGlow, () -> c.backWeaponGlow = !c.backWeaponGlow);
+                row("Rainbow", () -> c.backWeaponRainbow ? "ON" : "OFF", () -> c.backWeaponRainbow = !c.backWeaponRainbow, () -> c.backWeaponRainbow = !c.backWeaponRainbow);
+                row("Show others", () -> c.backWeaponShowOthers ? "ON" : "OFF", () -> c.backWeaponShowOthers = !c.backWeaponShowOthers, () -> c.backWeaponShowOthers = !c.backWeaponShowOthers);
+            }
+            case "head_cosmetic" -> {
+                row("Style", () -> headCosmeticStyleName(c.headCosmeticStyle), () -> c.headCosmeticStyle = Math.floorMod(c.headCosmeticStyle - 1, 4), () -> c.headCosmeticStyle = Math.floorMod(c.headCosmeticStyle + 1, 4));
+                row("Scale", () -> String.format("%.2f", c.headCosmeticScale), () -> c.headCosmeticScale = Math.max(0.45F, c.headCosmeticScale - 0.05F), () -> c.headCosmeticScale = Math.min(2F, c.headCosmeticScale + 0.05F));
+                row("Opacity", () -> Integer.toString(c.headCosmeticOpacity), () -> c.headCosmeticOpacity = Math.max(40, c.headCosmeticOpacity - 10), () -> c.headCosmeticOpacity = Math.min(255, c.headCosmeticOpacity + 10));
+                row("Primary", () -> hex(c.headCosmeticPrimaryArgb), () -> c.headCosmeticPrimaryArgb = previousColor(c.headCosmeticPrimaryArgb), () -> c.headCosmeticPrimaryArgb = nextColor(c.headCosmeticPrimaryArgb));
+                row("Secondary", () -> hex(c.headCosmeticSecondaryArgb), () -> c.headCosmeticSecondaryArgb = previousColor(c.headCosmeticSecondaryArgb), () -> c.headCosmeticSecondaryArgb = nextColor(c.headCosmeticSecondaryArgb));
+                row("Glow", () -> c.headCosmeticGlow ? "ON" : "OFF", () -> c.headCosmeticGlow = !c.headCosmeticGlow, () -> c.headCosmeticGlow = !c.headCosmeticGlow);
+                row("Rainbow", () -> c.headCosmeticRainbow ? "ON" : "OFF", () -> c.headCosmeticRainbow = !c.headCosmeticRainbow, () -> c.headCosmeticRainbow = !c.headCosmeticRainbow);
+                row("Show others", () -> c.headCosmeticShowOthers ? "ON" : "OFF", () -> c.headCosmeticShowOthers = !c.headCosmeticShowOthers, () -> c.headCosmeticShowOthers = !c.headCosmeticShowOthers);
             }
             case "drop_protection" -> {
                 row("Confirm window", () -> c.dropProtectionWindowMs + " ms", () -> c.dropProtectionWindowMs = Math.max(700L, c.dropProtectionWindowMs - 100L), () -> c.dropProtectionWindowMs = Math.min(5000L, c.dropProtectionWindowMs + 100L));
@@ -447,6 +472,17 @@ public final class ModuleSettingsScreen extends Screen {
                 c.wingsFlapSpeed = 1.0F; c.wingsFlapAmount = 0.16F; c.wingsOpacity = 145;
                 c.wingsPrimaryColorArgb = 0xFF8B5CF6; c.wingsSecondaryColorArgb = 0xFF41C7FF;
                 c.wingsRainbow = false; c.wingsGlow = true; c.wingsShowOthers = false;
+                c.wingsDetail = 3; c.wingsDepth = 0.16F; c.wingsBoneWidth = 3.2F;
+            }
+            case "back_weapon" -> {
+                c.backWeaponStyle = 0; c.backWeaponScale = 1.0F; c.backWeaponAngle = 36F; c.backWeaponOffsetY = 0F;
+                c.backWeaponPrimaryArgb = 0xFFB7C7FF; c.backWeaponSecondaryArgb = 0xFF8B5CF6;
+                c.backWeaponOpacity = 225; c.backWeaponGlow = true; c.backWeaponRainbow = false; c.backWeaponShowOthers = false;
+            }
+            case "head_cosmetic" -> {
+                c.headCosmeticStyle = 0; c.headCosmeticScale = 1.0F;
+                c.headCosmeticPrimaryArgb = 0xFFFFD166; c.headCosmeticSecondaryArgb = 0xFFFF8A3D;
+                c.headCosmeticOpacity = 225; c.headCosmeticGlow = true; c.headCosmeticRainbow = false; c.headCosmeticShowOthers = false;
             }
             case "drop_protection" -> { c.dropProtectionWindowMs = 1800L; c.protectArmor = true; c.protectTools = true; c.protectTotems = true; c.protectNamedItems = true; }
             case "auto_gg" -> { c.autoGgMessage = "gg"; c.autoGgCooldownMs = 15000L; }
@@ -550,6 +586,24 @@ public final class ModuleSettingsScreen extends Screen {
             case 2 -> "ROYAL";
             case 3 -> "ENERGY";
             default -> "FABRIC";
+        };
+    }
+
+    private static String backWeaponStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 1 -> "KATANA";
+            case 2 -> "CRYSTAL";
+            case 3 -> "SCYTHE";
+            default -> "GREAT SWORD";
+        };
+    }
+
+    private static String headCosmeticStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 1 -> "HORNS";
+            case 2 -> "ANTLERS";
+            case 3 -> "ARCANE";
+            default -> "CROWN";
         };
     }
 
