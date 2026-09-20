@@ -101,18 +101,46 @@ public final class WorldVisuals {
 
         var cfg = TopkaClient.CONFIG.get();
         AABB bounds = entity.getBoundingBox().inflate(0.055D);
+        float pulse = cfg.targetPulse
+                ? (float) (0.88D + (Math.sin(System.currentTimeMillis() / 120.0D) + 1.0D) * 0.12D)
+                : 1.0F;
+        float lineWidth = 2.6F * pulse;
 
-        context.poseStack().pushPose();
-        context.poseStack().translate(-camera.x, -camera.y, -camera.z);
-        context.submitNodeCollector().submitShapeOutline(
-                context.poseStack(),
-                Shapes.create(bounds),
-                RenderTypes.linesTranslucent(),
-                cfg.targetColorArgb,
-                3.0F,
-                true
-        );
-        context.poseStack().popPose();
+        if (cfg.targetMode == 0 || cfg.targetMode == 2) {
+            context.poseStack().pushPose();
+            context.poseStack().translate(-camera.x, -camera.y, -camera.z);
+            context.submitNodeCollector().submitShapeOutline(
+                    context.poseStack(),
+                    Shapes.create(bounds),
+                    RenderTypes.linesTranslucent(),
+                    cfg.targetColorArgb,
+                    lineWidth,
+                    true
+            );
+            context.poseStack().popPose();
+        }
+
+        if (cfg.targetMode == 1 || cfg.targetMode == 2) {
+            double centerX = (bounds.minX + bounds.maxX) * 0.5D;
+            double centerZ = (bounds.minZ + bounds.maxZ) * 0.5D;
+            double radius = Math.max(bounds.getXsize(), bounds.getZsize()) * 0.5D + cfg.targetPadding;
+            PoseStack poseStack = context.poseStack();
+            poseStack.pushPose();
+            poseStack.translate(centerX - camera.x, bounds.minY + 0.025D - camera.y, centerZ - camera.z);
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.linesTranslucent(),
+                    (pose, vertices) -> emitCircle(
+                            pose,
+                            vertices,
+                            (float) radius,
+                            0.0D,
+                            cfg.targetColorArgb,
+                            lineWidth
+                    )
+            );
+            poseStack.popPose();
+        }
     }
 
     private static void renderChinaHats(LevelRenderContext context, Vec3 camera, Minecraft client) {
@@ -170,7 +198,7 @@ public final class WorldVisuals {
         double z = client.player.getZ();
         float radius = Math.clamp(cfg.haloRadius, 0.2F, 1.0F);
         float width = Math.clamp(cfg.haloLineWidth, 1.0F, 5.0F);
-        int color = cfg.secondaryAccentArgb;
+        int color = Theme.secondary();
 
         PoseStack poseStack = context.poseStack();
         poseStack.pushPose();
