@@ -123,6 +123,19 @@ public final class TopkaConfig {
     public float capeLineWidth = 2.0F;
     public boolean capeShowOthers = false;
 
+    // Wings
+    public int wingsStyle = 0;
+    public float wingsScale = 1.0F;
+    public float wingsSpread = 0.95F;
+    public float wingsFlapSpeed = 1.0F;
+    public float wingsFlapAmount = 0.16F;
+    public int wingsPrimaryColorArgb = 0xFF8B5CF6;
+    public int wingsSecondaryColorArgb = 0xFF41C7FF;
+    public int wingsOpacity = 145;
+    public boolean wingsRainbow = false;
+    public boolean wingsGlow = true;
+    public boolean wingsShowOthers = false;
+
     // Inventory item highlighting
     public int itemHighlightColorArgb = 0xFF8B5CF6;
 
