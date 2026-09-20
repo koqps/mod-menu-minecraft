@@ -1,6 +1,7 @@
 package com.koqps.topka.ui;
 
 import com.koqps.topka.TopkaClient;
+import com.koqps.topka.hud.Theme;
 import com.koqps.topka.config.WaypointConfig;
 import com.koqps.topka.hud.WaypointController;
 import net.minecraft.client.Minecraft;
@@ -114,7 +115,7 @@ public final class WaypointScreen extends Screen {
 
         g.fill(0, 0, width, height, 0xAA000000);
         g.fill(x, y, x + PANEL_W, y + PANEL_H, cfg.panelArgb);
-        g.fill(x, y, x + PANEL_W, y + 3, cfg.accentArgb);
+        g.fill(x, y, x + PANEL_W, y + 3, Theme.accent());
 
         g.text(font, "WAYPOINT STUDIO", x + 26, y + 20, 0xFFFFFFFF, true);
         g.text(font, "Markers are isolated per server/world and dimension.", x + 26, y + 38, cfg.mutedTextArgb, false);
@@ -182,7 +183,7 @@ public final class WaypointScreen extends Screen {
     private void drawButton(GuiGraphicsExtractor g, int mx, int my, int x, int y, int w, String label) {
         boolean hover = mx >= x && mx < x + w && my >= y && my < y + 30;
         g.fill(x, y, x + w, y + 30, hover ? 0xFF30303C : 0xFF20202A);
-        g.fill(x, y + 29, x + w, y + 30, TopkaClient.CONFIG.get().accentArgb);
+        g.fill(x, y + 29, x + w, y + 30, Theme.accent());
         g.centeredText(font, label, x + w / 2, y + 10, 0xFFEDEDF4);
     }
 
