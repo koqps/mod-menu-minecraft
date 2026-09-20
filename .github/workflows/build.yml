@@ -44,36 +44,8 @@ jobs:
           grep -q '^topka.client.mixins.json$' jar-contents.txt
           grep -q '^com/koqps/topka/TopkaClient.class$' jar-contents.txt
           grep -q '^com/koqps/topka/mixin/NoHurtCamMixin.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/mixin/ClientLevelTimeMixin.class          grep -q '^com/koqps/topka/ui/TopkaScreen.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/ui/UiFont.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/HealthHud.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/WorldVisuals.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/WorldLabels.class$' jar-contents.txt
-          grep -q '^assets/topka/font/ui.json$' jar-contents.txt
-
-      - name: Upload normal mod jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: mod-menu-minecraft-26.3
-          path: |
-            build/libs/*.jar
-            !build/libs/*-sources.jar
- jar-contents.txt
-          grep -q '^com/koqps/topka/mixin/SkyRendererTimeMixin.class          grep -q '^com/koqps/topka/ui/TopkaScreen.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/ui/UiFont.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/HealthHud.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/WorldVisuals.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/WorldLabels.class$' jar-contents.txt
-          grep -q '^assets/topka/font/ui.json$' jar-contents.txt
-
-      - name: Upload normal mod jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: mod-menu-minecraft-26.3
-          path: |
-            build/libs/*.jar
-            !build/libs/*-sources.jar
- jar-contents.txt
+          grep -q '^com/koqps/topka/mixin/ClientLevelTimeMixin.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/mixin/SkyRendererTimeMixin.class$' jar-contents.txt
           grep -q '^com/koqps/topka/ui/TopkaScreen.class$' jar-contents.txt
           grep -q '^com/koqps/topka/ui/UiFont.class$' jar-contents.txt
           grep -q '^com/koqps/topka/hud/HealthHud.class$' jar-contents.txt
