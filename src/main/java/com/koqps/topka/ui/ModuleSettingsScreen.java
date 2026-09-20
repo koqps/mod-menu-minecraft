@@ -35,16 +35,44 @@ public final class ModuleSettingsScreen extends Screen {
         this.module = module;
     }
 
-    private int x() { return (width - PANEL_W) / 2; }
-    private int y() { return (height - PANEL_H) / 2; }
+    private float uiScale() {
+        return Math.clamp(TopkaClient.CONFIG.get().menuScale, 0.70F, 1.35F);
+    }
+
+    private int panelX() {
+        return (width - Math.round(PANEL_W * uiScale())) / 2;
+    }
+
+    private int panelY() {
+        return (height - Math.round(PANEL_H * uiScale())) / 2;
+    }
+
+    private int sx(int local) {
+        return panelX() + Math.round(local * uiScale());
+    }
+
+    private int sy(int local) {
+        return panelY() + Math.round(local * uiScale());
+    }
+
+    private int ss(int value) {
+        return Math.max(1, Math.round(value * uiScale()));
+    }
+
+    private int localMouseX(double mouseX) {
+        return Math.round((float) ((mouseX - panelX()) / uiScale()));
+    }
+
+    private int localMouseY(double mouseY) {
+        return Math.round((float) ((mouseY - panelY()) / uiScale()));
+    }
 
     @Override
     protected void init() {
         rows.clear();
         buildRows();
 
-        int x = x(), y = y();
-        addClickTarget(x + PANEL_W - 126, y + 20, 94, 26, () -> {
+        addLocalClickTarget(PANEL_W - 126, 20, 94, 26, () -> {
             module.toggle();
             TopkaClient.CONFIG.save();
         });
@@ -52,20 +80,20 @@ public final class ModuleSettingsScreen extends Screen {
         clampScroll();
         int first = scrollRow;
         int last = Math.min(rows.size(), first + VISIBLE_ROWS);
-        int rowY = y + 92;
+        int rowY = 92;
         for (int i = first; i < last; i++) {
             Row row = rows.get(i);
-            addClickTarget(x + 402, rowY + 5, 36, 26, row.minus());
-            addClickTarget(x + 446, rowY + 5, 36, 26, row.plus());
+            addLocalClickTarget(402, rowY + 5, 36, 26, row.minus());
+            addLocalClickTarget(446, rowY + 5, 36, 26, row.plus());
             rowY += 38;
         }
 
         if (isHudModule()) {
-            addClickTarget(x + 32, y + PANEL_H - 52, 164, 28, () -> minecraft.gui.setScreen(new HudEditorScreen(this)));
+            addLocalClickTarget(32, PANEL_H - 52, 164, 28, () -> minecraft.gui.setScreen(new HudEditorScreen(this)));
         } else if ("waypoints".equals(module.id())) {
-            addClickTarget(x + 32, y + PANEL_H - 52, 164, 28, () -> minecraft.gui.setScreen(new WaypointScreen(this)));
+            addLocalClickTarget(32, PANEL_H - 52, 164, 28, () -> minecraft.gui.setScreen(new WaypointScreen(this)));
         }
-        addClickTarget(x + PANEL_W - 196, y + PANEL_H - 52, 164, 28, this::resetModuleSettings);
+        addLocalClickTarget(PANEL_W - 196, PANEL_H - 52, 164, 28, this::resetModuleSettings);
     }
 
     private void buildRows() {
@@ -235,60 +263,68 @@ public final class ModuleSettingsScreen extends Screen {
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
         var cfg = TopkaClient.CONFIG.get();
-        int x = x(), y = y();
+        int mx = localMouseX(mouseX);
+        int my = localMouseY(mouseY);
 
         g.fill(0, 0, width, height, 0xAA000000);
-        g.fill(x, y, x + PANEL_W, y + PANEL_H, cfg.panelArgb);
-        g.fill(x, y, x + PANEL_W, y + 3, Theme.accent());
+        g.pose().pushMatrix();
+        g.pose().translate(panelX(), panelY());
+        g.pose().scale(uiScale(), uiScale());
 
-        g.text(font, UiFont.text(module.icon() + "  " + module.name().toUpperCase()), x + 32, y + 23, 0xFFFFFFFF, true);
-        g.text(font, UiFont.text(module.description()), x + 32, y + 43, cfg.mutedTextArgb, false);
+        g.fill(0, 0, PANEL_W, PANEL_H, cfg.panelArgb);
+        g.fill(0, 0, PANEL_W, 3, Theme.accent());
+
+        g.text(font, UiFont.text(module.icon() + "  " + module.name().toUpperCase()), 32, 23, 0xFFFFFFFF, true);
+        g.text(font, UiFont.trim(font, module.description(), 360), 32, 43, cfg.mutedTextArgb, false);
 
         int toggleColor = module.enabled() ? Theme.accent() : 0xFF555563;
-        g.fill(x + PANEL_W - 126, y + 20, x + PANEL_W - 32, y + 46, module.enabled() ? 0xFF272337 : 0xFF1C1C24);
-        g.fill(x + PANEL_W - 126, y + 45, x + PANEL_W - 32, y + 46, toggleColor);
-        g.centeredText(font, UiFont.text(module.enabled() ? "ENABLED" : "DISABLED"), x + PANEL_W - 79, y + 29, toggleColor);
+        g.fill(PANEL_W - 126, 20, PANEL_W - 32, 46, module.enabled() ? 0xFF272337 : 0xFF1C1C24);
+        g.fill(PANEL_W - 126, 45, PANEL_W - 32, 46, toggleColor);
+        g.centeredText(font, UiFont.text(module.enabled() ? "ENABLED" : "DISABLED"), PANEL_W - 79, 29, toggleColor);
 
-        g.text(font, UiFont.text("SETTINGS"), x + 32, y + 72, 0xFF707082, false);
+        g.text(font, UiFont.text("SETTINGS"), 32, 72, 0xFF707082, false);
 
         clampScroll();
-        int rowY = y + 92;
+        int rowY = 92;
         if (rows.isEmpty()) {
-            g.text(font, UiFont.text("This module has no extra settings yet."), x + 32, rowY + 8, 0xFF858596, false);
+            g.text(font, UiFont.text("This module has no extra settings yet."), 32, rowY + 8, 0xFF858596, false);
         }
 
         int first = scrollRow;
         int last = Math.min(rows.size(), first + VISIBLE_ROWS);
         for (int i = first; i < last; i++) {
             Row row = rows.get(i);
-            g.fill(x + 32, rowY, x + PANEL_W - 32, rowY + 34, 0xFF171720);
-            g.text(font, UiFont.text(row.label()), x + 46, rowY + 12, 0xFFCBCBD6, false);
-            g.text(font, UiFont.text(row.value().get()), x + 260, rowY + 12, Theme.accent(), true);
-            drawMini(g, mouseX, mouseY, x + 402, rowY + 5, "−");
-            drawMini(g, mouseX, mouseY, x + 446, rowY + 5, "+");
+            g.fill(32, rowY, PANEL_W - 32, rowY + 34, 0xFF171720);
+            g.text(font, UiFont.text(row.label()), 46, rowY + 12, 0xFFCBCBD6, false);
+            g.text(font, UiFont.text(row.value().get()), 260, rowY + 12, Theme.accent(), true);
+            drawMini(g, mx, my, 402, rowY + 5, "−");
+            drawMini(g, mx, my, 446, rowY + 5, "+");
             rowY += 38;
         }
 
         if (rows.size() > VISIBLE_ROWS) {
-            int trackX = x + PANEL_W - 23;
-            int trackY = y + 92;
+            int trackX = PANEL_W - 23;
+            int trackY = 92;
             int trackH = VISIBLE_ROWS * 38 - 4;
             g.fill(trackX, trackY, trackX + 3, trackY + trackH, 0xFF252530);
             int thumbH = Math.max(26, trackH * VISIBLE_ROWS / rows.size());
             int maxScroll = rows.size() - VISIBLE_ROWS;
             int thumbY = trackY + (trackH - thumbH) * scrollRow / Math.max(1, maxScroll);
             g.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, Theme.accent());
-            g.text(font, UiFont.text("Mouse wheel for more settings"), x + 340, y + 72, 0xFF656576, false);
+            g.text(font, UiFont.text("Mouse wheel for more settings"), 340, 72, 0xFF656576, false);
         }
 
         if (isHudModule()) {
-            drawBottomButton(g, mouseX, mouseY, x + 32, y + PANEL_H - 52, 164, "Open HUD workspace");
+            drawBottomButton(g, mx, my, 32, PANEL_H - 52, 164, "Open HUD workspace");
         } else if ("waypoints".equals(module.id())) {
-            drawBottomButton(g, mouseX, mouseY, x + 32, y + PANEL_H - 52, 164, "Manage waypoints");
+            drawBottomButton(g, mx, my, 32, PANEL_H - 52, 164, "Manage waypoints");
         }
-        drawBottomButton(g, mouseX, mouseY, x + PANEL_W - 196, y + PANEL_H - 52, 164, "Reset module settings");
+        drawBottomButton(g, mx, my, PANEL_W - 196, PANEL_H - 52, 164, "Reset module settings");
 
-        g.text(font, UiFont.text("ESC / " + TopkaClient.openMenuKey().getString() + " to return"), x + 32, y + PANEL_H - 18, 0xFF616171, false);
+        g.text(font, UiFont.text("Scale " + String.format("%.2fx", uiScale()) + "  •  ESC / "
+                + TopkaClient.openMenuKey().getString() + " to return"), 32, PANEL_H - 18, 0xFF616171, false);
+
+        g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
     }
 
@@ -298,8 +334,9 @@ public final class ModuleSettingsScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        int x = x(), y = y();
-        if (mouseX >= x + 24 && mouseX < x + PANEL_W - 24 && mouseY >= y + 82 && mouseY < y + 405) {
+        int mx = localMouseX(mouseX);
+        int my = localMouseY(mouseY);
+        if (mx >= 24 && mx < PANEL_W - 24 && my >= 82 && my < 405) {
             int before = scrollRow;
             if (scrollY < 0) scrollRow++;
             if (scrollY > 0) scrollRow--;
@@ -329,8 +366,11 @@ public final class ModuleSettingsScreen extends Screen {
         return module.category() == Module.Category.HUD;
     }
 
-    private void addClickTarget(int x, int y, int w, int h, Runnable action) {
-        addWidget(Button.builder(Component.empty(), b -> action.run()).pos(x, y).size(w, h).build());
+    private void addLocalClickTarget(int x, int y, int w, int h, Runnable action) {
+        addWidget(Button.builder(Component.empty(), b -> action.run())
+                .pos(sx(x), sy(y))
+                .size(ss(w), ss(h))
+                .build());
     }
 
     private void resetModuleSettings() {
