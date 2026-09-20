@@ -16,6 +16,9 @@ public final class ModuleManager {
         new Module("jump_particles", "Jump Particles", "Particle burst whenever you jump.", "✧", Module.Category.VISUAL, false),
         new Module("hit_particles", "Hit Particles", "Extra particles when you attack an entity.", "✹", Module.Category.VISUAL, false),
         new Module("full_bright", "Full Bright", "Client-side brightness override.", "☀", Module.Category.VISUAL, false),
+        new Module("viewmodel", "ViewModel", "Customize first-person item position and scale.", "◇", Module.Category.VISUAL, false),
+        new Module("swing_animations", "Swing Animations", "Extra visual-only first-person swing styles.", "↗", Module.Category.VISUAL, false),
+        new Module("ambience", "Ambience", "Client-side visual time override.", "☾", Module.Category.VISUAL, false),
 
         new Module("health_display", "Health Display", "Compact health bar and numeric health.", "♥", Module.Category.HUD, true),
         new Module("armor_display", "Armor Display", "Armor icons and durability percentages.", "◆", Module.Category.HUD, true),
