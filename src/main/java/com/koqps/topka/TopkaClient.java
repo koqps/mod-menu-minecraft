@@ -3,11 +3,14 @@ package com.koqps.topka;
 import com.koqps.topka.config.ConfigManager;
 import com.koqps.topka.hud.ArmorHud;
 import com.koqps.topka.hud.CrosshairHud;
+import com.koqps.topka.hud.FullBrightController;
 import com.koqps.topka.hud.HealthHud;
 import com.koqps.topka.hud.HitColorController;
 import com.koqps.topka.hud.HitboxController;
 import com.koqps.topka.hud.MapHud;
+import com.koqps.topka.hud.PingHud;
 import com.koqps.topka.hud.SprintController;
+import com.koqps.topka.hud.VisualEffectsController;
 import com.koqps.topka.hud.WorldVisuals;
 import com.koqps.topka.module.ModuleManager;
 import com.koqps.topka.ui.TopkaScreen;
@@ -30,24 +33,32 @@ public final class TopkaClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         CONFIG.load();
+
         HealthHud.register();
         ArmorHud.register();
         MapHud.register();
+        PingHud.register();
         CrosshairHud.register();
+        VisualEffectsController.register();
         WorldVisuals.register();
 
         KeyMapping.Category category = KeyMapping.Category.register(
-            Identifier.fromNamespaceAndPath(MOD_ID, "main")
+                Identifier.fromNamespaceAndPath(MOD_ID, "main")
         );
         openMenu = KeyMappingHelper.registerKeyMapping(new KeyMapping(
-            "key.topka.open_menu", InputConstants.Type.KEYBOARD,
-            InputConstants.KEY_RSHIFT, category
+                "key.topka.open_menu",
+                InputConstants.Type.KEYBOARD,
+                InputConstants.KEY_RSHIFT,
+                category
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             HitColorController.tick();
             HitboxController.tick();
             SprintController.tick();
+            FullBrightController.tick();
+            VisualEffectsController.tick();
+
             while (openMenu.consumeClick()) {
                 Minecraft minecraft = Minecraft.getInstance();
                 if (minecraft.gui.screen() instanceof TopkaScreen menu) {
