@@ -15,6 +15,7 @@ import java.util.List;
 public final class ModuleSettingsScreen extends Screen {
     private static final int PANEL_W = 590;
     private static final int PANEL_H = 500;
+    private static final int VISIBLE_ROWS = 8;
     private static final int[] COLORS = {
             0xFF8B5CF6, 0xFF41C7FF, 0xFF50FA7B, 0xFFFF5C77,
             0xFFFFD166, 0xFFFF7AD9, 0xFFFF8A3D, 0xFFFFFFFF
@@ -26,6 +27,7 @@ public final class ModuleSettingsScreen extends Screen {
     private final Screen parent;
     private final Module module;
     private final List<Row> rows = new ArrayList<>();
+    private int scrollRow;
 
     public ModuleSettingsScreen(Screen parent, Module module) {
         super(Component.literal(module.name() + " Settings"));
@@ -47,8 +49,12 @@ public final class ModuleSettingsScreen extends Screen {
             TopkaClient.CONFIG.save();
         });
 
+        clampScroll();
+        int first = scrollRow;
+        int last = Math.min(rows.size(), first + VISIBLE_ROWS);
         int rowY = y + 92;
-        for (Row row : rows) {
+        for (int i = first; i < last; i++) {
+            Row row = rows.get(i);
             addClickTarget(x + 402, rowY + 5, 36, 26, row.minus());
             addClickTarget(x + 446, rowY + 5, 36, 26, row.plus());
             rowY += 38;
@@ -199,18 +205,34 @@ public final class ModuleSettingsScreen extends Screen {
 
         g.text(font, "SETTINGS", x + 32, y + 72, 0xFF707082, false);
 
+        clampScroll();
         int rowY = y + 92;
         if (rows.isEmpty()) {
             g.text(font, "This module has no extra settings yet.", x + 32, rowY + 8, 0xFF858596, false);
         }
 
-        for (Row row : rows) {
+        int first = scrollRow;
+        int last = Math.min(rows.size(), first + VISIBLE_ROWS);
+        for (int i = first; i < last; i++) {
+            Row row = rows.get(i);
             g.fill(x + 32, rowY, x + PANEL_W - 32, rowY + 34, 0xFF171720);
             g.text(font, row.label(), x + 46, rowY + 12, 0xFFCBCBD6, false);
             g.text(font, row.value().get(), x + 260, rowY + 12, Theme.accent(), true);
             drawMini(g, mouseX, mouseY, x + 402, rowY + 5, "−");
             drawMini(g, mouseX, mouseY, x + 446, rowY + 5, "+");
             rowY += 38;
+        }
+
+        if (rows.size() > VISIBLE_ROWS) {
+            int trackX = x + PANEL_W - 23;
+            int trackY = y + 92;
+            int trackH = VISIBLE_ROWS * 38 - 4;
+            g.fill(trackX, trackY, trackX + 3, trackY + trackH, 0xFF252530);
+            int thumbH = Math.max(26, trackH * VISIBLE_ROWS / rows.size());
+            int maxScroll = rows.size() - VISIBLE_ROWS;
+            int thumbY = trackY + (trackH - thumbH) * scrollRow / Math.max(1, maxScroll);
+            g.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, Theme.accent());
+            g.text(font, "Mouse wheel for more settings", x + 340, y + 72, 0xFF656576, false);
         }
 
         if (isHudModule()) {
@@ -222,6 +244,26 @@ public final class ModuleSettingsScreen extends Screen {
 
         g.text(font, "ESC / " + TopkaClient.openMenuKey().getString() + " to return", x + 32, y + PANEL_H - 18, 0xFF616171, false);
         super.extractRenderState(g, mouseX, mouseY, delta);
+    }
+
+    private void clampScroll() {
+        scrollRow = Math.clamp(scrollRow, 0, Math.max(0, rows.size() - VISIBLE_ROWS));
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        int x = x(), y = y();
+        if (mouseX >= x + 24 && mouseX < x + PANEL_W - 24 && mouseY >= y + 82 && mouseY < y + 405) {
+            int before = scrollRow;
+            if (scrollY < 0) scrollRow++;
+            if (scrollY > 0) scrollRow--;
+            clampScroll();
+            if (before != scrollRow) {
+                rebuildWidgets();
+                return true;
+            }
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     private void drawMini(GuiGraphicsExtractor g, int mx, int my, int x, int y, String text) {
