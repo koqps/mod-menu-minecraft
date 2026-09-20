@@ -21,7 +21,9 @@ public final class ModuleManager {
         new Module("ambience", "Ambience", "Client-side visual time override.", "☾", Module.Category.VISUAL, false),
         new Module("baby_mode", "Baby Mode", "Purely visual player model scaling.", "♙", Module.Category.VISUAL, false),
         new Module("cape", "Cape", "Animated original cosmetic cape outline.", "▱", Module.Category.VISUAL, false),
-        new Module("wings", "Wings", "Solid animated cosmetic wings with multiple designs.", "✦", Module.Category.VISUAL, false),
+        new Module("wings", "Wings", "Layered modeled wings with bones, feathers and membranes.", "✦", Module.Category.VISUAL, false),
+        new Module("back_weapon", "Back Weapon", "Modeled sword, katana, crystal blade or scythe on your back.", "⚔", Module.Category.VISUAL, false),
+        new Module("head_cosmetic", "Head Cosmetic", "Crown, horns, antlers or arcane crest.", "♛", Module.Category.VISUAL, false),
 
         new Module("drop_protection", "Drop Protection", "Press Drop twice before protected items leave your hand.", "⛨", Module.Category.PLAYER, false),
 
