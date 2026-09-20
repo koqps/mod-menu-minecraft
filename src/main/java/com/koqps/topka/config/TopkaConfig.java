@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class TopkaConfig {
+    public int cosmeticRendererVersion = 2;
     public Map<String, Boolean> modules = new HashMap<>();
     public List<WaypointConfig> waypoints = new ArrayList<>();
     public List<String> highlightedItems = new ArrayList<>(List.of(
@@ -135,13 +136,13 @@ public final class TopkaConfig {
     public float wingsFlapAmount = 0.16F;
     public int wingsPrimaryColorArgb = 0xFF8B5CF6;
     public int wingsSecondaryColorArgb = 0xFF41C7FF;
-    public int wingsOpacity = 145;
+    public int wingsOpacity = 235;
     public boolean wingsRainbow = false;
     public boolean wingsGlow = true;
     public boolean wingsShowOthers = false;
-    public int wingsDetail = 3;
+    public int wingsDetail = 4;
     public float wingsDepth = 0.16F;
-    public float wingsBoneWidth = 3.2F;
+    public float wingsBoneWidth = 2.4F;
 
     // Back weapon
     public int backWeaponStyle = 0;
