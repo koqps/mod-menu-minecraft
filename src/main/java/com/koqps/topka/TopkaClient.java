@@ -9,6 +9,7 @@ import com.koqps.topka.hud.FullBrightController;
 import com.koqps.topka.hud.HealthHud;
 import com.koqps.topka.hud.HitColorController;
 import com.koqps.topka.hud.HitboxController;
+import com.koqps.topka.hud.ItemColorController;
 import com.koqps.topka.hud.MapHud;
 import com.koqps.topka.hud.PingHud;
 import com.koqps.topka.hud.SprintController;
@@ -47,6 +48,7 @@ public final class TopkaClient implements ClientModInitializer {
         WorldVisuals.register();
         WorldLabels.register();
         AutoGgController.register();
+        ItemColorController.register();
 
         KeyMapping.Category category = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath(MOD_ID, "main")
