@@ -1,7 +1,7 @@
 package com.koqps.topka.module;
 
 public final class Module {
-    public enum Category { COMBAT, VISUAL, HUD, MOVEMENT }
+    public enum Category { COMBAT, VISUAL, PLAYER, MOVEMENT, HUD, WORLD, MISC }
 
     private final String id;
     private final String name;
