@@ -104,6 +104,9 @@ public final class ConfigManager {
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
+        config.themeAnimationSpeed = Math.clamp(config.themeAnimationSpeed, 0.05F, 2.0F);
+        if (config.rainbowTheme && config.gradientTheme) config.gradientTheme = false;
+
         config.hitboxExpand = Math.clamp(config.hitboxExpand, 0.0F, 1.0F);
         config.hitboxLineWidth = Math.clamp(config.hitboxLineWidth, 1.0F, 6.0F);
 
