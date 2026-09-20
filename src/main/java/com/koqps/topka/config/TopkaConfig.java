@@ -53,9 +53,15 @@ public final class TopkaConfig {
     public float chinaHatHeight = 0.32F;
     public float chinaHatLineWidth = 2.0F;
     public boolean chinaHatShowOthers = false;
+    public int chinaHatColorArgb = 0xFF8B5CF6;
+    public int chinaHatStyle = 1;
+    public boolean chinaHatRainbow = false;
     public float haloRadius = 0.46F;
     public float haloHeight = 0.16F;
     public float haloLineWidth = 2.2F;
+    public int haloColorArgb = 0xFF41C7FF;
+    public int haloStyle = 1;
+    public boolean haloRainbow = false;
 
     // Trails / jump effects
     public int trailLifetimeMs = 900;
@@ -163,6 +169,8 @@ public final class TopkaConfig {
     public boolean crosshairOutline = true;
     public boolean crosshairDynamic = false;
     public int crosshairDynamicMaxGap = 10;
+    public int crosshairStyle = 0;
+    public boolean crosshairRainbow = false;
 
     // Movement
     public boolean sprintAlways = true;
