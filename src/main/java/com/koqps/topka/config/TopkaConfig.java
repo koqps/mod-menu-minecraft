@@ -22,6 +22,9 @@ public final class TopkaConfig {
     public int hudBackgroundArgb = 0xD9121219;
     public int textArgb = 0xFFF5F5FA;
     public int mutedTextArgb = 0xFF9292A4;
+    public boolean rainbowTheme = false;
+    public boolean gradientTheme = false;
+    public float themeAnimationSpeed = 0.35F;
 
     // Combat / visuals
     public int hitColorArgb = 0xB28B5CF6;
