@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "topka",
+  "version": "${version}",
+  "name": "Mod Menu",
+  "description": "A customizable client-side visual, HUD and quality-of-life Java mod for Minecraft 26.3.",
+  "authors": ["koqps"],
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["com.koqps.topka.TopkaClient"]
+  },
+  "mixins": [
+    {
+      "config": "topka.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.3",
+    "java": ">=25",
+    "fabric-api": "*"
+  }
+}
