@@ -1,4 +1,4 @@
-# Mod Menu 0.8.0
+# Mod Menu 0.8.1
 
 A polished client-side Minecraft Java mod for **Minecraft 26.3 + Fabric**, built for Java 25.
 
@@ -13,7 +13,15 @@ Mod Menu is an original visual/PvP/QoL client project. It is inspired by the pre
 - Default menu key: Right Shift
 - Config: `.minecraft/config/mod-menu.json`
 
-## 0.8.0 highlights
+## 0.8.1 highlights
+
+### Placement and ambience fixes
+- Wings now anchor to the center of the player's bounding box and rotate from rendered body yaw instead of head/look direction, preventing the cosmetic from sliding sideways when looking around.
+- Capes use the same body-centered orientation and now render as filled animated cloth rather than an outline-only rectangle.
+- Cape styles: FABRIC, SPLIT, ROYAL and ENERGY, with opacity, glow, rainbow, width, height and outline controls.
+- China Hat now adds a filled translucent brim under the cone shell.
+- Custom time no longer targets the pre-26.3 day-time API. Minecraft 26.3 reads sun/moon/star angles from EnvironmentAttributes into SkyRenderState, so Mod Menu now overrides those final render-state angles every frame. This avoids server-packet flicker without changing actual server time.
+
 
 
 ### Premium filled cosmetics
@@ -204,13 +212,13 @@ The normal mod JAR is generated in:
 build\libs\
 ```
 
-Install the normal `mod-menu-0.8.0.jar`, not `mod-menu-0.7.0-sources.jar`.
+Install the normal `mod-menu-0.8.1.jar`, not `mod-menu-0.7.0-sources.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 26.3.
 2. Put Fabric API matching Minecraft 26.3 in `%appdata%\.minecraft\mods`.
-3. Put `mod-menu-0.8.0.jar` in the same folder.
+3. Put `mod-menu-0.8.1.jar` in the same folder.
 4. Remove older Mod Menu / Topka development JARs so the internal mod id is not duplicated.
 5. Launch the Fabric 26.3 profile.
 6. Press Right Shift by default.
