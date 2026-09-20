@@ -28,19 +28,55 @@ public final class CrosshairHud {
             int size = Math.max(1, cfg.crosshairSize);
             int gap = computeGap(client, cfg.crosshairGap, cfg.crosshairDynamic, cfg.crosshairDynamicMaxGap);
             int t = Math.max(1, cfg.crosshairThickness);
+            int color = cfg.crosshairRainbow ? rainbowColor(0.0F) : cfg.crosshairColorArgb;
+
+            if (cfg.crosshairStyle == 3) {
+                drawDot(graphics, cx, cy, t, color, cfg.crosshairOutline, cfg.crosshairOutlineArgb);
+                return;
+            }
 
             if (cfg.crosshairOutline) {
-                drawCross(graphics, cx, cy, size + 1, gap, t + 2, cfg.crosshairOutlineArgb);
+                drawStyle(graphics, cfg.crosshairStyle, cx, cy, size + 1, gap, t + 2, cfg.crosshairOutlineArgb);
             }
-            drawCross(graphics, cx, cy, size, gap, t, cfg.crosshairColorArgb);
+            drawStyle(graphics, cfg.crosshairStyle, cx, cy, size, gap, t, color);
 
             if (cfg.crosshairDot) {
-                if (cfg.crosshairOutline) {
-                    graphics.fill(cx - 2, cy - 2, cx + 3, cy + 3, cfg.crosshairOutlineArgb);
-                }
-                graphics.fill(cx - 1, cy - 1, cx + 2, cy + 2, cfg.crosshairColorArgb);
+                drawDot(graphics, cx, cy, t, color, cfg.crosshairOutline, cfg.crosshairOutlineArgb);
             }
         });
+    }
+
+    private static void drawStyle(
+            net.minecraft.client.gui.GuiGraphicsExtractor graphics,
+            int style,
+            int cx,
+            int cy,
+            int size,
+            int gap,
+            int thickness,
+            int color
+    ) {
+        switch (Math.floorMod(style, 4)) {
+            case 1 -> drawBrackets(graphics, cx, cy, size, gap, thickness, color);
+            case 2 -> drawTShape(graphics, cx, cy, size, gap, thickness, color);
+            default -> drawCross(graphics, cx, cy, size, gap, thickness, color);
+        }
+    }
+
+    private static void drawDot(
+            net.minecraft.client.gui.GuiGraphicsExtractor graphics,
+            int cx,
+            int cy,
+            int thickness,
+            int color,
+            boolean outline,
+            int outlineColor
+    ) {
+        int radius = Math.max(1, thickness);
+        if (outline) {
+            graphics.fill(cx - radius - 1, cy - radius - 1, cx + radius + 2, cy + radius + 2, outlineColor);
+        }
+        graphics.fill(cx - radius, cy - radius, cx + radius + 1, cy + radius + 1, color);
     }
 
     private static int computeGap(Minecraft client, int baseGap, boolean dynamic, int maxGap) {
@@ -76,5 +112,41 @@ public final class CrosshairHud {
         graphics.fill(cx - thickness / 2, cy + gap, cx + (thickness + 1) / 2, cy + gap + size, color);
         graphics.fill(cx - gap - size, cy - thickness / 2, cx - gap, cy + (thickness + 1) / 2, color);
         graphics.fill(cx + gap, cy - thickness / 2, cx + gap + size, cy + (thickness + 1) / 2, color);
+    }
+
+    private static void drawBrackets(
+            net.minecraft.client.gui.GuiGraphicsExtractor graphics,
+            int cx,
+            int cy,
+            int size,
+            int gap,
+            int thickness,
+            int color
+    ) {
+        graphics.fill(cx - gap - size, cy - thickness / 2, cx - gap, cy + (thickness + 1) / 2, color);
+        graphics.fill(cx + gap, cy - thickness / 2, cx + gap + size, cy + (thickness + 1) / 2, color);
+
+        int cap = Math.max(2, size / 2);
+        graphics.fill(cx - gap - size, cy - cap, cx - gap - size + thickness, cy + cap + 1, color);
+        graphics.fill(cx + gap + size - thickness, cy - cap, cx + gap + size, cy + cap + 1, color);
+    }
+
+    private static void drawTShape(
+            net.minecraft.client.gui.GuiGraphicsExtractor graphics,
+            int cx,
+            int cy,
+            int size,
+            int gap,
+            int thickness,
+            int color
+    ) {
+        graphics.fill(cx - gap - size, cy - thickness / 2, cx - gap, cy + (thickness + 1) / 2, color);
+        graphics.fill(cx + gap, cy - thickness / 2, cx + gap + size, cy + (thickness + 1) / 2, color);
+        graphics.fill(cx - thickness / 2, cy + gap, cx + (thickness + 1) / 2, cy + gap + size, color);
+    }
+
+    private static int rainbowColor(float offset) {
+        float hue = (System.currentTimeMillis() / 3000.0F + offset) % 1.0F;
+        return 0xFF000000 | (java.awt.Color.HSBtoRGB(hue, 0.78F, 1.0F) & 0x00FFFFFF);
     }
 }
