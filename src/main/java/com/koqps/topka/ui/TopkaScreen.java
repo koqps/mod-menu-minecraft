@@ -169,7 +169,7 @@ public final class TopkaScreen extends Screen {
         drawBottomButton(g, mouseX, mouseY, x + 648, y + 426, 56, "Off");
 
         g.text(font, "Left click toggles • Right click settings • Mouse wheel scrolls", x + 172, y + 477, 0xFF686879, false);
-        g.text(font, "Mod Menu 0.5.0", x + 618, y + 477, 0xFF686879, true);
+        g.text(font, "Mod Menu 0.6.0", x + 618, y + 477, 0xFF686879, true);
 
         if (this.searchBox != null) {
             this.searchBox.extractRenderState(g, mouseX, mouseY, delta);
