@@ -205,10 +205,14 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Show others", () -> c.babyModeOthers ? "ON" : "OFF", () -> c.babyModeOthers = !c.babyModeOthers, () -> c.babyModeOthers = !c.babyModeOthers);
             }
             case "cape" -> {
+                row("Style", () -> capeStyleName(c.capeStyle), () -> c.capeStyle = Math.floorMod(c.capeStyle - 1, 4), () -> c.capeStyle = Math.floorMod(c.capeStyle + 1, 4));
                 row("Width", () -> String.format("%.2f", c.capeWidth), () -> c.capeWidth = Math.max(0.30F, c.capeWidth - 0.05F), () -> c.capeWidth = Math.min(1.20F, c.capeWidth + 0.05F));
                 row("Height", () -> String.format("%.2f", c.capeHeight), () -> c.capeHeight = Math.max(0.45F, c.capeHeight - 0.05F), () -> c.capeHeight = Math.min(1.60F, c.capeHeight + 0.05F));
-                row("Line width", () -> String.format("%.1f", c.capeLineWidth), () -> c.capeLineWidth = Math.max(1F, c.capeLineWidth - 0.25F), () -> c.capeLineWidth = Math.min(5F, c.capeLineWidth + 0.25F));
+                row("Outline", () -> String.format("%.1f", c.capeLineWidth), () -> c.capeLineWidth = Math.max(1F, c.capeLineWidth - 0.25F), () -> c.capeLineWidth = Math.min(8F, c.capeLineWidth + 0.25F));
+                row("Opacity", () -> Integer.toString(c.capeOpacity), () -> c.capeOpacity = Math.max(30, c.capeOpacity - 10), () -> c.capeOpacity = Math.min(235, c.capeOpacity + 10));
                 row("Color", () -> hex(c.capeColorArgb), () -> c.capeColorArgb = previousColor(c.capeColorArgb), () -> c.capeColorArgb = nextColor(c.capeColorArgb));
+                row("Glow", () -> c.capeGlow ? "ON" : "OFF", () -> c.capeGlow = !c.capeGlow, () -> c.capeGlow = !c.capeGlow);
+                row("Rainbow", () -> c.capeRainbow ? "ON" : "OFF", () -> c.capeRainbow = !c.capeRainbow, () -> c.capeRainbow = !c.capeRainbow);
                 row("Show others", () -> c.capeShowOthers ? "ON" : "OFF", () -> c.capeShowOthers = !c.capeShowOthers, () -> c.capeShowOthers = !c.capeShowOthers);
             }
             case "wings" -> {
@@ -434,7 +438,10 @@ public final class ModuleSettingsScreen extends Screen {
             case "health_tags" -> { c.healthTagHearts = true; c.healthTagMaxDistance = 48D; }
             case "projectile_prediction" -> { c.projectileColorArgb = 0xFF41C7FF; c.projectileLineWidth = 2F; c.projectileSteps = 72; }
             case "baby_mode" -> { c.babyScale = 0.65F; c.babyModeOthers = false; }
-            case "cape" -> { c.capeColorArgb = 0xFF8B5CF6; c.capeWidth = 0.64F; c.capeHeight = 1.05F; c.capeLineWidth = 2F; c.capeShowOthers = false; }
+            case "cape" -> {
+                c.capeColorArgb = 0xFF8B5CF6; c.capeWidth = 0.64F; c.capeHeight = 1.05F; c.capeLineWidth = 2F;
+                c.capeShowOthers = false; c.capeStyle = 0; c.capeOpacity = 155; c.capeRainbow = false; c.capeGlow = true;
+            }
             case "wings" -> {
                 c.wingsStyle = 0; c.wingsScale = 1.0F; c.wingsSpread = 0.95F;
                 c.wingsFlapSpeed = 1.0F; c.wingsFlapAmount = 0.16F; c.wingsOpacity = 145;
@@ -535,6 +542,15 @@ public final class ModuleSettingsScreen extends Screen {
         String[] values = {"gg", "GG", "good game", "gg wp"};
         for (int i = 0; i < values.length; i++) if (values[i].equalsIgnoreCase(current)) return values[(i + values.length - 1) % values.length];
         return values[0];
+    }
+
+    private static String capeStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 1 -> "SPLIT";
+            case 2 -> "ROYAL";
+            case 3 -> "ENERGY";
+            default -> "FABRIC";
+        };
     }
 
     private static String wingStyleName(int style) {
