@@ -19,7 +19,7 @@ public final class AmbienceController {
         boolean enabled = TopkaClient.MODULES.byId("ambience").enabled();
         if (enabled) {
             if (!applied) {
-                previousTime = client.level.getDayTime();
+                previousTime = client.level.getGameTime();
                 applied = true;
             }
             client.level.setTimeFromServer(Math.floorMod(TopkaClient.CONFIG.get().ambienceTime, 24000L));
