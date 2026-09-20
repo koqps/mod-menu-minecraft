@@ -9,7 +9,8 @@
     "DropProtectionMixin",
     "BabyModeMixin",
     "ContainerScreenAccessor",
-    "ClientLevelTimeMixin"
+    "ClientLevelTimeMixin",
+    "SkyRendererTimeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
