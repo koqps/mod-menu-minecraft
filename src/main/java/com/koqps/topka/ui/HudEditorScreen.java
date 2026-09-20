@@ -1,6 +1,7 @@
 package com.koqps.topka.ui;
 
 import com.koqps.topka.TopkaClient;
+import com.koqps.topka.hud.Theme;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,7 +27,7 @@ public final class HudEditorScreen extends Screen {
         var cfg = TopkaClient.CONFIG.get();
         graphics.fill(0, 0, width, height, 0xE0080810);
         graphics.fill(0, 0, width, 48, 0xF20D0D13);
-        graphics.fill(0, 46, width, 48, cfg.accentArgb);
+        graphics.fill(0, 46, width, 48, Theme.accent());
 
         graphics.centeredText(font, "HUD WORKSPACE", width / 2, 12, 0xFFFFFFFF);
         graphics.centeredText(font, "Drag panels • positions save automatically • Right Shift / ESC returns", width / 2, 28, 0xFF9292A4);
