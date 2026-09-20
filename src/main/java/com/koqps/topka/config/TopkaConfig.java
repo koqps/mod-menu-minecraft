@@ -45,6 +45,23 @@ public final class TopkaConfig {
     // Full bright
     public double fullBrightGamma = 12.0D;
 
+    // ViewModel / swing
+    public float viewMainX = 0.0F;
+    public float viewMainY = 0.0F;
+    public float viewMainZ = 0.0F;
+    public float viewOffX = 0.0F;
+    public float viewOffY = 0.0F;
+    public float viewOffZ = 0.0F;
+    public float viewScale = 1.0F;
+    public float viewPitch = 0.0F;
+    public float viewYaw = 0.0F;
+    public float viewRoll = 0.0F;
+    public int swingMode = 0;
+    public float swingStrength = 1.0F;
+
+    // Ambience
+    public long ambienceTime = 6000L;
+
     // HUD positions
     public int healthHudX = 12;
     public int healthHudY = 12;
