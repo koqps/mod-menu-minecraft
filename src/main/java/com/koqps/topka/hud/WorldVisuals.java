@@ -8,6 +8,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
@@ -739,21 +741,25 @@ public final class WorldVisuals {
 
             context.submitNodeCollector().submitCustomGeometry(
                     poseStack,
-                    RenderTypes.debugQuads(),
+                    RenderTypes.entityTranslucent(CosmeticTextures.WINGS),
                     (pose, vertices) -> {
                         emitWingSide(pose, vertices, anchor, right, back, up, -1.0D, scale, spread, flap, cfg, 0.0F);
                         emitWingSide(pose, vertices, anchor, right, back, up, 1.0D, scale, spread, flap, cfg, 0.5F);
                     }
             );
 
-            context.submitNodeCollector().submitCustomGeometry(
-                    poseStack,
-                    RenderTypes.linesTranslucent(),
-                    (pose, vertices) -> {
-                        emitWingOutline(pose, vertices, anchor, right, back, up, -1.0D, scale, spread, flap, cfg, 0.0F);
-                        emitWingOutline(pose, vertices, anchor, right, back, up, 1.0D, scale, spread, flap, cfg, 0.5F);
-                    }
-            );
+            // Only draw the internal structural bones when glow is enabled.
+            // The old perimeter wireframe was what made the wings read as a mesh.
+            if (cfg.wingsGlow) {
+                context.submitNodeCollector().submitCustomGeometry(
+                        poseStack,
+                        RenderTypes.linesTranslucent(),
+                        (pose, vertices) -> {
+                            emitWingOutline(pose, vertices, anchor, right, back, up, -1.0D, scale, spread, flap, cfg, 0.0F);
+                            emitWingOutline(pose, vertices, anchor, right, back, up, 1.0D, scale, spread, flap, cfg, 0.5F);
+                        }
+                );
+            }
 
             poseStack.popPose();
         }
@@ -780,109 +786,116 @@ public final class WorldVisuals {
         double lift = flap * scale;
         double depth = cfg.wingsDepth * scale;
 
-        Vec3 root = anchor.add(right.scale(s * 0.08D * scale));
-        Vec3 shoulder = root.add(right.scale(s * width * 0.46D)).add(up.scale((0.34D + lift * 0.35D) * scale));
-        Vec3 elbow = root.add(right.scale(s * width * 0.95D)).add(up.scale((0.64D + lift * 0.65D) * scale)).add(back.scale(depth * 0.30D));
-        Vec3 tip = root.add(right.scale(s * width * 1.62D)).add(up.scale((0.74D + lift) * scale)).add(back.scale(depth * 0.55D));
-        Vec3 lowerTip = root.add(right.scale(s * width * 1.44D)).add(up.scale((-0.22D + lift * 0.46D) * scale)).add(back.scale(depth * 1.10D));
-        Vec3 lowerRoot = root.add(up.scale(-0.54D * scale)).add(back.scale(depth * 0.52D));
-        Vec3 tail = root.add(right.scale(s * width * 0.56D)).add(up.scale(-0.96D * scale)).add(back.scale(depth * 1.32D));
+        Vec3 root = anchor.add(right.scale(s * 0.06D * scale));
+        Vec3 shoulder = root.add(right.scale(s * width * 0.43D)).add(up.scale((0.34D + lift * 0.30D) * scale));
+        Vec3 elbow = root.add(right.scale(s * width * 0.92D)).add(up.scale((0.63D + lift * 0.62D) * scale)).add(back.scale(depth * 0.35D));
+        Vec3 tip = root.add(right.scale(s * width * 1.58D)).add(up.scale((0.70D + lift) * scale)).add(back.scale(depth * 0.72D));
+        Vec3 lowerTip = root.add(right.scale(s * width * 1.38D)).add(up.scale((-0.24D + lift * 0.42D) * scale)).add(back.scale(depth * 1.20D));
+        Vec3 lowerRoot = root.add(up.scale(-0.52D * scale)).add(back.scale(depth * 0.58D));
+        Vec3 tail = root.add(right.scale(s * width * 0.54D)).add(up.scale(-0.92D * scale)).add(back.scale(depth * 1.34D));
 
-        int opacity = Math.clamp(cfg.wingsOpacity, 30, 235);
+        int opacity = Math.clamp(cfg.wingsOpacity, 30, 255);
         int primary = effectColor(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, colorOffset, opacity);
-        int secondary = effectColor(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, colorOffset + 0.15F, Math.max(28, opacity - 20));
-        int dim = withAlpha(primary, Math.max(20, opacity - 62));
+        int secondary = effectColor(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, colorOffset + 0.15F, Math.max(40, opacity - 8));
 
         switch (style) {
             case 1 -> {
-                // DEMON — articulated bat wing with sharp membrane fingers.
-                Vec3 clawTop = tip.add(right.scale(s * width * 0.24D)).add(up.scale(0.06D * scale));
-                Vec3 clawMid = lowerTip.add(right.scale(s * width * 0.20D)).add(up.scale(-0.08D * scale));
-                emitQuad(pose, vertices, root, shoulder, elbow, lowerRoot, secondary);
-                emitQuad(pose, vertices, shoulder, elbow, tip, lowerTip, primary);
-                emitQuad(pose, vertices, elbow, clawTop, clawMid, lowerTip, dim);
-                emitQuad(pose, vertices, lowerRoot, lowerTip, tail, tail, withAlpha(secondary, Math.max(20, opacity - 42)));
+                // DEMON: large continuous membrane surfaces plus layered fingers.
+                Vec3 claw = tip.add(right.scale(s * width * 0.22D)).add(up.scale(-0.10D * scale));
+                emitWingPanel(pose, vertices, style, root, shoulder, elbow, lowerRoot, secondary);
+                emitWingPanel(pose, vertices, style, shoulder, elbow, claw, lowerTip, primary);
+                emitWingPanel(pose, vertices, style, lowerRoot, lowerTip, tail, root, withAlpha(primary, Math.max(55, opacity - 28)));
 
                 for (int i = 0; i < detail; i++) {
-                    double t0 = i / (double) detail;
-                    double t1 = (i + 1) / (double) detail;
-                    Vec3 a = lerpVec(shoulder, lowerRoot, t0);
-                    Vec3 b = lerpVec(elbow, lowerTip, t0);
-                    Vec3 c1 = lerpVec(shoulder, lowerRoot, t1);
-                    Vec3 d = lerpVec(elbow, lowerTip, t1);
-                    int layer = effectColor(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, colorOffset + i * 0.035F, Math.max(18, opacity - 18 - i * 8));
-                    emitQuad(pose, vertices, a, b, d, c1, layer);
+                    double t = (i + 1.0D) / (detail + 1.0D);
+                    Vec3 ridge = lerpVec(shoulder, elbow, t);
+                    Vec3 edge = lerpVec(lowerRoot, lowerTip, t).add(back.scale(depth * 0.08D));
+                    emitWingPanel(pose, vertices, style, ridge, edge, edge.add(right.scale(s * 0.08D * scale)), ridge.add(right.scale(s * 0.05D * scale)),
+                            withAlpha(secondary, Math.max(48, opacity - 35)));
                 }
             }
             case 2 -> {
-                // CRYSTAL — multiple faceted solid shards.
-                Vec3 high = tip.add(up.scale(0.26D * scale));
-                Vec3 far = tip.add(right.scale(s * width * 0.22D)).add(up.scale(-0.18D * scale));
-                Vec3 low = lowerTip.add(up.scale(-0.30D * scale));
-                emitQuad(pose, vertices, root, shoulder, high, elbow, primary);
-                emitQuad(pose, vertices, root, elbow, far, lowerRoot, secondary);
-                emitQuad(pose, vertices, lowerRoot, far, low, tail, dim);
+                // CRYSTAL: overlapping faceted plates with texture detail.
+                Vec3 high = tip.add(up.scale(0.20D * scale));
+                Vec3 far = lowerTip.add(right.scale(s * width * 0.18D));
+                emitWingPanel(pose, vertices, style, root, shoulder, high, elbow, primary);
+                emitWingPanel(pose, vertices, style, root, elbow, far, lowerRoot, secondary);
+                emitWingPanel(pose, vertices, style, lowerRoot, far, tail, root, withAlpha(primary, Math.max(50, opacity - 24)));
 
                 for (int i = 0; i < detail; i++) {
                     double t = (i + 1.0D) / (detail + 1.0D);
                     Vec3 base = lerpVec(root, lowerRoot, t);
-                    Vec3 shardTip = lerpVec(elbow, tip, t * 0.82D)
-                            .add(right.scale(s * width * (0.12D + t * 0.12D)))
-                            .add(up.scale((0.08D - t * 0.18D) * scale));
-                    Vec3 edge = base.add(right.scale(s * 0.10D * scale));
-                    int crystal = effectColor(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, colorOffset + 0.24F + i * 0.045F, Math.max(22, opacity - i * 10));
-                    emitQuad(pose, vertices, base, edge, shardTip, shardTip, crystal);
+                    Vec3 shard = lerpVec(elbow, tip, Math.min(1.0D, 0.34D + t * 0.62D))
+                            .add(right.scale(s * width * (0.05D + t * 0.09D)));
+                    emitWingPanel(pose, vertices, style, base, shard, shard.add(up.scale(-0.14D * scale)), base.add(up.scale(-0.08D * scale)),
+                            i % 2 == 0 ? primary : secondary);
                 }
             }
             case 3 -> {
-                // DRAGON — broad armored membrane with layered scales.
-                Vec3 crown = elbow.add(up.scale(0.24D * scale));
-                Vec3 rear = lowerTip.add(back.scale(depth * 0.68D));
-                emitQuad(pose, vertices, root, shoulder, crown, lowerRoot, secondary);
-                emitQuad(pose, vertices, shoulder, tip, lowerTip, crown, primary);
-                emitQuad(pose, vertices, crown, lowerTip, rear, lowerRoot, dim);
-                emitQuad(pose, vertices, lowerRoot, rear, tail, tail, withAlpha(primary, Math.max(20, opacity - 45)));
+                // DRAGON: one broad leathery wing with overlapping scale-textured bands.
+                Vec3 crown = elbow.add(up.scale(0.20D * scale));
+                Vec3 rear = lowerTip.add(back.scale(depth * 0.62D));
+                emitWingPanel(pose, vertices, style, root, shoulder, crown, lowerRoot, secondary);
+                emitWingPanel(pose, vertices, style, shoulder, tip, lowerTip, crown, primary);
+                emitWingPanel(pose, vertices, style, crown, lowerTip, rear, lowerRoot, withAlpha(primary, Math.max(55, opacity - 18)));
+                emitWingPanel(pose, vertices, style, lowerRoot, rear, tail, root, withAlpha(secondary, Math.max(45, opacity - 30)));
 
-                for (int i = 0; i < detail + 1; i++) {
-                    double t0 = i / (double) (detail + 1);
-                    double t1 = (i + 1) / (double) (detail + 1);
+                for (int i = 0; i < detail; i++) {
+                    double t0 = i / (double) detail;
+                    double t1 = (i + 1.0D) / detail;
                     Vec3 top0 = lerpVec(shoulder, tip, t0);
                     Vec3 top1 = lerpVec(shoulder, tip, t1);
                     Vec3 bot1 = lerpVec(lowerRoot, lowerTip, t1);
                     Vec3 bot0 = lerpVec(lowerRoot, lowerTip, t0);
-                    int scaleColor = effectColor(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, colorOffset + i * 0.028F, Math.max(18, opacity - 30 - i * 6));
-                    emitQuad(pose, vertices, top0, top1, bot1, bot0, scaleColor);
+                    emitWingPanel(pose, vertices, style, top0, top1, bot1, bot0,
+                            withAlpha(i % 2 == 0 ? primary : secondary, Math.max(60, opacity - 22)));
                 }
             }
             default -> {
-                // ANGEL — individual overlapping feather blades, much denser than a flat quad.
-                emitQuad(pose, vertices, root, shoulder, elbow, lowerRoot, secondary);
-                int featherCount = 4 + detail * 2;
+                // ANGEL: many solid overlapping textured feathers.
+                emitWingPanel(pose, vertices, style, root, shoulder, elbow, lowerRoot, secondary);
+                int featherCount = 6 + detail * 3;
                 for (int i = 0; i < featherCount; i++) {
                     double t = i / (double) Math.max(1, featherCount - 1);
-                    double rootT = Math.min(0.86D, t * 0.92D);
-                    Vec3 featherRoot = lerpVec(shoulder, lowerRoot, rootT);
-                    double reach = width * (1.0D + 0.58D * (1.0D - t));
+                    Vec3 featherRoot = lerpVec(shoulder, lowerRoot, Math.min(0.92D, t * 0.96D));
+                    double reach = width * (1.02D + 0.62D * (1.0D - t));
                     Vec3 featherTip = root
                             .add(right.scale(s * reach))
-                            .add(up.scale((0.72D - t * 1.45D + lift * (0.85D - t * 0.40D)) * scale))
-                            .add(back.scale(depth * (0.35D + t * 1.3D)));
-                    Vec3 featherBase2 = featherRoot
-                            .add(right.scale(s * 0.13D * scale))
-                            .add(up.scale(-0.08D * scale));
-                    Vec3 featherTip2 = featherTip
-                            .add(right.scale(-s * 0.08D * scale))
-                            .add(up.scale(-0.16D * scale));
+                            .add(up.scale((0.74D - t * 1.48D + lift * (0.82D - t * 0.38D)) * scale))
+                            .add(back.scale(depth * (0.40D + t * 1.45D)));
+                    double featherWidth = (0.13D + (1.0D - t) * 0.07D) * scale;
+                    Vec3 base2 = featherRoot.add(right.scale(s * featherWidth));
+                    Vec3 tip2 = featherTip.add(right.scale(-s * featherWidth * 0.58D)).add(up.scale(-0.12D * scale));
                     int feather = effectColor(
                             (i & 1) == 0 ? cfg.wingsPrimaryColorArgb : cfg.wingsSecondaryColorArgb,
                             cfg.wingsRainbow,
-                            colorOffset + i * 0.027F,
-                            Math.max(30, opacity - i * 5)
+                            colorOffset + i * 0.021F,
+                            Math.max(75, opacity - i * 2)
                     );
-                    emitQuad(pose, vertices, featherRoot, featherBase2, featherTip2, featherTip, feather);
+                    emitWingPanel(pose, vertices, style, featherRoot, base2, tip2, featherTip, feather);
                 }
             }
         }
+    }
+
+    private static void emitWingPanel(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            int style,
+            Vec3 a,
+            Vec3 b,
+            Vec3 c,
+            Vec3 d,
+            int color
+    ) {
+        float u0 = (style & 1) == 0 ? 0.0F : 0.5F;
+        float v0 = style < 2 ? 0.0F : 0.5F;
+        float u1 = u0 + 0.5F;
+        float v1 = v0 + 0.5F;
+
+        emitTexturedQuad(pose, vertices, a, b, c, d, color, u0, v0, u1, v1);
+        // Reverse face so the cosmetic stays solid from front and rear camera angles.
+        emitTexturedQuad(pose, vertices, d, c, b, a, color, u0, v0, u1, v1);
     }
 
     private static void emitWingOutline(
@@ -904,34 +917,20 @@ public final class WorldVisuals {
         double lift = flap * scale;
         double depth = cfg.wingsDepth * scale;
 
-        Vec3 root = anchor.add(right.scale(s * 0.08D * scale));
-        Vec3 shoulder = root.add(right.scale(s * width * 0.46D)).add(up.scale((0.34D + lift * 0.35D) * scale));
-        Vec3 elbow = root.add(right.scale(s * width * 0.95D)).add(up.scale((0.64D + lift * 0.65D) * scale)).add(back.scale(depth * 0.30D));
-        Vec3 tip = root.add(right.scale(s * width * 1.62D)).add(up.scale((0.74D + lift) * scale)).add(back.scale(depth * 0.55D));
-        Vec3 lowerTip = root.add(right.scale(s * width * 1.44D)).add(up.scale((-0.22D + lift * 0.46D) * scale)).add(back.scale(depth * 1.10D));
-        Vec3 lowerRoot = root.add(up.scale(-0.54D * scale)).add(back.scale(depth * 0.52D));
-        Vec3 tail = root.add(right.scale(s * width * 0.56D)).add(up.scale(-0.96D * scale)).add(back.scale(depth * 1.32D));
+        Vec3 root = anchor.add(right.scale(s * 0.06D * scale));
+        Vec3 shoulder = root.add(right.scale(s * width * 0.43D)).add(up.scale((0.34D + lift * 0.30D) * scale));
+        Vec3 elbow = root.add(right.scale(s * width * 0.92D)).add(up.scale((0.63D + lift * 0.62D) * scale)).add(back.scale(depth * 0.35D));
+        Vec3 tip = root.add(right.scale(s * width * 1.58D)).add(up.scale((0.70D + lift) * scale)).add(back.scale(depth * 0.72D));
+        Vec3 lowerRoot = root.add(up.scale(-0.52D * scale)).add(back.scale(depth * 0.58D));
 
-        int bone = effectColor(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, colorOffset + 0.18F, 245);
+        int bone = effectColor(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, colorOffset + 0.18F, 205);
         float boneWidth = Math.clamp(cfg.wingsBoneWidth, 1.0F, 8.0F);
-        if (cfg.wingsGlow) {
-            int glow = withAlpha(bone, 72);
-            emitLine(pose, vertices, root, shoulder, glow, Math.min(14F, boneWidth * 2.25F));
-            emitLine(pose, vertices, shoulder, elbow, glow, Math.min(14F, boneWidth * 2.25F));
-            emitLine(pose, vertices, elbow, tip, glow, Math.min(14F, boneWidth * 2.25F));
-        }
 
+        // Internal bones only — no perimeter wireframe.
         emitLine(pose, vertices, root, shoulder, bone, boneWidth);
         emitLine(pose, vertices, shoulder, elbow, bone, boneWidth);
-        emitLine(pose, vertices, elbow, tip, bone, boneWidth);
-        emitLine(pose, vertices, elbow, lowerTip, bone, Math.max(1.0F, boneWidth - 0.4F));
-        emitLine(pose, vertices, root, lowerRoot, bone, Math.max(1.0F, boneWidth - 0.4F));
-        emitLine(pose, vertices, lowerRoot, tail, bone, Math.max(1.0F, boneWidth - 0.65F));
-
-        int edge = effectColor(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, colorOffset, 215);
-        emitLine(pose, vertices, tip, lowerTip, edge, Math.max(1.0F, boneWidth - 1.0F));
-        emitLine(pose, vertices, lowerTip, tail, edge, Math.max(1.0F, boneWidth - 1.0F));
-        emitLine(pose, vertices, tail, lowerRoot, edge, Math.max(1.0F, boneWidth - 1.0F));
+        emitLine(pose, vertices, elbow, tip, bone, Math.max(1.0F, boneWidth - 0.3F));
+        emitLine(pose, vertices, root, lowerRoot, withAlpha(bone, 150), Math.max(1.0F, boneWidth - 0.8F));
     }
 
     private static void renderBackWeapon(LevelRenderContext context, Vec3 camera, Minecraft client) {
@@ -1395,6 +1394,33 @@ public final class WorldVisuals {
                 .setColor(color)
                 .setNormal(pose, nx, ny, nz)
                 .setLineWidth(width);
+    }
+
+    private static void emitTexturedQuad(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            Vec3 a,
+            Vec3 b,
+            Vec3 c,
+            Vec3 d,
+            int color,
+            float u0,
+            float v0,
+            float u1,
+            float v1
+    ) {
+        vertices.addVertex(pose, (float) a.x, (float) a.y, (float) a.z)
+                .setColor(color).setUv(u0, v0).setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightCoordsUtil.FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);
+        vertices.addVertex(pose, (float) b.x, (float) b.y, (float) b.z)
+                .setColor(color).setUv(u1, v0).setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightCoordsUtil.FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);
+        vertices.addVertex(pose, (float) c.x, (float) c.y, (float) c.z)
+                .setColor(color).setUv(u1, v1).setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightCoordsUtil.FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);
+        vertices.addVertex(pose, (float) d.x, (float) d.y, (float) d.z)
+                .setColor(color).setUv(u0, v1).setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightCoordsUtil.FULL_BRIGHT).setNormal(pose, 0.0F, 1.0F, 0.0F);
     }
 
     private static void emitQuad(
