@@ -49,6 +49,7 @@ public final class WorldVisuals {
         if (TopkaClient.MODULES.byId("projectile_prediction").enabled()) renderProjectilePrediction(context, camera, client);
         if (TopkaClient.MODULES.byId("waypoints").enabled()) renderWaypointBeams(context, camera);
         if (TopkaClient.MODULES.byId("cape").enabled()) renderCape(context, camera, client);
+        if (TopkaClient.MODULES.byId("wings").enabled()) renderWings(context, camera, client);
     }
 
     private static void renderHitboxes(LevelRenderContext context, Vec3 camera, Minecraft client) {
@@ -628,6 +629,195 @@ public final class WorldVisuals {
             );
             poseStack.popPose();
         }
+    }
+
+    private static void renderWings(LevelRenderContext context, Vec3 camera, Minecraft client) {
+        var cfg = TopkaClient.CONFIG.get();
+
+        for (Entity entity : client.level.entitiesForRendering()) {
+            if (!(entity instanceof Player player) || entity.isRemoved()) continue;
+            if (player != client.player && !cfg.wingsShowOthers) continue;
+            if (player == client.player && client.options.getCameraType().isFirstPerson()) continue;
+            if (client.player.distanceToSqr(player) > 4096.0D) continue;
+
+            Vec3 look = player.getLookAngle();
+            Vec3 forward = new Vec3(look.x, 0.0D, look.z);
+            if (forward.lengthSqr() < 1.0E-5D) forward = new Vec3(0.0D, 0.0D, 1.0D);
+            forward = forward.normalize();
+            Vec3 back = forward.scale(-1.0D);
+            Vec3 right = new Vec3(-forward.z, 0.0D, forward.x).normalize();
+            Vec3 up = new Vec3(0.0D, 1.0D, 0.0D);
+
+            float scale = Math.clamp(cfg.wingsScale, 0.45F, 2.25F);
+            float spread = Math.clamp(cfg.wingsSpread, 0.35F, 1.65F);
+            float flapAmount = Math.clamp(cfg.wingsFlapAmount, 0.0F, 0.55F);
+            double phase = System.currentTimeMillis() / 1000.0D * Math.clamp(cfg.wingsFlapSpeed, 0.10F, 3.0F) * Math.PI * 2.0D;
+            double flap = Math.sin(phase) * flapAmount;
+
+            Vec3 anchor = new Vec3(player.getX(), player.getBoundingBox().maxY - 0.52D, player.getZ())
+                    .add(back.scale(0.17D));
+
+            PoseStack poseStack = context.poseStack();
+            poseStack.pushPose();
+            poseStack.translate(-camera.x, -camera.y, -camera.z);
+
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.debugQuads(),
+                    (pose, vertices) -> {
+                        emitWingSide(pose, vertices, anchor, right, back, up, -1.0D, scale, spread, flap, cfg, 0.0F);
+                        emitWingSide(pose, vertices, anchor, right, back, up, 1.0D, scale, spread, flap, cfg, 0.5F);
+                    }
+            );
+
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.linesTranslucent(),
+                    (pose, vertices) -> {
+                        emitWingOutline(pose, vertices, anchor, right, back, up, -1.0D, scale, spread, flap, cfg, 0.0F);
+                        emitWingOutline(pose, vertices, anchor, right, back, up, 1.0D, scale, spread, flap, cfg, 0.5F);
+                    }
+            );
+
+            poseStack.popPose();
+        }
+    }
+
+    private static void emitWingSide(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            Vec3 anchor,
+            Vec3 right,
+            Vec3 back,
+            Vec3 up,
+            double side,
+            float scale,
+            float spread,
+            double flap,
+            com.koqps.topka.config.TopkaConfig cfg,
+            float colorOffset
+    ) {
+        int style = Math.floorMod(cfg.wingsStyle, 4);
+        double s = side;
+        double width = scale * spread;
+        double lift = flap * scale;
+
+        Vec3 rootTop = anchor.add(up.scale(0.20D * scale)).add(right.scale(s * 0.08D * scale));
+        Vec3 rootBottom = anchor.add(up.scale(-0.42D * scale)).add(right.scale(s * 0.11D * scale));
+
+        Vec3 inner = anchor
+                .add(right.scale(s * width * 0.72D))
+                .add(up.scale((0.38D + lift) * scale))
+                .add(back.scale(0.08D * scale));
+
+        Vec3 outerTop = anchor
+                .add(right.scale(s * width * 1.34D))
+                .add(up.scale((0.82D + lift * 0.78D) * scale))
+                .add(back.scale(0.12D * scale));
+
+        Vec3 outerMid = anchor
+                .add(right.scale(s * width * 1.58D))
+                .add(up.scale((0.08D + lift * 0.52D) * scale))
+                .add(back.scale(0.23D * scale));
+
+        Vec3 outerLow = anchor
+                .add(right.scale(s * width * 1.22D))
+                .add(up.scale((-0.68D + lift * 0.30D) * scale))
+                .add(back.scale(0.31D * scale));
+
+        Vec3 tail = anchor
+                .add(right.scale(s * width * 0.62D))
+                .add(up.scale(-0.93D * scale))
+                .add(back.scale(0.36D * scale));
+
+        int a0 = Math.clamp(cfg.wingsOpacity, 30, 235);
+        int primary = effectColor(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, colorOffset, a0);
+        int secondary = effectColor(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, colorOffset + 0.18F, Math.max(24, a0 - 28));
+
+        switch (style) {
+            case 1 -> {
+                // Demon: sharp bat-like membrane panels.
+                Vec3 spike = anchor
+                        .add(right.scale(s * width * 1.82D))
+                        .add(up.scale((-0.15D + lift * 0.42D) * scale))
+                        .add(back.scale(0.18D * scale));
+                Vec3 notch = anchor
+                        .add(right.scale(s * width * 1.14D))
+                        .add(up.scale(-0.18D * scale))
+                        .add(back.scale(0.28D * scale));
+
+                emitQuad(pose, vertices, rootTop, inner, spike, notch, primary);
+                emitQuad(pose, vertices, rootTop, notch, outerLow, rootBottom, secondary);
+                emitQuad(pose, vertices, notch, spike, outerLow, outerLow, withAlpha(primary, Math.max(20, a0 - 45)));
+            }
+            case 2 -> {
+                // Crystal: overlapping faceted panels.
+                Vec3 crystalTop = outerTop.add(up.scale(0.20D * scale));
+                Vec3 crystalTip = outerMid.add(right.scale(s * width * 0.25D)).add(up.scale(-0.08D * scale));
+                emitQuad(pose, vertices, rootTop, inner, crystalTop, rootTop, primary);
+                emitQuad(pose, vertices, rootTop, crystalTop, crystalTip, outerMid, secondary);
+                emitQuad(pose, vertices, rootBottom, outerMid, outerLow, tail, withAlpha(primary, Math.max(25, a0 - 35)));
+            }
+            case 3 -> {
+                // Dragon: broader three-lobed membrane.
+                Vec3 crown = outerTop.add(up.scale(0.18D * scale));
+                Vec3 rear = outerMid.add(back.scale(0.26D * scale));
+                emitQuad(pose, vertices, rootTop, inner, crown, outerMid, primary);
+                emitQuad(pose, vertices, rootTop, outerMid, rear, rootBottom, secondary);
+                emitQuad(pose, vertices, rootBottom, rear, outerLow, tail, withAlpha(primary, Math.max(28, a0 - 32)));
+            }
+            default -> {
+                // Angel: layered broad feather-like blades.
+                Vec3 feather1 = outerTop;
+                Vec3 feather2 = outerMid;
+                Vec3 feather3 = outerLow;
+                emitQuad(pose, vertices, rootTop, inner, feather1, rootTop, primary);
+                emitQuad(pose, vertices, rootTop, feather1, feather2, rootBottom, secondary);
+                emitQuad(pose, vertices, rootBottom, feather2, feather3, tail, withAlpha(primary, Math.max(26, a0 - 24)));
+            }
+        }
+    }
+
+    private static void emitWingOutline(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            Vec3 anchor,
+            Vec3 right,
+            Vec3 back,
+            Vec3 up,
+            double side,
+            float scale,
+            float spread,
+            double flap,
+            com.koqps.topka.config.TopkaConfig cfg,
+            float colorOffset
+    ) {
+        double s = side;
+        double width = scale * spread;
+        double lift = flap * scale;
+
+        Vec3 rootTop = anchor.add(up.scale(0.20D * scale)).add(right.scale(s * 0.08D * scale));
+        Vec3 rootBottom = anchor.add(up.scale(-0.42D * scale)).add(right.scale(s * 0.11D * scale));
+        Vec3 inner = anchor.add(right.scale(s * width * 0.72D)).add(up.scale((0.38D + lift) * scale)).add(back.scale(0.08D * scale));
+        Vec3 outerTop = anchor.add(right.scale(s * width * 1.34D)).add(up.scale((0.82D + lift * 0.78D) * scale)).add(back.scale(0.12D * scale));
+        Vec3 outerMid = anchor.add(right.scale(s * width * 1.58D)).add(up.scale((0.08D + lift * 0.52D) * scale)).add(back.scale(0.23D * scale));
+        Vec3 outerLow = anchor.add(right.scale(s * width * 1.22D)).add(up.scale((-0.68D + lift * 0.30D) * scale)).add(back.scale(0.31D * scale));
+        Vec3 tail = anchor.add(right.scale(s * width * 0.62D)).add(up.scale(-0.93D * scale)).add(back.scale(0.36D * scale));
+
+        int color = effectColor(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, colorOffset, 235);
+        float line = cfg.wingsGlow ? 4.2F : 2.4F;
+
+        emitLine(pose, vertices, rootTop, inner, color, line);
+        emitLine(pose, vertices, inner, outerTop, color, line);
+        emitLine(pose, vertices, outerTop, outerMid, color, line);
+        emitLine(pose, vertices, outerMid, outerLow, color, line);
+        emitLine(pose, vertices, outerLow, tail, color, line);
+        emitLine(pose, vertices, tail, rootBottom, color, line);
+        emitLine(pose, vertices, rootBottom, rootTop, color, line);
+
+        int rib = effectColor(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, colorOffset + 0.18F, 170);
+        emitLine(pose, vertices, rootTop, outerMid, rib, Math.max(1.0F, line - 1.0F));
+        emitLine(pose, vertices, rootBottom, outerMid, rib, Math.max(1.0F, line - 1.0F));
     }
 
     private static void renderProjectilePrediction(LevelRenderContext context, Vec3 camera, Minecraft client) {
