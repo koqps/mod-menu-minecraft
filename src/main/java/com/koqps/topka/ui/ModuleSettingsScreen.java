@@ -76,7 +76,14 @@ public final class ModuleSettingsScreen extends Screen {
             case "hitbox" -> {
                 row("Expansion", () -> String.format("%.2f", c.hitboxExpand), () -> c.hitboxExpand = Math.max(0F, c.hitboxExpand - 0.05F), () -> c.hitboxExpand = Math.min(1F, c.hitboxExpand + 0.05F));
                 row("Line width", () -> String.format("%.1f", c.hitboxLineWidth), () -> c.hitboxLineWidth = Math.max(1F, c.hitboxLineWidth - 0.25F), () -> c.hitboxLineWidth = Math.min(6F, c.hitboxLineWidth + 0.25F));
-                row("Color", () -> hex(c.hitboxColorArgb), () -> c.hitboxColorArgb = previousColor(c.hitboxColorArgb), () -> c.hitboxColorArgb = nextColor(c.hitboxColorArgb));
+                row("Players", () -> c.hitboxPlayers ? "ON" : "OFF", () -> c.hitboxPlayers = !c.hitboxPlayers, () -> c.hitboxPlayers = !c.hitboxPlayers);
+                row("Player color", () -> hex(c.hitboxPlayerColorArgb), () -> c.hitboxPlayerColorArgb = previousColor(c.hitboxPlayerColorArgb), () -> c.hitboxPlayerColorArgb = nextColor(c.hitboxPlayerColorArgb));
+                row("Hostile mobs", () -> c.hitboxHostile ? "ON" : "OFF", () -> c.hitboxHostile = !c.hitboxHostile, () -> c.hitboxHostile = !c.hitboxHostile);
+                row("Hostile color", () -> hex(c.hitboxHostileColorArgb), () -> c.hitboxHostileColorArgb = previousColor(c.hitboxHostileColorArgb), () -> c.hitboxHostileColorArgb = nextColor(c.hitboxHostileColorArgb));
+                row("Passive mobs", () -> c.hitboxPassive ? "ON" : "OFF", () -> c.hitboxPassive = !c.hitboxPassive, () -> c.hitboxPassive = !c.hitboxPassive);
+                row("Passive color", () -> hex(c.hitboxPassiveColorArgb), () -> c.hitboxPassiveColorArgb = previousColor(c.hitboxPassiveColorArgb), () -> c.hitboxPassiveColorArgb = nextColor(c.hitboxPassiveColorArgb));
+                row("Other entities", () -> c.hitboxOther ? "ON" : "OFF", () -> c.hitboxOther = !c.hitboxOther, () -> c.hitboxOther = !c.hitboxOther);
+                row("Other color", () -> hex(c.hitboxOtherColorArgb), () -> c.hitboxOtherColorArgb = previousColor(c.hitboxOtherColorArgb), () -> c.hitboxOtherColorArgb = nextColor(c.hitboxOtherColorArgb));
             }
             case "china_hat" -> {
                 row("Radius", () -> String.format("%.2f", c.chinaHatRadius), () -> c.chinaHatRadius = Math.max(0.25F, c.chinaHatRadius - 0.05F), () -> c.chinaHatRadius = Math.min(1.25F, c.chinaHatRadius + 0.05F));
@@ -245,7 +252,12 @@ public final class ModuleSettingsScreen extends Screen {
                 c.crosshairColorArgb = 0xFFFFFFFF; c.crosshairSize = 5; c.crosshairGap = 2;
                 c.crosshairThickness = 1; c.crosshairDot = false; c.crosshairOutline = true;
             }
-            case "hitbox" -> { c.hitboxExpand = 0F; c.hitboxLineWidth = 2F; c.hitboxColorArgb = 0xFF41C7FF; }
+            case "hitbox" -> {
+                c.hitboxExpand = 0F; c.hitboxLineWidth = 2F; c.hitboxColorArgb = 0xFF41C7FF;
+                c.hitboxPlayerColorArgb = 0xFF41C7FF; c.hitboxHostileColorArgb = 0xFFFF5C77;
+                c.hitboxPassiveColorArgb = 0xFF50FA7B; c.hitboxOtherColorArgb = 0xFFFFD166;
+                c.hitboxPlayers = true; c.hitboxHostile = true; c.hitboxPassive = true; c.hitboxOther = false;
+            }
             case "china_hat" -> { c.chinaHatRadius = 0.66F; c.chinaHatHeight = 0.32F; c.chinaHatLineWidth = 2F; c.chinaHatShowOthers = false; }
             case "halo" -> { c.haloRadius = 0.46F; c.haloHeight = 0.16F; c.haloLineWidth = 2.2F; }
             case "trails" -> { c.trailLifetimeMs = 900; c.trailLineWidth = 2.2F; c.trailColorArgb = 0xFF8B5CF6; }
