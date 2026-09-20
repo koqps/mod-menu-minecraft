@@ -8,6 +8,11 @@ import java.util.Map;
 public final class TopkaConfig {
     public Map<String, Boolean> modules = new HashMap<>();
     public List<WaypointConfig> waypoints = new ArrayList<>();
+    public List<String> highlightedItems = new ArrayList<>(List.of(
+            "minecraft:totem_of_undying",
+            "minecraft:enchanted_golden_apple",
+            "minecraft:elytra"
+    ));
 
     // Theme
     public int accentArgb = 0xFF8B5CF6;
@@ -84,6 +89,9 @@ public final class TopkaConfig {
     public float capeHeight = 1.05F;
     public float capeLineWidth = 2.0F;
     public boolean capeShowOthers = false;
+
+    // Inventory item highlighting
+    public int itemHighlightColorArgb = 0xFF8B5CF6;
 
     // Drop protection
     public long dropProtectionWindowMs = 1800L;
