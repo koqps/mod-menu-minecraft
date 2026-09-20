@@ -28,7 +28,7 @@ public final class HudEditorScreen extends Screen {
         graphics.fill(0, 0, width, 48, 0xF20D0D13);
         graphics.fill(0, 46, width, 48, Theme.accent());
 
-        graphics.centeredText(font, "HUD WORKSPACE", width / 2, 11, 0xFFFFFFFF);
+        graphics.centeredText(font, UiFont.text("HUD WORKSPACE"), width / 2, 11, 0xFFFFFFFF);
         graphics.centeredText(
                 font,
                 "Drag panels • mouse wheel scales hovered panel • positions save automatically",
@@ -63,12 +63,12 @@ public final class HudEditorScreen extends Screen {
             g.fill(0, 0, 146, 40, c.hudBackgroundArgb);
             g.fill(0, 0, 3, 40, Theme.accent());
         }
-        g.text(font, "HEALTH", 10, 6, c.mutedTextArgb, false);
-        g.text(font, "18.5 +2.0", 91, 6, c.textArgb, true);
+        g.text(font, UiFont.text("HEALTH"), 10, 6, c.mutedTextArgb, false);
+        g.text(font, UiFont.text("18.5 +2.0"), 91, 6, c.textArgb, true);
         g.fill(10, 23, 136, 29, 0xFF292934);
         g.fill(10, 23, 116, 29, Theme.accent());
         g.fill(116, 23, 130, 29, 0xFFFFD166);
-        g.text(font, "19 / 20", 10, 32, 0xFF767688, false);
+        g.text(font, UiFont.text("19 / 20"), 10, 32, 0xFF767688, false);
 
         g.pose().popMatrix();
     }
@@ -85,7 +85,7 @@ public final class HudEditorScreen extends Screen {
             g.fill(0, 0, 170, 72, c.hudBackgroundArgb);
             g.fill(0, 0, 3, 72, Theme.accent());
         }
-        g.text(font, "ARMOR", 10, 6, c.mutedTextArgb, false);
+        g.text(font, UiFont.text("ARMOR"), 10, 6, c.mutedTextArgb, false);
         int sx = 10;
         for (int i = 0; i < 4; i++) {
             g.fill(sx, 22, sx + 18, 40, 0x553A3A47);
@@ -110,10 +110,10 @@ public final class HudEditorScreen extends Screen {
             g.fill(0, 0, 158, 58, c.hudBackgroundArgb);
             g.fill(0, 0, 3, 58, Theme.accent());
         }
-        g.text(font, "LOCATION", 10, 6, c.mutedTextArgb, false);
-        g.text(font, "X 120  Y 64  Z -48", 10, 20, c.textArgb, false);
-        g.text(font, "NORTH", 10, 34, Theme.accent(), true);
-        g.text(font, "OVERWORLD", 56, 34, 0xFF77778A, false);
+        g.text(font, UiFont.text("LOCATION"), 10, 6, c.mutedTextArgb, false);
+        g.text(font, UiFont.text("X 120  Y 64  Z -48"), 10, 20, c.textArgb, false);
+        g.text(font, UiFont.text("NORTH"), 10, 34, Theme.accent(), true);
+        g.text(font, UiFont.text("OVERWORLD"), 56, 34, 0xFF77778A, false);
         g.fill(10, 49, 148, 51, 0xFF292934);
         g.fill(67, 47, 71, 53, Theme.accent());
 
@@ -132,8 +132,8 @@ public final class HudEditorScreen extends Screen {
             g.fill(0, 0, 88, 28, c.hudBackgroundArgb);
             g.fill(0, 0, 3, 28, Theme.accent());
         }
-        g.text(font, "PING", 10, 6, c.mutedTextArgb, false);
-        g.text(font, "42 ms", 48, 6, 0xFF58E38C, true);
+        g.text(font, UiFont.text("PING"), 10, 6, c.mutedTextArgb, false);
+        g.text(font, UiFont.text("42 ms"), 48, 6, 0xFF58E38C, true);
         g.fill(10, 20, 78, 23, 0xFF292934);
         g.fill(10, 20, 68, 23, 0xFF58E38C);
 
