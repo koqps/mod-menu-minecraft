@@ -175,6 +175,22 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Highlight color", () -> hex(c.itemHighlightColorArgb), () -> c.itemHighlightColorArgb = previousColor(c.itemHighlightColorArgb), () -> c.itemHighlightColorArgb = nextColor(c.itemHighlightColorArgb));
                 row("Tracked items", () -> Integer.toString(c.highlightedItems.size()), () -> cycleHighlightPreset(-1), () -> cycleHighlightPreset(1));
             }
+            case "health_display" -> {
+                row("Scale", () -> String.format("%.2f", c.healthHudScale), () -> c.healthHudScale = Math.max(0.55F, c.healthHudScale - 0.05F), () -> c.healthHudScale = Math.min(2.0F, c.healthHudScale + 0.05F));
+                row("Background", () -> c.healthHudBackground ? "ON" : "OFF", () -> c.healthHudBackground = !c.healthHudBackground, () -> c.healthHudBackground = !c.healthHudBackground);
+            }
+            case "armor_display" -> {
+                row("Scale", () -> String.format("%.2f", c.armorHudScale), () -> c.armorHudScale = Math.max(0.55F, c.armorHudScale - 0.05F), () -> c.armorHudScale = Math.min(2.0F, c.armorHudScale + 0.05F));
+                row("Background", () -> c.armorHudBackground ? "ON" : "OFF", () -> c.armorHudBackground = !c.armorHudBackground, () -> c.armorHudBackground = !c.armorHudBackground);
+            }
+            case "map_display" -> {
+                row("Scale", () -> String.format("%.2f", c.mapHudScale), () -> c.mapHudScale = Math.max(0.55F, c.mapHudScale - 0.05F), () -> c.mapHudScale = Math.min(2.0F, c.mapHudScale + 0.05F));
+                row("Background", () -> c.mapHudBackground ? "ON" : "OFF", () -> c.mapHudBackground = !c.mapHudBackground, () -> c.mapHudBackground = !c.mapHudBackground);
+            }
+            case "ping_display" -> {
+                row("Scale", () -> String.format("%.2f", c.pingHudScale), () -> c.pingHudScale = Math.max(0.55F, c.pingHudScale - 0.05F), () -> c.pingHudScale = Math.min(2.0F, c.pingHudScale + 0.05F));
+                row("Background", () -> c.pingHudBackground ? "ON" : "OFF", () -> c.pingHudBackground = !c.pingHudBackground, () -> c.pingHudBackground = !c.pingHudBackground);
+            }
             case "waypoints" -> row("Markers", () -> Integer.toString(c.waypoints.size()), () -> { }, () -> { });
             default -> {
                 if (isHudModule()) row("HUD position", () -> "OPEN EDITOR BELOW", () -> { }, () -> { });
@@ -338,6 +354,10 @@ public final class ModuleSettingsScreen extends Screen {
                 c.highlightedItems.add("minecraft:enchanted_golden_apple");
                 c.highlightedItems.add("minecraft:elytra");
             }
+            case "health_display" -> { c.healthHudScale = 1.0F; c.healthHudBackground = true; }
+            case "armor_display" -> { c.armorHudScale = 1.0F; c.armorHudBackground = true; }
+            case "map_display" -> { c.mapHudScale = 1.0F; c.mapHudBackground = true; }
+            case "ping_display" -> { c.pingHudScale = 1.0F; c.pingHudBackground = true; }
             default -> { }
         }
         TopkaClient.CONFIG.save();
