@@ -29,6 +29,14 @@ public final class TopkaConfig {
     // Combat / visuals
     public int hitColorArgb = 0xB28B5CF6;
     public int hitboxColorArgb = 0xFF41C7FF;
+    public int hitboxPlayerColorArgb = 0xFF41C7FF;
+    public int hitboxHostileColorArgb = 0xFFFF5C77;
+    public int hitboxPassiveColorArgb = 0xFF50FA7B;
+    public int hitboxOtherColorArgb = 0xFFFFD166;
+    public boolean hitboxPlayers = true;
+    public boolean hitboxHostile = true;
+    public boolean hitboxPassive = true;
+    public boolean hitboxOther = false;
     public int targetColorArgb = 0xFFFF5C77;
     public int trailColorArgb = 0xFF8B5CF6;
     public int jumpCircleColorArgb = 0xFF41C7FF;
