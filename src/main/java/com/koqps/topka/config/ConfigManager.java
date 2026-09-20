@@ -101,6 +101,16 @@ public final class ConfigManager {
 
     private void normalize() {
         if (config.modules == null) config.modules = new HashMap<>();
+
+        // v2 switches the old transparent debug-quad wing preset to the new
+        // textured solid material. Preserve user colors/size while upgrading
+        // the visual defaults once.
+        if (config.cosmeticRendererVersion < 2) {
+            config.wingsOpacity = Math.max(config.wingsOpacity, 220);
+            config.wingsDetail = Math.max(config.wingsDetail, 4);
+            if (Math.abs(config.wingsBoneWidth - 3.2F) < 0.01F) config.wingsBoneWidth = 2.4F;
+            config.cosmeticRendererVersion = 2;
+        }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
