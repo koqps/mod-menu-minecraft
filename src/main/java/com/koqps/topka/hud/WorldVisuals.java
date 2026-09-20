@@ -224,6 +224,21 @@ public final class WorldVisuals {
                         }
                     }
             );
+            if (cfg.chinaHatStyle != 0) {
+                context.submitNodeCollector().submitCustomGeometry(
+                        poseStack,
+                        RenderTypes.debugQuads(),
+                        (pose, vertices) -> emitConeShell(
+                                pose,
+                                vertices,
+                                radius,
+                                height,
+                                cfg.chinaHatColorArgb,
+                                cfg.chinaHatRainbow,
+                                cfg.chinaHatStyle == 2 ? 112 : 76
+                        )
+                );
+            }
             poseStack.popPose();
         }
     }
@@ -287,6 +302,25 @@ public final class WorldVisuals {
                     }
                 }
         );
+        if (cfg.haloStyle != 0) {
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.debugQuads(),
+                    (pose, vertices) -> {
+                        float band = Math.max(0.035F, radius * 0.16F);
+                        emitAnnulus(
+                                pose,
+                                vertices,
+                                Math.max(0.04F, radius - band),
+                                radius + band,
+                                0.0D,
+                                cfg.haloColorArgb,
+                                cfg.haloRainbow,
+                                cfg.haloStyle == 1 ? 78 : 54
+                        );
+                    }
+            );
+        }
         poseStack.popPose();
     }
 
@@ -386,6 +420,39 @@ public final class WorldVisuals {
                     }
                 }
         );
+
+        if (cfg.trailStyle != 0) {
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.debugQuads(),
+                    (pose, vertices) -> {
+                        for (int i = 1; i < points.size(); i++) {
+                            var previous = points.get(i - 1);
+                            var current = points.get(i);
+                            double age = Math.clamp((double) (now - current.createdAt()) / lifetime, 0.0D, 1.0D);
+                            double life = 1.0D - age;
+                            int alpha = (int) Math.round((cfg.trailStyle == 3 ? 120.0D : 92.0D) * life);
+                            if (alpha <= 3) continue;
+
+                            Vec3 a = previous.position();
+                            Vec3 b = current.position();
+                            Vec3 delta = b.subtract(a);
+                            Vec3 right = new Vec3(-delta.z, 0.0D, delta.x);
+                            if (right.lengthSqr() < 1.0E-6D) right = new Vec3(1.0D, 0.0D, 0.0D);
+                            right = right.normalize();
+
+                            int fill = effectColor(cfg.trailColorArgb, cfg.trailRainbow, i * 0.035F, alpha);
+
+                            if (cfg.trailStyle == 2) {
+                                double wave = Math.sin((i + now / 80.0D) * 0.48D) * height * 0.22D;
+                                emitWingRibbon(pose, vertices, a, b, right, width, height, wave, fill);
+                            } else {
+                                emitRibbonPrism(pose, vertices, a, b, right, width, height, fill);
+                            }
+                        }
+                    }
+            );
+        }
         poseStack.popPose();
     }
 
@@ -457,6 +524,33 @@ public final class WorldVisuals {
                         }
                     }
             );
+
+            if (cfg.jumpCircleStyle != 0) {
+                context.submitNodeCollector().submitCustomGeometry(
+                        poseStack,
+                        RenderTypes.debugQuads(),
+                        (pose, vertices) -> {
+                            float band = Math.max(0.055F, radius * 0.13F);
+                            int fillAlpha = Math.max(10, alpha / 4);
+                            if (cfg.jumpCircleStyle == 1) fillAlpha = Math.max(18, alpha / 3);
+                            for (int layer = 0; layer < layers; layer++) {
+                                float spread = layer * 0.045F;
+                                float outer = radius + spread + band;
+                                float inner = Math.max(0.02F, radius + spread - band);
+                                emitAnnulus(
+                                        pose,
+                                        vertices,
+                                        inner,
+                                        outer,
+                                        layer * 0.002D,
+                                        cfg.jumpCircleColorArgb,
+                                        cfg.jumpCircleRainbow,
+                                        Math.max(8, fillAlpha - layer * 8)
+                                );
+                            }
+                        }
+                );
+            }
             poseStack.popPose();
         }
     }
@@ -665,6 +759,124 @@ public final class WorldVisuals {
                 .setColor(color)
                 .setNormal(pose, nx, ny, nz)
                 .setLineWidth(width);
+    }
+
+    private static void emitQuad(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            Vec3 a,
+            Vec3 b,
+            Vec3 c,
+            Vec3 d,
+            int color
+    ) {
+        vertices.addVertex(pose, (float) a.x, (float) a.y, (float) a.z).setColor(color);
+        vertices.addVertex(pose, (float) b.x, (float) b.y, (float) b.z).setColor(color);
+        vertices.addVertex(pose, (float) c.x, (float) c.y, (float) c.z).setColor(color);
+        vertices.addVertex(pose, (float) d.x, (float) d.y, (float) d.z).setColor(color);
+    }
+
+    private static void emitRibbonPrism(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            Vec3 a,
+            Vec3 b,
+            Vec3 right,
+            float width,
+            float height,
+            int color
+    ) {
+        Vec3 leftOffset = right.scale(-width * 0.5D);
+        Vec3 rightOffset = right.scale(width * 0.5D);
+        Vec3 aLL = a.add(leftOffset);
+        Vec3 bLL = b.add(leftOffset);
+        Vec3 aRL = a.add(rightOffset);
+        Vec3 bRL = b.add(rightOffset);
+        Vec3 up = new Vec3(0.0D, height, 0.0D);
+        Vec3 aLU = aLL.add(up);
+        Vec3 bLU = bLL.add(up);
+        Vec3 aRU = aRL.add(up);
+        Vec3 bRU = bRL.add(up);
+
+        emitQuad(pose, vertices, aLL, bLL, bLU, aLU, color);
+        emitQuad(pose, vertices, bRL, aRL, aRU, bRU, color);
+        emitQuad(pose, vertices, aLU, bLU, bRU, aRU, withAlpha(color, Math.max(12, ((color >>> 24) & 0xFF) * 3 / 4)));
+    }
+
+    private static void emitWingRibbon(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            Vec3 a,
+            Vec3 b,
+            Vec3 right,
+            float width,
+            float height,
+            double wave,
+            int color
+    ) {
+        Vec3 centerA = a.add(0.0D, height * 0.48D, 0.0D);
+        Vec3 centerB = b.add(0.0D, height * 0.48D, 0.0D);
+        Vec3 leftA = a.add(right.scale(-width * 0.22D)).add(0.0D, wave, 0.0D);
+        Vec3 leftB = b.add(right.scale(-width)).add(0.0D, height + wave, 0.0D);
+        Vec3 rightA = a.add(right.scale(width * 0.22D)).add(0.0D, -wave, 0.0D);
+        Vec3 rightB = b.add(right.scale(width)).add(0.0D, height - wave, 0.0D);
+
+        emitQuad(pose, vertices, centerA, centerB, leftB, leftA, color);
+        emitQuad(pose, vertices, rightA, rightB, centerB, centerA, color);
+    }
+
+    private static void emitAnnulus(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            float innerRadius,
+            float outerRadius,
+            double y,
+            int baseColor,
+            boolean rainbow,
+            int alpha
+    ) {
+        for (int i = 0; i < CIRCLE_SEGMENTS; i++) {
+            double a0 = Math.PI * 2.0D * i / CIRCLE_SEGMENTS;
+            double a1 = Math.PI * 2.0D * (i + 1) / CIRCLE_SEGMENTS;
+            Vec3 i0 = new Vec3(Math.cos(a0) * innerRadius, y, Math.sin(a0) * innerRadius);
+            Vec3 i1 = new Vec3(Math.cos(a1) * innerRadius, y, Math.sin(a1) * innerRadius);
+            Vec3 o1 = new Vec3(Math.cos(a1) * outerRadius, y, Math.sin(a1) * outerRadius);
+            Vec3 o0 = new Vec3(Math.cos(a0) * outerRadius, y, Math.sin(a0) * outerRadius);
+            int color = effectColor(baseColor, rainbow, i / (float) CIRCLE_SEGMENTS, alpha);
+            emitQuad(pose, vertices, i0, i1, o1, o0, color);
+        }
+    }
+
+    private static void emitConeShell(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            float radius,
+            float height,
+            int baseColor,
+            boolean rainbow,
+            int alpha
+    ) {
+        int bands = 7;
+        for (int band = 0; band < bands; band++) {
+            float t0 = band / (float) bands;
+            float t1 = (band + 1) / (float) bands;
+            float r0 = radius * (1.0F - t0 * 0.96F);
+            float r1 = radius * (1.0F - t1 * 0.96F);
+            double y0 = height * t0;
+            double y1 = height * t1;
+
+            for (int i = 0; i < HAT_SEGMENTS; i++) {
+                double a0 = Math.PI * 2.0D * i / HAT_SEGMENTS;
+                double a1 = Math.PI * 2.0D * (i + 1) / HAT_SEGMENTS;
+                Vec3 p00 = new Vec3(Math.cos(a0) * r0, y0, Math.sin(a0) * r0);
+                Vec3 p01 = new Vec3(Math.cos(a1) * r0, y0, Math.sin(a1) * r0);
+                Vec3 p11 = new Vec3(Math.cos(a1) * r1, y1, Math.sin(a1) * r1);
+                Vec3 p10 = new Vec3(Math.cos(a0) * r1, y1, Math.sin(a0) * r1);
+                int bandAlpha = Math.max(12, alpha - band * 7);
+                int color = effectColor(baseColor, rainbow, i / (float) HAT_SEGMENTS + band * 0.035F, bandAlpha);
+                emitQuad(pose, vertices, p00, p01, p11, p10, color);
+            }
+        }
     }
 
     private static int effectColor(int baseArgb, boolean rainbow, float offset, int alpha) {
