@@ -72,6 +72,7 @@ public final class ModuleSettingsScreen extends Screen {
         var c = TopkaClient.CONFIG.get();
         switch (module.id()) {
             case "crosshair" -> {
+                row("Style", () -> crosshairStyleName(c.crosshairStyle), () -> c.crosshairStyle = Math.floorMod(c.crosshairStyle - 1, 4), () -> c.crosshairStyle = Math.floorMod(c.crosshairStyle + 1, 4));
                 row("Size", () -> Integer.toString(c.crosshairSize), () -> c.crosshairSize = Math.max(1, c.crosshairSize - 1), () -> c.crosshairSize = Math.min(16, c.crosshairSize + 1));
                 row("Center gap", () -> Integer.toString(c.crosshairGap), () -> c.crosshairGap = Math.max(0, c.crosshairGap - 1), () -> c.crosshairGap = Math.min(12, c.crosshairGap + 1));
                 row("Thickness", () -> Integer.toString(c.crosshairThickness), () -> c.crosshairThickness = Math.max(1, c.crosshairThickness - 1), () -> c.crosshairThickness = Math.min(6, c.crosshairThickness + 1));
@@ -80,6 +81,7 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Outline", () -> c.crosshairOutline ? "ON" : "OFF", () -> c.crosshairOutline = !c.crosshairOutline, () -> c.crosshairOutline = !c.crosshairOutline);
                 row("Dynamic spread", () -> c.crosshairDynamic ? "ON" : "OFF", () -> c.crosshairDynamic = !c.crosshairDynamic, () -> c.crosshairDynamic = !c.crosshairDynamic);
                 row("Dynamic max gap", () -> Integer.toString(c.crosshairDynamicMaxGap), () -> c.crosshairDynamicMaxGap = Math.max(2, c.crosshairDynamicMaxGap - 1), () -> c.crosshairDynamicMaxGap = Math.min(24, c.crosshairDynamicMaxGap + 1));
+                row("Rainbow", () -> c.crosshairRainbow ? "ON" : "OFF", () -> c.crosshairRainbow = !c.crosshairRainbow, () -> c.crosshairRainbow = !c.crosshairRainbow);
             }
             case "hitbox" -> {
                 row("Expansion", () -> String.format("%.2f", c.hitboxExpand), () -> c.hitboxExpand = Math.max(0F, c.hitboxExpand - 0.05F), () -> c.hitboxExpand = Math.min(1F, c.hitboxExpand + 0.05F));
@@ -94,15 +96,21 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Other color", () -> hex(c.hitboxOtherColorArgb), () -> c.hitboxOtherColorArgb = previousColor(c.hitboxOtherColorArgb), () -> c.hitboxOtherColorArgb = nextColor(c.hitboxOtherColorArgb));
             }
             case "china_hat" -> {
+                row("Style", () -> hatStyleName(c.chinaHatStyle), () -> c.chinaHatStyle = Math.floorMod(c.chinaHatStyle - 1, 4), () -> c.chinaHatStyle = Math.floorMod(c.chinaHatStyle + 1, 4));
                 row("Radius", () -> String.format("%.2f", c.chinaHatRadius), () -> c.chinaHatRadius = Math.max(0.25F, c.chinaHatRadius - 0.05F), () -> c.chinaHatRadius = Math.min(1.25F, c.chinaHatRadius + 0.05F));
                 row("Height", () -> String.format("%.2f", c.chinaHatHeight), () -> c.chinaHatHeight = Math.max(0.12F, c.chinaHatHeight - 0.04F), () -> c.chinaHatHeight = Math.min(0.8F, c.chinaHatHeight + 0.04F));
-                row("Line width", () -> String.format("%.1f", c.chinaHatLineWidth), () -> c.chinaHatLineWidth = Math.max(1F, c.chinaHatLineWidth - 0.25F), () -> c.chinaHatLineWidth = Math.min(5F, c.chinaHatLineWidth + 0.25F));
+                row("Line width", () -> String.format("%.1f", c.chinaHatLineWidth), () -> c.chinaHatLineWidth = Math.max(1F, c.chinaHatLineWidth - 0.25F), () -> c.chinaHatLineWidth = Math.min(7F, c.chinaHatLineWidth + 0.25F));
+                row("Color", () -> hex(c.chinaHatColorArgb), () -> c.chinaHatColorArgb = previousColor(c.chinaHatColorArgb), () -> c.chinaHatColorArgb = nextColor(c.chinaHatColorArgb));
+                row("Rainbow", () -> c.chinaHatRainbow ? "ON" : "OFF", () -> c.chinaHatRainbow = !c.chinaHatRainbow, () -> c.chinaHatRainbow = !c.chinaHatRainbow);
                 row("Show others", () -> c.chinaHatShowOthers ? "ON" : "OFF", () -> c.chinaHatShowOthers = !c.chinaHatShowOthers, () -> c.chinaHatShowOthers = !c.chinaHatShowOthers);
             }
             case "halo" -> {
+                row("Style", () -> haloStyleName(c.haloStyle), () -> c.haloStyle = Math.floorMod(c.haloStyle - 1, 4), () -> c.haloStyle = Math.floorMod(c.haloStyle + 1, 4));
                 row("Radius", () -> String.format("%.2f", c.haloRadius), () -> c.haloRadius = Math.max(0.2F, c.haloRadius - 0.04F), () -> c.haloRadius = Math.min(1F, c.haloRadius + 0.04F));
                 row("Height", () -> String.format("%.2f", c.haloHeight), () -> c.haloHeight = Math.max(0F, c.haloHeight - 0.03F), () -> c.haloHeight = Math.min(0.7F, c.haloHeight + 0.03F));
-                row("Line width", () -> String.format("%.1f", c.haloLineWidth), () -> c.haloLineWidth = Math.max(1F, c.haloLineWidth - 0.25F), () -> c.haloLineWidth = Math.min(5F, c.haloLineWidth + 0.25F));
+                row("Line width", () -> String.format("%.1f", c.haloLineWidth), () -> c.haloLineWidth = Math.max(1F, c.haloLineWidth - 0.25F), () -> c.haloLineWidth = Math.min(7F, c.haloLineWidth + 0.25F));
+                row("Color", () -> hex(c.haloColorArgb), () -> c.haloColorArgb = previousColor(c.haloColorArgb), () -> c.haloColorArgb = nextColor(c.haloColorArgb));
+                row("Rainbow", () -> c.haloRainbow ? "ON" : "OFF", () -> c.haloRainbow = !c.haloRainbow, () -> c.haloRainbow = !c.haloRainbow);
             }
             case "trails" -> {
                 row("Style", () -> trailStyleName(c.trailStyle), () -> c.trailStyle = Math.floorMod(c.trailStyle - 1, 4), () -> c.trailStyle = Math.floorMod(c.trailStyle + 1, 4));
@@ -156,7 +164,7 @@ public final class ModuleSettingsScreen extends Screen {
             }
             case "sprint" -> row("Stop while using item", () -> c.sprintStopWhileUsingItem ? "ON" : "OFF", () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem, () -> c.sprintStopWhileUsingItem = !c.sprintStopWhileUsingItem);
             case "health_tags" -> {
-                row("Display style", () -> c.healthTagHearts ? "HEARTS" : "NUMERIC", () -> c.healthTagHearts = !c.healthTagHearts, () -> c.healthTagHearts = !c.healthTagHearts);
+                row("Style", () -> "HEARTS ONLY", () -> { }, () -> { });
                 row("Max distance", () -> Math.round(c.healthTagMaxDistance) + " blocks", () -> c.healthTagMaxDistance = Math.max(8D, c.healthTagMaxDistance - 4D), () -> c.healthTagMaxDistance = Math.min(128D, c.healthTagMaxDistance + 4D));
             }
             case "projectile_prediction" -> {
@@ -233,20 +241,20 @@ public final class ModuleSettingsScreen extends Screen {
         g.fill(x, y, x + PANEL_W, y + PANEL_H, cfg.panelArgb);
         g.fill(x, y, x + PANEL_W, y + 3, Theme.accent());
 
-        g.text(font, module.icon() + "  " + module.name().toUpperCase(), x + 32, y + 23, 0xFFFFFFFF, true);
-        g.text(font, module.description(), x + 32, y + 43, cfg.mutedTextArgb, false);
+        g.text(font, UiFont.text(module.icon() + "  " + module.name().toUpperCase()), x + 32, y + 23, 0xFFFFFFFF, true);
+        g.text(font, UiFont.text(module.description()), x + 32, y + 43, cfg.mutedTextArgb, false);
 
         int toggleColor = module.enabled() ? Theme.accent() : 0xFF555563;
         g.fill(x + PANEL_W - 126, y + 20, x + PANEL_W - 32, y + 46, module.enabled() ? 0xFF272337 : 0xFF1C1C24);
         g.fill(x + PANEL_W - 126, y + 45, x + PANEL_W - 32, y + 46, toggleColor);
-        g.centeredText(font, module.enabled() ? "ENABLED" : "DISABLED", x + PANEL_W - 79, y + 29, toggleColor);
+        g.centeredText(font, UiFont.text(module.enabled() ? "ENABLED" : "DISABLED"), x + PANEL_W - 79, y + 29, toggleColor);
 
-        g.text(font, "SETTINGS", x + 32, y + 72, 0xFF707082, false);
+        g.text(font, UiFont.text("SETTINGS"), x + 32, y + 72, 0xFF707082, false);
 
         clampScroll();
         int rowY = y + 92;
         if (rows.isEmpty()) {
-            g.text(font, "This module has no extra settings yet.", x + 32, rowY + 8, 0xFF858596, false);
+            g.text(font, UiFont.text("This module has no extra settings yet."), x + 32, rowY + 8, 0xFF858596, false);
         }
 
         int first = scrollRow;
@@ -254,8 +262,8 @@ public final class ModuleSettingsScreen extends Screen {
         for (int i = first; i < last; i++) {
             Row row = rows.get(i);
             g.fill(x + 32, rowY, x + PANEL_W - 32, rowY + 34, 0xFF171720);
-            g.text(font, row.label(), x + 46, rowY + 12, 0xFFCBCBD6, false);
-            g.text(font, row.value().get(), x + 260, rowY + 12, Theme.accent(), true);
+            g.text(font, UiFont.text(row.label()), x + 46, rowY + 12, 0xFFCBCBD6, false);
+            g.text(font, UiFont.text(row.value().get()), x + 260, rowY + 12, Theme.accent(), true);
             drawMini(g, mouseX, mouseY, x + 402, rowY + 5, "−");
             drawMini(g, mouseX, mouseY, x + 446, rowY + 5, "+");
             rowY += 38;
@@ -270,7 +278,7 @@ public final class ModuleSettingsScreen extends Screen {
             int maxScroll = rows.size() - VISIBLE_ROWS;
             int thumbY = trackY + (trackH - thumbH) * scrollRow / Math.max(1, maxScroll);
             g.fill(trackX, thumbY, trackX + 3, thumbY + thumbH, Theme.accent());
-            g.text(font, "Mouse wheel for more settings", x + 340, y + 72, 0xFF656576, false);
+            g.text(font, UiFont.text("Mouse wheel for more settings"), x + 340, y + 72, 0xFF656576, false);
         }
 
         if (isHudModule()) {
@@ -280,7 +288,7 @@ public final class ModuleSettingsScreen extends Screen {
         }
         drawBottomButton(g, mouseX, mouseY, x + PANEL_W - 196, y + PANEL_H - 52, 164, "Reset module settings");
 
-        g.text(font, "ESC / " + TopkaClient.openMenuKey().getString() + " to return", x + 32, y + PANEL_H - 18, 0xFF616171, false);
+        g.text(font, UiFont.text("ESC / " + TopkaClient.openMenuKey().getString() + " to return"), x + 32, y + PANEL_H - 18, 0xFF616171, false);
         super.extractRenderState(g, mouseX, mouseY, delta);
     }
 
@@ -307,14 +315,14 @@ public final class ModuleSettingsScreen extends Screen {
     private void drawMini(GuiGraphicsExtractor g, int mx, int my, int x, int y, String text) {
         boolean hover = mx >= x && mx < x + 36 && my >= y && my < y + 26;
         g.fill(x, y, x + 36, y + 26, hover ? 0xFF333340 : 0xFF24242E);
-        g.centeredText(font, text, x + 18, y + 9, 0xFFF0F0F5);
+        g.centeredText(font, UiFont.text(text), x + 18, y + 9, 0xFFF0F0F5);
     }
 
     private void drawBottomButton(GuiGraphicsExtractor g, int mx, int my, int x, int y, int w, String text) {
         boolean hover = mx >= x && mx < x + w && my >= y && my < y + 28;
         g.fill(x, y, x + w, y + 28, hover ? 0xFF30303C : 0xFF21212B);
         g.fill(x, y + 27, x + w, y + 28, Theme.accent());
-        g.centeredText(font, text, x + w / 2, y + 9, 0xFFEDEDF4);
+        g.centeredText(font, UiFont.text(text), x + w / 2, y + 9, 0xFFEDEDF4);
     }
 
     private boolean isHudModule() {
@@ -332,6 +340,7 @@ public final class ModuleSettingsScreen extends Screen {
                 c.crosshairColorArgb = 0xFFFFFFFF; c.crosshairSize = 5; c.crosshairGap = 2;
                 c.crosshairThickness = 1; c.crosshairDot = false; c.crosshairOutline = true;
                 c.crosshairDynamic = false; c.crosshairDynamicMaxGap = 10;
+                c.crosshairStyle = 0; c.crosshairRainbow = false;
             }
             case "hitbox" -> {
                 c.hitboxExpand = 0F; c.hitboxLineWidth = 2F; c.hitboxColorArgb = 0xFF41C7FF;
@@ -339,8 +348,14 @@ public final class ModuleSettingsScreen extends Screen {
                 c.hitboxPassiveColorArgb = 0xFF50FA7B; c.hitboxOtherColorArgb = 0xFFFFD166;
                 c.hitboxPlayers = true; c.hitboxHostile = true; c.hitboxPassive = true; c.hitboxOther = false;
             }
-            case "china_hat" -> { c.chinaHatRadius = 0.66F; c.chinaHatHeight = 0.32F; c.chinaHatLineWidth = 2F; c.chinaHatShowOthers = false; }
-            case "halo" -> { c.haloRadius = 0.46F; c.haloHeight = 0.16F; c.haloLineWidth = 2.2F; }
+            case "china_hat" -> {
+                c.chinaHatRadius = 0.66F; c.chinaHatHeight = 0.32F; c.chinaHatLineWidth = 2F;
+                c.chinaHatShowOthers = false; c.chinaHatColorArgb = 0xFF8B5CF6; c.chinaHatStyle = 1; c.chinaHatRainbow = false;
+            }
+            case "halo" -> {
+                c.haloRadius = 0.46F; c.haloHeight = 0.16F; c.haloLineWidth = 2.2F;
+                c.haloColorArgb = 0xFF41C7FF; c.haloStyle = 1; c.haloRainbow = false;
+            }
             case "trails" -> {
                 c.trailLifetimeMs = 900; c.trailLineWidth = 2.2F; c.trailColorArgb = 0xFF8B5CF6;
                 c.trailStyle = 1; c.trailHeight = 0.42F; c.trailWidth = 0.72F; c.trailLayers = 3;
@@ -461,6 +476,33 @@ public final class ModuleSettingsScreen extends Screen {
         String[] values = {"gg", "GG", "good game", "gg wp"};
         for (int i = 0; i < values.length; i++) if (values[i].equalsIgnoreCase(current)) return values[(i + values.length - 1) % values.length];
         return values[0];
+    }
+
+    private static String crosshairStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 1 -> "BRACKETS";
+            case 2 -> "T-SHAPE";
+            case 3 -> "DOT";
+            default -> "CLASSIC";
+        };
+    }
+
+    private static String hatStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 0 -> "OUTLINE";
+            case 1 -> "MESH";
+            case 2 -> "DENSE";
+            default -> "AURA";
+        };
+    }
+
+    private static String haloStyleName(int style) {
+        return switch (Math.floorMod(style, 4)) {
+            case 0 -> "SINGLE";
+            case 1 -> "GLOW";
+            case 2 -> "TRIPLE";
+            default -> "PULSE";
+        };
     }
 
     private static String trailStyleName(int style) {
