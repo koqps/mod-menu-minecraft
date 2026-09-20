@@ -117,15 +117,15 @@ public final class WaypointScreen extends Screen {
         g.fill(x, y, x + PANEL_W, y + PANEL_H, cfg.panelArgb);
         g.fill(x, y, x + PANEL_W, y + 3, Theme.accent());
 
-        g.text(font, "WAYPOINT STUDIO", x + 26, y + 20, 0xFFFFFFFF, true);
-        g.text(font, "Markers are isolated per server/world and dimension.", x + 26, y + 38, cfg.mutedTextArgb, false);
-        g.text(font, "NAME", x + 254, y + 58, 0xFF727283, false);
+        g.text(font, UiFont.text("WAYPOINT STUDIO"), x + 26, y + 20, 0xFFFFFFFF, true);
+        g.text(font, UiFont.text("Markers are isolated per server/world and dimension."), x + 26, y + 38, cfg.mutedTextArgb, false);
+        g.text(font, UiFont.text("NAME"), x + 254, y + 58, 0xFF727283, false);
 
         List<WaypointConfig> list = currentWaypoints();
         clampScroll(list);
 
         if (list.isEmpty()) {
-            g.centeredText(font, "No waypoints here yet — add your current position.", x + PANEL_W / 2, y + 200, 0xFF7D7D8D);
+            g.centeredText(font, UiFont.text("No waypoints here yet — add your current position."), x + PANEL_W / 2, y + 200, 0xFF7D7D8D);
         } else {
             int first = scroll;
             int last = Math.min(list.size(), first + MAX_ROWS);
@@ -152,8 +152,8 @@ public final class WaypointScreen extends Screen {
         drawButton(g, mouseX, mouseY, x + 372, y + 360, 98, "Delete");
         drawButton(g, mouseX, mouseY, x + 478, y + 360, 116, "Back");
 
-        g.text(font, "Mouse wheel scrolls the list", x + 26, y + 405, 0xFF666676, false);
-        g.text(font, "ESC / " + TopkaClient.openMenuKey().getString() + " to return", x + 362, y + 405, 0xFF666676, false);
+        g.text(font, UiFont.text("Mouse wheel scrolls the list"), x + 26, y + 405, 0xFF666676, false);
+        g.text(font, UiFont.text("ESC / ") + TopkaClient.openMenuKey().getString() + " to return", x + 362, y + 405, 0xFF666676, false);
 
         if (nameBox != null) nameBox.extractRenderState(g, mouseX, mouseY, delta);
         super.extractRenderState(g, mouseX, mouseY, delta);
