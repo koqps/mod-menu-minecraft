@@ -20,8 +20,10 @@ import com.koqps.topka.module.ModuleManager;
 import com.koqps.topka.ui.TopkaScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.KeyEvent;
@@ -32,6 +34,7 @@ public final class TopkaClient implements ClientModInitializer {
     public static final String MOD_ID = "topka";
     public static final ModuleManager MODULES = new ModuleManager();
     public static final ConfigManager CONFIG = new ConfigManager();
+
     private static KeyMapping openMenu;
 
     @Override
@@ -69,18 +72,38 @@ public final class TopkaClient implements ClientModInitializer {
             VisualEffectsController.tick();
 
             while (openMenu.consumeClick()) {
-                Minecraft minecraft = Minecraft.getInstance();
-                if (minecraft.gui.screen() instanceof TopkaScreen menu) {
-                    minecraft.gui.setScreen(menu.parentScreen());
-                } else {
-                    minecraft.gui.setScreen(new TopkaScreen(Component.literal("Mod Menu"), minecraft.gui.screen()));
-                }
+                toggleMenu();
             }
+        });
+
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            VisualEffectsController.clear();
+            CONFIG.save();
+        });
+
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            FullBrightController.restore();
+            VisualEffectsController.clear();
+            CONFIG.save();
         });
     }
 
+    private static void toggleMenu() {
+        Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.gui.screen() instanceof TopkaScreen menu) {
+            minecraft.gui.setScreen(menu.parentScreen());
+        } else {
+            minecraft.gui.setScreen(new TopkaScreen(
+                    Component.literal("Mod Menu"),
+                    minecraft.gui.screen()
+            ));
+        }
+    }
+
     public static Component openMenuKey() {
-        return openMenu == null ? Component.literal("Right Shift") : openMenu.getTranslatedKeyMessage();
+        return openMenu == null
+                ? Component.literal("Right Shift")
+                : openMenu.getTranslatedKeyMessage();
     }
 
     public static boolean menuKeyMatches(KeyEvent event) {
