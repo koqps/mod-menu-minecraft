@@ -122,6 +122,10 @@ public final class TopkaConfig {
     public float capeHeight = 1.05F;
     public float capeLineWidth = 2.0F;
     public boolean capeShowOthers = false;
+    public int capeStyle = 0;
+    public int capeOpacity = 155;
+    public boolean capeRainbow = false;
+    public boolean capeGlow = true;
 
     // Wings
     public int wingsStyle = 0;
