@@ -150,6 +150,10 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Message", () -> c.autoGgMessage, () -> c.autoGgMessage = previousGgMessage(c.autoGgMessage), () -> c.autoGgMessage = nextGgMessage(c.autoGgMessage));
                 row("Cooldown", () -> (c.autoGgCooldownMs / 1000L) + " sec", () -> c.autoGgCooldownMs = Math.max(5_000L, c.autoGgCooldownMs - 5_000L), () -> c.autoGgCooldownMs = Math.min(60_000L, c.autoGgCooldownMs + 5_000L));
             }
+            case "item_color" -> {
+                row("Highlight color", () -> hex(c.itemHighlightColorArgb), () -> c.itemHighlightColorArgb = previousColor(c.itemHighlightColorArgb), () -> c.itemHighlightColorArgb = nextColor(c.itemHighlightColorArgb));
+                row("Tracked items", () -> Integer.toString(c.highlightedItems.size()), () -> cycleHighlightPreset(-1), () -> cycleHighlightPreset(1));
+            }
             case "waypoints" -> row("Markers", () -> Integer.toString(c.waypoints.size()), () -> { }, () -> { });
             default -> {
                 if (isHudModule()) row("HUD position", () -> "OPEN EDITOR BELOW", () -> { }, () -> { });
@@ -264,6 +268,13 @@ public final class ModuleSettingsScreen extends Screen {
             case "cape" -> { c.capeColorArgb = 0xFF8B5CF6; c.capeWidth = 0.64F; c.capeHeight = 1.05F; c.capeLineWidth = 2F; c.capeShowOthers = false; }
             case "drop_protection" -> { c.dropProtectionWindowMs = 1800L; c.protectArmor = true; c.protectTools = true; c.protectTotems = true; c.protectNamedItems = true; }
             case "auto_gg" -> { c.autoGgMessage = "gg"; c.autoGgCooldownMs = 15000L; }
+            case "item_color" -> {
+                c.itemHighlightColorArgb = 0xFF8B5CF6;
+                c.highlightedItems.clear();
+                c.highlightedItems.add("minecraft:totem_of_undying");
+                c.highlightedItems.add("minecraft:enchanted_golden_apple");
+                c.highlightedItems.add("minecraft:elytra");
+            }
             default -> { }
         }
         TopkaClient.CONFIG.save();
@@ -307,6 +318,32 @@ public final class ModuleSettingsScreen extends Screen {
 
     private static int withAlpha(int rgb, int alpha) {
         return (Math.clamp(alpha, 0, 255) << 24) | (rgb & 0x00FFFFFF);
+    }
+
+    private void cycleHighlightPreset(int direction) {
+        var c = TopkaClient.CONFIG.get();
+        int preset;
+        if (c.highlightedItems.contains("minecraft:netherite_sword")) preset = 2;
+        else if (c.highlightedItems.contains("minecraft:diamond")) preset = 1;
+        else preset = 0;
+        preset = Math.floorMod(preset + direction, 3);
+        c.highlightedItems.clear();
+        if (preset == 0) {
+            c.highlightedItems.add("minecraft:totem_of_undying");
+            c.highlightedItems.add("minecraft:enchanted_golden_apple");
+            c.highlightedItems.add("minecraft:elytra");
+        } else if (preset == 1) {
+            c.highlightedItems.add("minecraft:diamond");
+            c.highlightedItems.add("minecraft:emerald");
+            c.highlightedItems.add("minecraft:netherite_ingot");
+            c.highlightedItems.add("minecraft:ancient_debris");
+        } else {
+            c.highlightedItems.add("minecraft:netherite_sword");
+            c.highlightedItems.add("minecraft:netherite_pickaxe");
+            c.highlightedItems.add("minecraft:netherite_axe");
+            c.highlightedItems.add("minecraft:totem_of_undying");
+            c.highlightedItems.add("minecraft:elytra");
+        }
     }
 
     private static String nextGgMessage(String current) {
