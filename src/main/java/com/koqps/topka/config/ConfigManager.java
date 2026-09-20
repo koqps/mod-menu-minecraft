@@ -105,6 +105,8 @@ public final class ConfigManager {
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
         config.themeAnimationSpeed = Math.clamp(config.themeAnimationSpeed, 0.05F, 2.0F);
+        config.menuScale = Math.clamp(config.menuScale, 0.70F, 1.35F);
+        config.menuStyle = Math.clamp(config.menuStyle, 0, 3);
         if (config.rainbowTheme && config.gradientTheme) config.gradientTheme = false;
 
         config.targetMode = Math.clamp(config.targetMode, 0, 2);
@@ -122,12 +124,20 @@ public final class ConfigManager {
         config.haloLineWidth = Math.clamp(config.haloLineWidth, 1.0F, 5.0F);
 
         config.trailLifetimeMs = Math.clamp(config.trailLifetimeMs, 250, 3000);
-        config.trailLineWidth = Math.clamp(config.trailLineWidth, 1.0F, 6.0F);
+        config.trailLineWidth = Math.clamp(config.trailLineWidth, 1.0F, 12.0F);
+        config.trailStyle = Math.clamp(config.trailStyle, 0, 3);
+        config.trailHeight = Math.clamp(config.trailHeight, 0.05F, 1.8F);
+        config.trailWidth = Math.clamp(config.trailWidth, 0.10F, 2.5F);
+        config.trailLayers = Math.clamp(config.trailLayers, 1, 6);
         config.jumpCircleLifetimeMs = Math.clamp(config.jumpCircleLifetimeMs, 250, 2500);
-        config.jumpCircleRadius = Math.clamp(config.jumpCircleRadius, 0.3F, 3.0F);
-        config.jumpCircleLineWidth = Math.clamp(config.jumpCircleLineWidth, 1.0F, 6.0F);
-        config.jumpParticleCount = Math.clamp(config.jumpParticleCount, 1, 32);
-        config.hitParticleCount = Math.clamp(config.hitParticleCount, 1, 40);
+        config.jumpCircleRadius = Math.clamp(config.jumpCircleRadius, 0.3F, 4.0F);
+        config.jumpCircleLineWidth = Math.clamp(config.jumpCircleLineWidth, 1.0F, 10.0F);
+        config.jumpCircleStyle = Math.clamp(config.jumpCircleStyle, 0, 3);
+        config.jumpCircleLayers = Math.clamp(config.jumpCircleLayers, 1, 5);
+        config.jumpParticleCount = Math.clamp(config.jumpParticleCount, 1, 48);
+        config.hitParticleCount = Math.clamp(config.hitParticleCount, 1, 64);
+        config.jumpParticleStyle = Math.clamp(config.jumpParticleStyle, 0, 3);
+        config.hitParticleStyle = Math.clamp(config.hitParticleStyle, 0, 3);
 
         config.fullBrightGamma = Math.clamp(config.fullBrightGamma, 1.0D, 16.0D);
 
