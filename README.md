@@ -1,4 +1,4 @@
-# Mod Menu 0.9.0
+# Mod Menu 0.9.1
 
 A polished client-side Minecraft Java mod for **Minecraft 26.3 + Fabric**, built for Java 25.
 
@@ -13,7 +13,21 @@ Mod Menu is an original visual/PvP/QoL client project. It is inspired by the pre
 - Default menu key: Right Shift
 - Config: `.minecraft/config/mod-menu.json`
 
-## 0.9.0 highlights
+## 0.9.1 highlights
+
+### Textured solid wing renderer
+The old debug-quad look has been removed from Wings.
+
+- Wings now use a dedicated runtime-generated texture atlas and Minecraft's `entityTranslucent` render type instead of `debugQuads`.
+- Angel surfaces have feather texture/ribs.
+- Demon surfaces have membrane/vein texture.
+- Crystal surfaces use faceted texture.
+- Dragon surfaces use scale texture.
+- Wing panels are rendered double-sided so they remain visually solid from both third-person camera angles.
+- The old bright perimeter wireframe was removed. Glow now draws only a small internal wing-bone structure.
+- Existing configs automatically migrate from the old transparent preset to a more opaque, higher-detail material.
+- Default wing opacity is now 235, detail 4, and structural bone width 2.4.
+
 
 ### Modeled cosmetic gear
 This release moves the client farther away from simple outline cosmetics and toward layered server-style modeled accessories.
@@ -261,13 +275,13 @@ The normal mod JAR is generated in:
 build\libs\
 ```
 
-Install the normal `mod-menu-0.9.0.jar`, not `mod-menu-0.7.0-sources.jar`.
+Install the normal `mod-menu-0.9.1.jar`, not `mod-menu-0.7.0-sources.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 26.3.
 2. Put Fabric API matching Minecraft 26.3 in `%appdata%\.minecraft\mods`.
-3. Put `mod-menu-0.9.0.jar` in the same folder.
+3. Put `mod-menu-0.9.1.jar` in the same folder.
 4. Remove older Mod Menu / Topka development JARs so the internal mod id is not duplicated.
 5. Launch the Fabric 26.3 profile.
 6. Press Right Shift by default.
