@@ -1,6 +1,7 @@
 package com.koqps.topka.ui;
 
 import com.koqps.topka.TopkaClient;
+import com.koqps.topka.hud.Theme;
 import com.koqps.topka.module.Module;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -179,12 +180,12 @@ public final class ModuleSettingsScreen extends Screen {
 
         g.fill(0, 0, width, height, 0xAA000000);
         g.fill(x, y, x + PANEL_W, y + PANEL_H, cfg.panelArgb);
-        g.fill(x, y, x + PANEL_W, y + 3, cfg.accentArgb);
+        g.fill(x, y, x + PANEL_W, y + 3, Theme.accent());
 
         g.text(font, module.icon() + "  " + module.name().toUpperCase(), x + 32, y + 23, 0xFFFFFFFF, true);
         g.text(font, module.description(), x + 32, y + 43, cfg.mutedTextArgb, false);
 
-        int toggleColor = module.enabled() ? cfg.accentArgb : 0xFF555563;
+        int toggleColor = module.enabled() ? Theme.accent() : 0xFF555563;
         g.fill(x + PANEL_W - 126, y + 20, x + PANEL_W - 32, y + 46, module.enabled() ? 0xFF272337 : 0xFF1C1C24);
         g.fill(x + PANEL_W - 126, y + 45, x + PANEL_W - 32, y + 46, toggleColor);
         g.centeredText(font, module.enabled() ? "ENABLED" : "DISABLED", x + PANEL_W - 79, y + 29, toggleColor);
@@ -199,7 +200,7 @@ public final class ModuleSettingsScreen extends Screen {
         for (Row row : rows) {
             g.fill(x + 32, rowY, x + PANEL_W - 32, rowY + 34, 0xFF171720);
             g.text(font, row.label(), x + 46, rowY + 12, 0xFFCBCBD6, false);
-            g.text(font, row.value().get(), x + 260, rowY + 12, cfg.accentArgb, true);
+            g.text(font, row.value().get(), x + 260, rowY + 12, Theme.accent(), true);
             drawMini(g, mouseX, mouseY, x + 402, rowY + 5, "−");
             drawMini(g, mouseX, mouseY, x + 446, rowY + 5, "+");
             rowY += 38;
@@ -225,7 +226,7 @@ public final class ModuleSettingsScreen extends Screen {
     private void drawBottomButton(GuiGraphicsExtractor g, int mx, int my, int x, int y, int w, String text) {
         boolean hover = mx >= x && mx < x + w && my >= y && my < y + 28;
         g.fill(x, y, x + w, y + 28, hover ? 0xFF30303C : 0xFF21212B);
-        g.fill(x, y + 27, x + w, y + 28, TopkaClient.CONFIG.get().accentArgb);
+        g.fill(x, y + 27, x + w, y + 28, Theme.accent());
         g.centeredText(font, text, x + w / 2, y + 9, 0xFFEDEDF4);
     }
 
