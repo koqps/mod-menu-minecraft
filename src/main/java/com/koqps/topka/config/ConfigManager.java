@@ -164,6 +164,11 @@ public final class ConfigManager {
         config.crosshairThickness = Math.clamp(config.crosshairThickness, 1, 6);
         config.crosshairDynamicMaxGap = Math.clamp(config.crosshairDynamicMaxGap, 2, 24);
 
+        config.healthHudScale = Math.clamp(config.healthHudScale, 0.55F, 2.0F);
+        config.armorHudScale = Math.clamp(config.armorHudScale, 0.55F, 2.0F);
+        config.mapHudScale = Math.clamp(config.mapHudScale, 0.55F, 2.0F);
+        config.pingHudScale = Math.clamp(config.pingHudScale, 0.55F, 2.0F);
+
         config.menuOffsetX = Math.clamp(config.menuOffsetX, -4000, 4000);
         config.menuOffsetY = Math.clamp(config.menuOffsetY, -4000, 4000);
 
