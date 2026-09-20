@@ -36,6 +36,7 @@ public final class ModuleManager {
         new Module("projectile_prediction", "Projectile Prediction", "Visual trajectory and impact preview.", "⌁", Module.Category.WORLD, false),
         new Module("waypoints", "Waypoints", "Persistent world markers with distance labels.", "⚑", Module.Category.WORLD, false),
 
+        new Module("item_color", "Item Color", "Highlights configured valuable items in inventories.", "▣", Module.Category.MISC, false),
         new Module("auto_gg", "Auto GG", "Rate-limited friendly message after detected wins.", "GG", Module.Category.MISC, false)
     );
 
