@@ -1,4 +1,4 @@
-# Mod Menu 0.7.0
+# Mod Menu 0.8.0
 
 A polished client-side Minecraft Java mod for **Minecraft 26.3 + Fabric**, built for Java 25.
 
@@ -13,7 +13,42 @@ Mod Menu is an original visual/PvP/QoL client project. It is inspired by the pre
 - Default menu key: Right Shift
 - Config: `.minecraft/config/mod-menu.json`
 
-## 0.7.0 highlights
+## 0.8.0 highlights
+
+
+### Premium filled cosmetics
+The main visual effects are no longer limited to thin debug-style lines.
+
+- Trails now use filled translucent ribbon/prism geometry in the Ribbon/Beam modes, with bright line cores layered on top.
+- Wings-style trails use filled side membranes rather than only rails.
+- Jump circles now use filled translucent annulus bands under the bright ring outlines.
+- China Hat mesh/dense/aura modes include a multi-band translucent cone shell plus bright structural edges.
+- Halo glow/triple/pulse styles now include a filled translucent ring band under the luminous outline.
+- These filled passes use Minecraft 26.3's deferred `submitCustomGeometry` pipeline with `RenderTypes.debugQuads()`.
+
+### Solid cosmetic wings
+A new **Wings** visual module renders actual geometry attached to the player — not particles.
+
+Designs:
+- ANGEL
+- DEMON
+- CRYSTAL
+- DRAGON
+
+Wing settings:
+- scale
+- spread
+- flap speed
+- flap amount
+- opacity
+- primary color
+- secondary color
+- glow
+- rainbow
+- optional display on other players
+
+The wings use filled membrane/panel quads plus structural outline/rib passes and animate with a configurable flap cycle.
+
 
 ### Client menu
 - Search field is now embedded directly into the client header and uses the same drag/scale coordinate system as the rest of the window.
@@ -169,13 +204,13 @@ The normal mod JAR is generated in:
 build\libs\
 ```
 
-Install the normal `mod-menu-0.7.0.jar`, not `mod-menu-0.7.0-sources.jar`.
+Install the normal `mod-menu-0.8.0.jar`, not `mod-menu-0.7.0-sources.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 26.3.
 2. Put Fabric API matching Minecraft 26.3 in `%appdata%\.minecraft\mods`.
-3. Put `mod-menu-0.7.0.jar` in the same folder.
+3. Put `mod-menu-0.8.0.jar` in the same folder.
 4. Remove older Mod Menu / Topka development JARs so the internal mod id is not duplicated.
 5. Launch the Fabric 26.3 profile.
 6. Press Right Shift by default.
