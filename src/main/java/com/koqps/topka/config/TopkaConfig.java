@@ -137,6 +137,8 @@ public final class TopkaConfig {
     public int crosshairThickness = 1;
     public boolean crosshairDot = false;
     public boolean crosshairOutline = true;
+    public boolean crosshairDynamic = false;
+    public int crosshairDynamicMaxGap = 10;
 
     // Movement
     public boolean sprintAlways = true;
