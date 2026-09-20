@@ -127,6 +127,14 @@ public final class TopkaConfig {
     public int mapHudY = 124;
     public int pingHudX = 12;
     public int pingHudY = 178;
+    public float healthHudScale = 1.0F;
+    public float armorHudScale = 1.0F;
+    public float mapHudScale = 1.0F;
+    public float pingHudScale = 1.0F;
+    public boolean healthHudBackground = true;
+    public boolean armorHudBackground = true;
+    public boolean mapHudBackground = true;
+    public boolean pingHudBackground = true;
 
     // Menu
     public int menuOffsetX = 0;
