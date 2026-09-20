@@ -139,6 +139,31 @@ public final class TopkaConfig {
     public boolean wingsRainbow = false;
     public boolean wingsGlow = true;
     public boolean wingsShowOthers = false;
+    public int wingsDetail = 3;
+    public float wingsDepth = 0.16F;
+    public float wingsBoneWidth = 3.2F;
+
+    // Back weapon
+    public int backWeaponStyle = 0;
+    public float backWeaponScale = 1.0F;
+    public float backWeaponAngle = 36.0F;
+    public float backWeaponOffsetY = 0.0F;
+    public int backWeaponPrimaryArgb = 0xFFB7C7FF;
+    public int backWeaponSecondaryArgb = 0xFF8B5CF6;
+    public int backWeaponOpacity = 225;
+    public boolean backWeaponGlow = true;
+    public boolean backWeaponRainbow = false;
+    public boolean backWeaponShowOthers = false;
+
+    // Head cosmetic
+    public int headCosmeticStyle = 0;
+    public float headCosmeticScale = 1.0F;
+    public int headCosmeticPrimaryArgb = 0xFFFFD166;
+    public int headCosmeticSecondaryArgb = 0xFFFF8A3D;
+    public int headCosmeticOpacity = 225;
+    public boolean headCosmeticGlow = true;
+    public boolean headCosmeticRainbow = false;
+    public boolean headCosmeticShowOthers = false;
 
     // Inventory item highlighting
     public int itemHighlightColorArgb = 0xFF8B5CF6;
