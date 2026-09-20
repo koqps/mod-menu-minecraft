@@ -98,7 +98,8 @@ public final class VisualEffectsController {
         Minecraft client = Minecraft.getInstance();
         if (client.level == null) return;
 
-        int count = Math.clamp(TopkaClient.CONFIG.get().hitParticleCount, 1, 40);
+        int count = Math.clamp(TopkaClient.CONFIG.get().hitParticleCount, 1, 64);
+        int style = Math.clamp(TopkaClient.CONFIG.get().hitParticleStyle, 0, 3);
         for (int i = 0; i < count; i++) {
             double px = target.getX() + (RANDOM.nextDouble() - 0.5D) * Math.max(0.4D, target.getBbWidth());
             double py = target.getY() + 0.25D + RANDOM.nextDouble() * Math.max(0.5D, target.getBbHeight() * 0.8D);
@@ -106,11 +107,13 @@ public final class VisualEffectsController {
             double vx = (RANDOM.nextDouble() - 0.5D) * 0.10D;
             double vy = 0.03D + RANDOM.nextDouble() * 0.10D;
             double vz = (RANDOM.nextDouble() - 0.5D) * 0.10D;
-            if ((i & 3) == 0) {
-                client.level.addParticle(ParticleTypes.HEART, px, py, pz, vx, vy, vz);
-            } else {
-                client.level.addParticle(ParticleTypes.CRIT, px, py, pz, vx, vy, vz);
-            }
+            var type = switch (style) {
+                case 1 -> ParticleTypes.HEART;
+                case 2 -> ParticleTypes.END_ROD;
+                case 3 -> ParticleTypes.CRIT;
+                default -> (i & 3) == 0 ? ParticleTypes.HEART : ParticleTypes.CRIT;
+            };
+            client.level.addParticle(type, px, py, pz, vx, vy, vz);
         }
     }
 
@@ -118,16 +121,25 @@ public final class VisualEffectsController {
         Minecraft client = Minecraft.getInstance();
         if (client.level == null) return;
 
-        int count = Math.clamp(TopkaClient.CONFIG.get().jumpParticleCount, 1, 32);
+        int count = Math.clamp(TopkaClient.CONFIG.get().jumpParticleCount, 1, 48);
+        int style = Math.clamp(TopkaClient.CONFIG.get().jumpParticleStyle, 0, 3);
         for (int i = 0; i < count; i++) {
             double angle = (Math.PI * 2.0D * i) / count;
             double radius = 0.35D + RANDOM.nextDouble() * 0.22D;
             double px = player.getX() + Math.cos(angle) * radius;
             double pz = player.getZ() + Math.sin(angle) * radius;
+            var type = switch (style) {
+                case 1 -> ParticleTypes.HEART;
+                case 2 -> ParticleTypes.END_ROD;
+                case 3 -> ParticleTypes.CRIT;
+                default -> (i % 3 == 0) ? ParticleTypes.END_ROD : ParticleTypes.CRIT;
+            };
             client.level.addParticle(
-                    (i % 3 == 0) ? ParticleTypes.END_ROD : ParticleTypes.CRIT,
+                    type,
                     px, player.getY() + 0.08D, pz,
-                    Math.cos(angle) * 0.02D, 0.03D + RANDOM.nextDouble() * 0.03D, Math.sin(angle) * 0.02D
+                    Math.cos(angle) * 0.02D,
+                    0.03D + RANDOM.nextDouble() * 0.03D,
+                    Math.sin(angle) * 0.02D
             );
         }
     }
