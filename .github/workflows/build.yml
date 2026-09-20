@@ -42,8 +42,105 @@ jobs:
           grep -q '^topka.client.mixins.json$' jar-contents.txt
           grep -q '^com/koqps/topka/TopkaClient.class$' jar-contents.txt
           grep -q '^com/koqps/topka/mixin/NoHurtCamMixin.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/mixin/OverlayTextureAccessor.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/ui/TopkaScreen.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/mixin/OverlayTextureAccessor.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/mixin/FirstPersonViewMixin.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/mixin/DropProtectionMixin.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/mixin/BabyModeMixin.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/ui/TopkaScreen.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/ui/ModuleSettingsScreen.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/ui/WaypointScreen.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/hud/WorldVisuals.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
+          grep -q '^com/koqps/topka/hud/WorldLabels.class
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-${{ github.sha }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+ jar-contents.txt
 
       - name: Upload mod JAR
         uses: actions/upload-artifact@v4
