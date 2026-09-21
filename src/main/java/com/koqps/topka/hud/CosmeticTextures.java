@@ -121,8 +121,8 @@ public final class CosmeticTextures {
     }
 
     private static void clear(NativeImage image) {
-        for (int y = 0; y < 128; y++) {
-            for (int x = 0; x < 128; x++) {
+        for (int y = 0; y < image.getHeight(); y++) {
+            for (int x = 0; x < image.getWidth(); x++) {
                 image.setPixel(x, y, 0x00000000);
             }
         }
