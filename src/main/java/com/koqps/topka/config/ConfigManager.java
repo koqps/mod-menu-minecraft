@@ -172,6 +172,15 @@ public final class ConfigManager {
             config.armorBootsStyle = style;
             config.cosmeticRendererVersion = 7;
         }
+
+        if (config.cosmeticRendererVersion < 8) {
+            // Imported wing OBJ files did not include their source textures, so
+            // those variants produced rectangular/grid geometry. Map any old
+            // imported selection onto the equivalent stable modeled family.
+            if (config.wingsStyle >= 5) config.wingsStyle = Math.floorMod(config.wingsStyle, 5);
+            config.importedWingTintArgb = 0xFFFFFFFF;
+            config.cosmeticRendererVersion = 8;
+        }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
@@ -236,7 +245,7 @@ public final class ConfigManager {
         config.capeStyle = Math.clamp(config.capeStyle, 0, 3);
         config.capeOpacity = Math.clamp(config.capeOpacity, 30, 235);
 
-        config.wingsStyle = Math.clamp(config.wingsStyle, 0, 8);
+        config.wingsStyle = Math.clamp(config.wingsStyle, 0, 4);
         config.wingsScale = Math.clamp(config.wingsScale, 0.45F, 2.25F);
         config.wingsSpread = Math.clamp(config.wingsSpread, 0.35F, 1.65F);
         config.wingsFlapSpeed = Math.clamp(config.wingsFlapSpeed, 0.10F, 3.0F);
