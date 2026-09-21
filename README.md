@@ -1,4 +1,4 @@
-# Mod Menu 0.10.0
+# Mod Menu 0.10.1
 
 A polished client-side Minecraft Java mod for **Minecraft 26.3 + Fabric**, built for Java 25.
 
@@ -13,7 +13,21 @@ Mod Menu is an original visual/PvP/QoL client project. It is inspired by the pre
 - Default menu key: Right Shift
 - Config: `.minecraft/config/mod-menu.json`
 
-## 0.10.0 highlights
+## 0.10.1 highlights
+
+### Angel wing silhouette rebuild
+The screenshot from 0.10.0 showed that Angel still read as one large rectangular fan. 0.10.1 rebuilds Angel again:
+
+- removes the continuous fan silhouette
+- uses two staggered rows of separated pointed feather solids
+- leaves deliberate gaps between feathers
+- gives each feather front/back/edge faces and a tapered solid tip
+- adds small tertiary feathers at the shoulder instead of hiding the mount with a broad plane
+- reduces default material depth
+- disables structural glow by default for Angel
+- lowers bone-line prominence
+- migrates existing Angel configs to the cleaner defaults automatically
+
 
 ### Modeled cosmetics rewrite
 0.10.0 replaces the old flat wing-sheet path with a dedicated cosmetic framework:
@@ -316,13 +330,13 @@ The normal mod JAR is generated in:
 build\libs\
 ```
 
-Install the normal `mod-menu-0.10.0.jar`, not `mod-menu-0.7.0-sources.jar`.
+Install the normal `mod-menu-0.10.1.jar`, not `mod-menu-0.7.0-sources.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 26.3.
 2. Put Fabric API matching Minecraft 26.3 in `%appdata%\.minecraft\mods`.
-3. Put `mod-menu-0.10.0.jar` in the same folder.
+3. Put `mod-menu-0.10.1.jar` in the same folder.
 4. Remove older Mod Menu / Topka development JARs so the internal mod id is not duplicated.
 5. Launch the Fabric 26.3 profile.
 6. Press Right Shift by default.
