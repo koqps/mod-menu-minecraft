@@ -181,6 +181,21 @@ public final class ConfigManager {
             config.importedWingTintArgb = 0xFFFFFFFF;
             config.cosmeticRendererVersion = 8;
         }
+
+        if (config.cosmeticRendererVersion < 9) {
+            // Move everybody back to the uploaded Angel-wing presentation so
+            // configs left on the old Crystal/Tech debug-like wings don't keep
+            // rendering the fan/grid silhouette.
+            config.wingsStyle = 0;
+            config.wingsPrimaryColorArgb = 0xFFFFFFFF;
+            config.wingsSecondaryColorArgb = 0xFFC8CDD8;
+            config.wingsGlow = false;
+            config.wingsRainbow = false;
+            config.wingsOpacity = 245;
+            config.wingsDetail = 5;
+            config.wingsDepth = Math.min(config.wingsDepth, 0.10F);
+            config.cosmeticRendererVersion = 9;
+        }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
