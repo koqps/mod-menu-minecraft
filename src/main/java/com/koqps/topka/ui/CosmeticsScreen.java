@@ -2,6 +2,7 @@ package com.koqps.topka.ui;
 
 import com.koqps.topka.TopkaClient;
 import com.koqps.topka.hud.Theme;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -217,7 +218,7 @@ public final class CosmeticsScreen extends Screen {
         drawBottomButton(g, mx, my, 648, 426, 56, "Reset");
 
         g.text(font, UiFont.text("Armor skins apply to equipped netherite pieces • slots are independent"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Cosmetics 0.13.0"), 616, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Cosmetics 0.13.1"), 616, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
@@ -488,16 +489,17 @@ public final class CosmeticsScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        int mx = localMouseX(click.x());
-        int my = localMouseY(click.y());
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            double mx = click.x();
+            double my = click.y();
 
-        if (click.button() == 0) {
-            // Direct fallback hit-testing for every control. These mirror the
-            // real Button widgets created in init(), so clicks still work even
-            // if a scaled/invisible widget misses an event on a client build.
+            // Test against the exact scaled/offset screen-space rectangles
+            // used to position the visible UI. This avoids any disagreement
+            // between local-coordinate conversion and Minecraft's mouse event
+            // coordinates when menu scale/offset is non-default.
             Section[] sections = Section.values();
             for (int i = 0; i < sections.length; i++) {
-                if (inside(mx, my, 15, 86 + i * 29, 118, 24)) {
+                if (insideScreen(mx, my, 15, 86 + i * 29, 118, 24)) {
                     section = sections[i];
                     searchQuery = "";
                     if (searchBox != null) searchBox.setValue("");
@@ -505,23 +507,23 @@ public final class CosmeticsScreen extends Screen {
                 }
             }
 
-            if (inside(mx, my, 172, 426, 104, 30)) {
+            if (insideScreen(mx, my, 172, 426, 104, 30)) {
                 onClose();
                 return true;
             }
-            if (inside(mx, my, 284, 426, 118, 30)) {
+            if (insideScreen(mx, my, 284, 426, 118, 30)) {
                 toggleCurrentModule();
                 return true;
             }
-            if (inside(mx, my, 410, 426, 118, 30)) {
+            if (insideScreen(mx, my, 410, 426, 118, 30)) {
                 equipWholeSet();
                 return true;
             }
-            if (inside(mx, my, 536, 426, 104, 30)) {
+            if (insideScreen(mx, my, 536, 426, 104, 30)) {
                 clearArmor();
                 return true;
             }
-            if (inside(mx, my, 648, 426, 56, 30)) {
+            if (insideScreen(mx, my, 648, 426, 56, 30)) {
                 resetColors();
                 return true;
             }
@@ -532,14 +534,24 @@ public final class CosmeticsScreen extends Screen {
                 int row = i / 2;
                 int x = 172 + column * (CARD_W + CARD_GAP_X);
                 int y = 82 + row * (CARD_H + CARD_GAP_Y);
-                if (inside(mx, my, x, y, CARD_W, CARD_H)) {
+                if (insideScreen(mx, my, x, y, CARD_W, CARD_H)) {
                     select(entries.get(i));
                     return true;
                 }
             }
         }
 
+        // Search box and any widget-based fallback targets still receive the
+        // normal Screen event path.
         return super.mouseClicked(click, doubled);
+    }
+
+    private boolean insideScreen(double mouseX, double mouseY, int localX, int localY, int localW, int localH) {
+        int x = sx(localX);
+        int y = sy(localY);
+        int w = sw(localW);
+        int h = sw(localH);
+        return mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
     }
 
     @Override
