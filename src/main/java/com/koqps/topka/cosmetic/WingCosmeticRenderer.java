@@ -117,115 +117,112 @@ public final class WingCosmeticRenderer {
             Vec3 root, Vec3 shoulder, Vec3 elbow, Vec3 outer, Vec3 low, Vec3 lowerRoot,
             double side, float scale, float thickness, int primary, int secondary, TopkaConfig cfg
     ) {
-        // Compact shoulder mount. The visible wing is made from separated
-        // feather solids, not from one continuous fan/sheet.
-        prismBetween(
-                pose, v,
-                root,
-                shoulder,
-                a.right(), a.back(),
-                0.075D * scale,
-                0.055D * scale,
-                shade(secondary, 0.90F),
-                0
-        );
-
+        /*
+         * 0.10.2 Angel is based on the uploaded Blockbench angel-wing model:
+         * many small rotated cuboids arranged into several feather clusters.
+         * There is deliberately NO continuous membrane or broad quad anywhere
+         * in the Angel renderer.
+         */
         int detail = Math.clamp(cfg.wingsDetail, 1, 5);
-        int primaryCount = 5 + detail;
-        int secondaryCount = 4 + detail;
+        double span = Math.max(0.55F, cfg.wingsSpread) * scale;
 
-        // Upper/outer flight feathers. Each feather has its own root, depth,
-        // width and pointed tip, leaving deliberate visible gaps.
+        // Compact three-piece shoulder/back mount.
+        prismBetween(pose, v, root, shoulder, a.right(), a.back(),
+                0.070D * scale, 0.050D * scale, shade(secondary, 0.80F), 0);
+        Vec3 upperJoint = lerp(shoulder, elbow, 0.46D);
+        prismBetween(pose, v, shoulder, upperJoint, a.right(), a.back(),
+                0.060D * scale, 0.044D * scale, shade(secondary, 0.74F), 0);
+
+        // UPPER CREST — short feathers that rise above the shoulder.
+        int upperCount = 4 + detail;
+        for (int i = 0; i < upperCount; i++) {
+            double t = i / (double) Math.max(1, upperCount - 1);
+            Vec3 base = lerp(root, shoulder, 0.22D + t * 0.70D)
+                    .add(a.back().scale((-0.015D + t * 0.025D) * scale));
+
+            Vec3 control = base
+                    .add(a.right().scale(side * (0.24D + 0.16D * t) * span))
+                    .add(a.up().scale((0.25D + 0.22D * (1.0D - t)) * scale))
+                    .add(a.back().scale((0.02D + 0.05D * t) * scale));
+
+            Vec3 tip = root
+                    .add(a.right().scale(side * (0.58D + 0.54D * t) * span))
+                    .add(a.up().scale((0.62D - 0.10D * t) * scale))
+                    .add(a.back().scale((0.08D + 0.09D * t) * scale));
+
+            int col = (i & 1) == 0 ? shade(primary, 1.04F) : primary;
+            voxelFeather(pose, v, base, control, tip, a, side, scale,
+                    5 + detail, 0.050D, 0.027D, col, 0);
+        }
+
+        // PRIMARY FLIGHT FEATHERS — the long lower/outward fan from the source
+        // model, but preserved as individual cuboid chains with visible gaps.
+        int primaryCount = 6 + detail;
         for (int i = 0; i < primaryCount; i++) {
             double t = i / (double) Math.max(1, primaryCount - 1);
 
-            Vec3 featherRoot = lerp(shoulder, lowerRoot, 0.10D + t * 0.66D)
-                    .add(a.back().scale((0.015D + t * 0.020D) * scale));
+            Vec3 base = lerp(shoulder, lowerRoot, 0.10D + 0.74D * t)
+                    .add(a.back().scale((0.01D + 0.035D * t) * scale));
 
-            double reach = (1.20D + (1.0D - t) * 0.54D) * scale * Math.max(0.55F, cfg.wingsSpread);
-            double y = (0.69D - t * 1.30D) * scale;
-            double z = (0.15D + t * 0.34D) * scale;
+            double reach = (1.10D + 0.58D * (1.0D - t)) * span;
+            Vec3 control = base
+                    .add(a.right().scale(side * reach * 0.48D))
+                    .add(a.up().scale((0.16D - 0.40D * t) * scale))
+                    .add(a.back().scale((0.11D + 0.14D * t) * scale));
 
-            Vec3 featherTip = root
+            Vec3 tip = root
                     .add(a.right().scale(side * reach))
-                    .add(a.up().scale(y))
-                    .add(a.back().scale(z));
+                    .add(a.up().scale((0.49D - 1.28D * t) * scale))
+                    .add(a.back().scale((0.20D + 0.31D * t) * scale));
 
-            double baseHalf = (0.040D + (1.0D - t) * 0.022D) * scale;
-            double midHalf = (0.070D + (1.0D - t) * 0.030D) * scale;
-            double featherDepth = Math.max(0.018D, thickness * (0.20D + t * 0.05D));
-
-            int col = (i & 1) == 0 ? primary : shade(primary, 0.94F);
-            taperedFeather(
-                    pose, v,
-                    featherRoot,
-                    featherTip,
-                    a.right().scale(side),
-                    a.back(),
-                    baseHalf,
-                    midHalf,
-                    featherDepth,
-                    col,
-                    0
-            );
+            int col = (i & 1) == 0 ? primary : shade(primary, 0.91F);
+            voxelFeather(pose, v, base, control, tip, a, side, scale,
+                    6 + detail, 0.057D, 0.031D, col, 0);
         }
 
-        // Inner coverts. Shorter row sits closer to the body and slightly in
-        // front of the long flight feathers, giving a layered bird-wing shape.
+        // SECONDARY FEATHERS — a middle row offset toward the camera/back to
+        // create the layered depth seen in the Blockbench base model.
+        int secondaryCount = 5 + detail;
         for (int i = 0; i < secondaryCount; i++) {
             double t = i / (double) Math.max(1, secondaryCount - 1);
 
-            Vec3 featherRoot = lerp(root, lowerRoot, 0.08D + t * 0.74D)
-                    .add(a.back().scale(-0.018D * scale));
+            Vec3 base = lerp(root, lowerRoot, 0.06D + 0.78D * t)
+                    .add(a.back().scale(-0.035D * scale));
 
-            double reach = (0.66D + (1.0D - t) * 0.40D) * scale * Math.max(0.55F, cfg.wingsSpread);
-            Vec3 featherTip = root
+            double reach = (0.68D + 0.46D * (1.0D - t)) * span;
+            Vec3 control = base
+                    .add(a.right().scale(side * reach * 0.52D))
+                    .add(a.up().scale((0.10D - 0.28D * t) * scale))
+                    .add(a.back().scale((0.02D + 0.09D * t) * scale));
+
+            Vec3 tip = root
                     .add(a.right().scale(side * reach))
-                    .add(a.up().scale((0.42D - t * 0.92D) * scale))
-                    .add(a.back().scale((0.02D + t * 0.18D) * scale));
+                    .add(a.up().scale((0.33D - 0.88D * t) * scale))
+                    .add(a.back().scale((0.04D + 0.18D * t) * scale));
 
-            double baseHalf = 0.036D * scale;
-            double midHalf = (0.060D + (1.0D - t) * 0.018D) * scale;
             int col = (i & 1) == 0 ? secondary : shade(secondary, 0.90F);
-
-            taperedFeather(
-                    pose, v,
-                    featherRoot,
-                    featherTip,
-                    a.right().scale(side),
-                    a.back(),
-                    baseHalf,
-                    midHalf,
-                    Math.max(0.016D, thickness * 0.16D),
-                    col,
-                    0
-            );
+            voxelFeather(pose, v, base, control, tip, a, side, scale,
+                    5 + detail, 0.048D, 0.026D, col, 0);
         }
 
-        // Small tertiary feathers hide the shoulder mount without creating a
-        // broad rectangular plane.
-        for (int i = 0; i < 4; i++) {
-            double t = i / 3.0D;
-            Vec3 featherRoot = root
-                    .add(a.right().scale(side * (0.07D + t * 0.08D) * scale))
-                    .add(a.up().scale((0.12D - t * 0.17D) * scale));
-            Vec3 featherTip = root
-                    .add(a.right().scale(side * (0.42D + t * 0.14D) * scale))
-                    .add(a.up().scale((0.28D - t * 0.38D) * scale))
-                    .add(a.back().scale(0.035D * scale));
+        // SHOULDER COVER FEATHERS — tiny block feathers close the root without
+        // ever becoming a single rectangular surface.
+        for (int i = 0; i < 5; i++) {
+            double t = i / 4.0D;
+            Vec3 base = root
+                    .add(a.right().scale(side * (0.035D + t * 0.080D) * scale))
+                    .add(a.up().scale((0.13D - 0.22D * t) * scale))
+                    .add(a.back().scale(-0.045D * scale));
+            Vec3 control = base
+                    .add(a.right().scale(side * (0.18D + t * 0.04D) * scale))
+                    .add(a.up().scale((0.08D - 0.09D * t) * scale));
+            Vec3 tip = base
+                    .add(a.right().scale(side * (0.38D + t * 0.10D) * scale))
+                    .add(a.up().scale((0.12D - 0.22D * t) * scale))
+                    .add(a.back().scale(0.025D * scale));
 
-            taperedFeather(
-                    pose, v,
-                    featherRoot,
-                    featherTip,
-                    a.right().scale(side),
-                    a.back(),
-                    0.030D * scale,
-                    0.052D * scale,
-                    Math.max(0.014D, thickness * 0.14D),
-                    shade(secondary, 0.84F + i * 0.03F),
-                    0
-            );
+            voxelFeather(pose, v, base, control, tip, a, side, scale,
+                    5, 0.039D, 0.022D, shade(secondary, 0.82F + 0.035F * i), 0);
         }
     }
 
@@ -368,6 +365,67 @@ public final class WingCosmeticRenderer {
         float width = Math.max(1.0F, cfg.wingsBoneWidth * 0.68F);
         line(pose, v, root, shoulder, col, width);
         line(pose, v, shoulder, elbow, col, width);
+    }
+
+    private static void voxelFeather(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            Vec3 start,
+            Vec3 control,
+            Vec3 end,
+            CosmeticAnchor anchor,
+            double side,
+            float scale,
+            int segments,
+            double startHalfWidth,
+            double startHalfDepth,
+            int color,
+            int tile
+    ) {
+        Vec3 previous = start;
+        for (int i = 1; i <= segments; i++) {
+            double t = i / (double) segments;
+            double omt = 1.0D - t;
+
+            Vec3 point = start.scale(omt * omt)
+                    .add(control.scale(2.0D * omt * t))
+                    .add(end.scale(t * t));
+
+            // Source Blockbench model is built from many short rotated cubes.
+            // Reproduce that structure: every feather is a chain of separate
+            // tapered cuboids rather than a continuous face.
+            double taper = 1.0D - 0.72D * Math.pow(t, 1.35D);
+            double halfWidth = Math.max(0.012D * scale, startHalfWidth * scale * taper);
+            double halfDepth = Math.max(0.010D * scale, startHalfDepth * scale * (0.92D - 0.42D * t));
+
+            Vec3 segment = point.subtract(previous);
+            if (segment.lengthSqr() > 1.0E-7D) {
+                // Use an axis perpendicular to the feather direction and the
+                // back axis so each little block follows the curve.
+                Vec3 widthAxis = segment.cross(anchor.back());
+                if (widthAxis.lengthSqr() < 1.0E-7D) {
+                    widthAxis = anchor.right().scale(side);
+                } else {
+                    widthAxis = widthAxis.normalize();
+                    if (widthAxis.dot(anchor.right()) * side < 0.0D) widthAxis = widthAxis.scale(-1.0D);
+                }
+
+                int segmentColor = (i & 1) == 0 ? color : shade(color, 0.94F);
+                prismBetween(
+                        pose,
+                        vertices,
+                        previous,
+                        point,
+                        widthAxis,
+                        anchor.back(),
+                        halfWidth,
+                        halfDepth,
+                        segmentColor,
+                        tile
+                );
+            }
+            previous = point;
+        }
     }
 
     private static void taperedFeather(
