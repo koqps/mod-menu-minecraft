@@ -23,8 +23,6 @@ public final class ImportedCosmeticRenderer {
 
     public static void renderWingPack(LevelRenderContext context, Vec3 camera, Minecraft client) {
         var cfg = TopkaClient.CONFIG.get();
-        int importedIndex = Math.clamp(cfg.wingsStyle - 5, 0, 3);
-        String modelName = "model_" + importedIndex;
 
         for (Entity entity : client.level.entitiesForRendering()) {
             if (!(entity instanceof Player player) || player.isRemoved()) continue;
@@ -35,29 +33,33 @@ public final class ImportedCosmeticRenderer {
             AABB box = player.getBoundingBox();
             Vec3 center = new Vec3(
                     (box.minX + box.maxX) * 0.5D,
-                    box.maxY - 0.74D + cfg.importedWingVerticalOffset,
+                    box.minY + 0.84D + cfg.importedWingVerticalOffset,
                     (box.minZ + box.maxZ) * 0.5D
             );
 
             double yaw = player.getVisualRotationYInDegrees();
             double radians = Math.toRadians(yaw);
             Vec3 back = new Vec3(Math.sin(radians), 0.0D, -Math.cos(radians));
-            center = center.add(back.scale(cfg.importedWingBackOffset));
+            center = center.add(back.scale(0.11D + cfg.importedWingBackOffset));
 
             PoseStack poseStack = context.poseStack();
             poseStack.pushPose();
             poseStack.translate(center.x - camera.x, center.y - camera.y, center.z - camera.z);
             poseStack.rotateDegrees(Axis.YP, (float) (180.0D - yaw));
-            float scale = cfg.importedWingScale * cfg.wingsScale;
+
+            // The supplied OBJ set spans roughly 4.5 units wide x 2.45 high.
+            // A fixed source-to-player conversion keeps the exact geometry but
+            // fits it to Minecraft's player scale.
+            float scale = 0.42F * cfg.importedWingScale * cfg.wingsScale;
             poseStack.scale(scale, scale, scale);
 
             PackedMeshSubmitter.submit(
-                    PackedMeshLibrary.get(PackedMeshLibrary.Pack.WINGS, modelName),
+                    PackedMeshLibrary.get(PackedMeshLibrary.Pack.WINGS, "set_wings"),
                     poseStack,
                     context.submitNodeCollector(),
                     LightCoordsUtil.FULL_BRIGHT,
                     OverlayTexture.NO_OVERLAY,
-                    multiplyAlpha(cfg.importedWingTintArgb, cfg.wingsOpacity)
+                    multiplyAlpha(cfg.wingsPrimaryColorArgb, cfg.wingsOpacity)
             );
             poseStack.popPose();
         }
