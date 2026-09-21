@@ -302,10 +302,10 @@ public final class ConfigManager {
         config.littleDemonBackOffset = Math.clamp(config.littleDemonBackOffset, -0.3F, 1.0F);
 
         config.armorCosmeticStyle = Math.clamp(config.armorCosmeticStyle, 1, 2);
-        config.armorHelmetStyle = Math.clamp(config.armorHelmetStyle, 0, 2);
-        config.armorChestStyle = Math.clamp(config.armorChestStyle, 0, 2);
-        config.armorLeggingsStyle = Math.clamp(config.armorLeggingsStyle, 0, 2);
-        config.armorBootsStyle = Math.clamp(config.armorBootsStyle, 0, 2);
+        config.armorHelmetStyle = Math.clamp(config.armorHelmetStyle, 0, 3);
+        config.armorChestStyle = Math.clamp(config.armorChestStyle, 0, 3);
+        config.armorLeggingsStyle = Math.clamp(config.armorLeggingsStyle, 0, 3);
+        config.armorBootsStyle = Math.clamp(config.armorBootsStyle, 0, 3);
         config.armorCosmeticScale = Math.clamp(config.armorCosmeticScale, 0.70F, 1.35F);
         config.armorCosmeticVerticalOffset = Math.clamp(config.armorCosmeticVerticalOffset, -0.35F, 0.35F);
 
