@@ -57,11 +57,7 @@ public final class CosmeticsScreen extends Screen {
             new CosmeticEntry("Demon Wings", "Membrane", 1),
             new CosmeticEntry("Crystal Wings", "Faceted", 2),
             new CosmeticEntry("Dragon Wings", "Scaled", 3),
-            new CosmeticEntry("Tech Wings", "Mechanical", 4),
-            new CosmeticEntry("Wing Pack I", "Imported", 5),
-            new CosmeticEntry("Wing Pack II", "Imported", 6),
-            new CosmeticEntry("Wing Pack III", "Imported", 7),
-            new CosmeticEntry("Wing Pack IV", "Imported", 8)
+            new CosmeticEntry("Tech Wings", "Mechanical", 4)
     );
 
     private static final List<CosmeticEntry> ARMOR = List.of(
@@ -310,7 +306,7 @@ public final class CosmeticsScreen extends Screen {
         int top = 196;
 
         if (TopkaClient.MODULES.byId("wings").enabled()) {
-            int wing = cfg.wingsStyle >= 5 ? cfg.importedWingTintArgb : cfg.wingsPrimaryColorArgb;
+            int wing = cfg.wingsPrimaryColorArgb;
             drawPreviewWings(g, cx, top + 46, wing);
         }
 
@@ -456,7 +452,6 @@ public final class CosmeticsScreen extends Screen {
         switch (section) {
             case WINGS -> {
                 cfg.wingsStyle = entry.style;
-                if (entry.style >= 5) cfg.importedWingTintArgb = 0xFFFFFFFF;
                 TopkaClient.MODULES.byId("wings").setEnabled(true);
             }
             case HELMETS -> cfg.armorHelmetStyle = entry.style;
