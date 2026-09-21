@@ -155,18 +155,29 @@ public final class CosmeticTextures {
             return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
         }
 
-        // Demonic: blackened netherite with crimson/purple highlights.
-        boolean ember = luma >= 126 || ((x * 7 + y * 11) % 37 == 0 && luma > 60);
-        if (ember) {
-            int rr = Math.clamp(84 + luma / 2, 0, 235);
-            int gg = Math.clamp(12 + luma / 10, 0, 90);
-            int bb = Math.clamp(24 + luma / 5, 0, 140);
+        // Demonic reference: charcoal forged metal, deep red trim and
+        // sparse copper/orange gem-like highlights.
+        boolean copper = luma >= 188
+                || (((x * 13 + y * 17) % 71) == 0 && luma > 115);
+        if (copper) {
+            int rr = Math.clamp(154 + luma / 3, 0, 245);
+            int gg = Math.clamp(54 + luma / 4, 0, 170);
+            int bb = Math.clamp(30 + luma / 8, 0, 105);
             return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
         }
 
-        int rr = Math.clamp(18 + luma / 5, 0, 95);
-        int gg = Math.clamp(12 + luma / 8, 0, 70);
-        int bb = Math.clamp(24 + luma / 3, 0, 145);
+        boolean crimson = luma >= 118
+                || (((x * 5 + y * 7) % 31) == 0 && luma > 65);
+        if (crimson) {
+            int rr = Math.clamp(72 + luma / 2, 0, 205);
+            int gg = Math.clamp(10 + luma / 14, 0, 62);
+            int bb = Math.clamp(14 + luma / 16, 0, 68);
+            return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
+        }
+
+        int rr = Math.clamp(18 + luma / 4, 0, 82);
+        int gg = Math.clamp(19 + luma / 4, 0, 84);
+        int bb = Math.clamp(23 + luma / 4, 0, 92);
         return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
     }
 
