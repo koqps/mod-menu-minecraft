@@ -18,6 +18,7 @@ import com.koqps.topka.hud.VisualEffectsController;
 import com.koqps.topka.hud.WorldLabels;
 import com.koqps.topka.hud.WorldVisuals;
 import com.koqps.topka.module.ModuleManager;
+import com.koqps.topka.item.OniWeaponSpecialRenderer;
 import com.koqps.topka.ui.TopkaScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
@@ -41,6 +42,7 @@ public final class TopkaClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         CONFIG.load();
+        OniWeaponSpecialRenderer.init();
 
         HealthHud.register();
         ArmorHud.register();
