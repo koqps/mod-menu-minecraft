@@ -7,7 +7,7 @@
         "when": "oni",
         "model": {
           "type": "minecraft:special",
-          "base": "minecraft:item/netherite_pickaxe",
+          "base": "topka:item/oni_weapon_base",
           "model": {
             "type": "topka:weapon_mesh",
             "pack": "oni",
@@ -15,7 +15,8 @@
             "scale": 0.72,
             "rx": 0,
             "ry": 0,
-            "rz": 0
+            "rz": 0,
+            "y": 0.504
           }
         }
       },
@@ -23,7 +24,7 @@
         "when": "ender",
         "model": {
           "type": "minecraft:special",
-          "base": "minecraft:item/netherite_pickaxe",
+          "base": "topka:item/oni_weapon_base",
           "model": {
             "type": "topka:weapon_mesh",
             "pack": "ender",
@@ -31,7 +32,8 @@
             "scale": 0.72,
             "rx": 0,
             "ry": 0,
-            "rz": 0
+            "rz": 0,
+            "y": 0.504
           }
         }
       }
