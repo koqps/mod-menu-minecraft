@@ -1,6 +1,8 @@
 package com.koqps.topka.cosmetic;
 
 import com.koqps.topka.TopkaClient;
+import com.koqps.topka.asset.PackedMeshLibrary;
+import com.koqps.topka.asset.PackedMeshSubmitter;
 import com.koqps.topka.asset.PackedTextureRegistry;
 import com.koqps.topka.hud.CosmeticTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -64,8 +66,16 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
             HumanoidModel<HumanoidRenderState> contextModel
     ) {
         int style = styleFor(slot);
-        Identifier texture = textureFor(style, slot);
 
+        // Paladin is a real OBJ replacement. Do not draw vanilla netherite
+        // underneath it; split OBJ sections are attached directly to the
+        // animated Minecraft head/body/arm/leg ModelParts.
+        if (style == 3) {
+            renderPaladin(slot, contextModel, poseStack, submitNodeCollector, light);
+            return;
+        }
+
+        Identifier texture = textureFor(style, slot);
         HumanoidModel<HumanoidRenderState> armorModel = armorModels.get(slot);
 
         ArmorRenderer.submitTransformCopyingModel(
@@ -88,6 +98,58 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
         if (style == 2) {
             submitDemonicDetails(slot, contextModel, poseStack, submitNodeCollector, light);
         }
+    }
+
+    private static void renderPaladin(
+            EquipmentSlot slot,
+            HumanoidModel<HumanoidRenderState> model,
+            PoseStack poseStack,
+            SubmitNodeCollector collector,
+            int light
+    ) {
+        switch (slot) {
+            case HEAD -> submitPaladinPart("helmet", model.head, poseStack, collector, light);
+            case CHEST -> {
+                submitPaladinPart("body", model.body, poseStack, collector, light);
+                submitPaladinPart("right_arm", model.rightArm, poseStack, collector, light);
+                submitPaladinPart("left_arm", model.leftArm, poseStack, collector, light);
+            }
+            case LEGS -> {
+                // Hip/waist geometry follows the torso pivot while each leg
+                // follows Minecraft's normal animated leg bone.
+                submitPaladinPart("waist", model.body, poseStack, collector, light);
+                submitPaladinPart("right_leg", model.rightLeg, poseStack, collector, light);
+                submitPaladinPart("left_leg", model.leftLeg, poseStack, collector, light);
+            }
+            case FEET -> {
+                submitPaladinPart("right_boot", model.rightLeg, poseStack, collector, light);
+                submitPaladinPart("left_boot", model.leftLeg, poseStack, collector, light);
+            }
+            default -> { }
+        }
+    }
+
+    private static void submitPaladinPart(
+            String name,
+            ModelPart part,
+            PoseStack poseStack,
+            SubmitNodeCollector collector,
+            int light
+    ) {
+        PackedMeshLibrary.Model mesh = PackedMeshLibrary.get(PackedMeshLibrary.Pack.PALADIN_ARMOR, name);
+        if (mesh == null) return;
+
+        poseStack.pushPose();
+        part.translateAndRotate(poseStack);
+        PackedMeshSubmitter.submit(
+                mesh,
+                poseStack,
+                collector,
+                light,
+                OverlayTexture.NO_OVERLAY,
+                0xFFFFFFFF
+        );
+        poseStack.popPose();
     }
 
     private static void submitDemonicDetails(
