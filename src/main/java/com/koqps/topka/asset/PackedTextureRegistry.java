@@ -15,7 +15,6 @@ import java.util.List;
 
 public final class PackedTextureRegistry {
     public static final Identifier ONI = Identifier.fromNamespaceAndPath("topka", "textures/weapons/oni_atlas.png");
-    public static final Identifier ENDER = Identifier.fromNamespaceAndPath("topka", "textures/weapons/ender_eye/gltf_embedded_2.png");
     public static final Identifier LITTLE_DEMON = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/little_demon.png");
     public static final Identifier PLAIN_WHITE = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/plain_white.png");
 
@@ -23,7 +22,6 @@ public final class PackedTextureRegistry {
 
     private static final List<TextureSpec> SPECS = List.of(
             new TextureSpec(ONI, "oni_tex", 6),
-            new TextureSpec(ENDER, "ender_tex", 1),
             new TextureSpec(LITTLE_DEMON, "demon_tex", 1),
             new TextureSpec(PLAIN_WHITE, "white_tex", 1)
     );
