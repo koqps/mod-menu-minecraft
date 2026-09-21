@@ -10,9 +10,7 @@
     "BabyModeMixin",
     "ContainerScreenAccessor",
     "ClientLevelTimeMixin",
-    "SkyRendererTimeMixin",
-    "LivingEntityRendererAccessor",
-    "AvatarRendererCosmeticLayerMixin"
+    "SkyRendererTimeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
