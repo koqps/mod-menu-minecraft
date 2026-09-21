@@ -30,7 +30,7 @@ jobs:
       - name: Build
         run: ./gradlew clean build --stacktrace
 
-      - name: Verify compiled 0.14.4 systems
+      - name: Verify compiled 0.15.0 Valentine item systems
         shell: bash
         run: |
           JAR=$(find build/libs -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' | head -n 1)
@@ -52,7 +52,136 @@ jobs:
           grep -q '^assets/minecraft/items/bow.json$' jar-contents.txt
           grep -q '^assets/minecraft/items/shield.json$' jar-contents.txt
           grep -q '^assets/minecraft/items/trident.json$' jar-contents.txt
-          grep -q '^assets/minecraft/items/mace.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/mace.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/crossbow.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/fishing_rod.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/blaze_rod.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/firework_star.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/tripwire_hook.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/chest.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/bundle.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/minecraft/items/elytra.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/topka/models/item/valentine_sword_base.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/topka/models/item/valentine_bow_base.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/topka/models/item/valentine_crossbow_base.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
+          grep -q '^assets/topka/models/item/valentine_shield_base.json
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
 
       - name: Upload normal mod jar
         uses: actions/upload-artifact@v4
