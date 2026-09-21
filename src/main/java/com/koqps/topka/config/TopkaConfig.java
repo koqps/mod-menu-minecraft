@@ -171,7 +171,8 @@ public final class TopkaConfig {
     public boolean littleDemonShowOthers = false;
 
     // Uploaded wearable armor cosmetics.
-    // Each slot can be selected independently: 0 = none, 1 = Valkyrie, 2 = Demonic.
+    // Each slot can be selected independently:
+    // 0 = vanilla netherite, 1 = Valkyrie, 2 = Demonic, 3 = Paladin direct OBJ.
     public int armorCosmeticStyle = 1; // legacy whole-set selector
     public int armorHelmetStyle = 1;
     public int armorChestStyle = 1;
