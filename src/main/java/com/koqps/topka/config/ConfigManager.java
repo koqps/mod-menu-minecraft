@@ -155,12 +155,22 @@ public final class ConfigManager {
             if (config.diamondWeaponTheme == 2) config.diamondWeaponTheme = 1;
             if (config.netheriteWeaponTheme == 2) config.netheriteWeaponTheme = 1;
             if (config.utilityWeaponTheme == 2) config.utilityWeaponTheme = 1;
-            // Uploaded wing geometry now carries a real static material instead
-            // of the old blank white runtime texture.
             config.importedWingTintArgb = 0xFFFFFFFF;
             config.wingsOpacity = Math.max(config.wingsOpacity, 230);
             config.armorCosmeticStyle = Math.clamp(config.armorCosmeticStyle, 1, 2);
             config.cosmeticRendererVersion = 6;
+        }
+
+        if (config.cosmeticRendererVersion < 7) {
+            // Migrate the old rigid whole-body armor selection into four actual
+            // Minecraft armor/body slots. The new renderer skins these parts to
+            // the animated player model instead of drawing one static OBJ shell.
+            int style = Math.clamp(config.armorCosmeticStyle, 1, 2);
+            config.armorHelmetStyle = style;
+            config.armorChestStyle = style;
+            config.armorLeggingsStyle = style;
+            config.armorBootsStyle = style;
+            config.cosmeticRendererVersion = 7;
         }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
@@ -254,6 +264,10 @@ public final class ConfigManager {
         config.littleDemonBackOffset = Math.clamp(config.littleDemonBackOffset, -0.3F, 1.0F);
 
         config.armorCosmeticStyle = Math.clamp(config.armorCosmeticStyle, 1, 2);
+        config.armorHelmetStyle = Math.clamp(config.armorHelmetStyle, 0, 2);
+        config.armorChestStyle = Math.clamp(config.armorChestStyle, 0, 2);
+        config.armorLeggingsStyle = Math.clamp(config.armorLeggingsStyle, 0, 2);
+        config.armorBootsStyle = Math.clamp(config.armorBootsStyle, 0, 2);
         config.armorCosmeticScale = Math.clamp(config.armorCosmeticScale, 0.70F, 1.35F);
         config.armorCosmeticVerticalOffset = Math.clamp(config.armorCosmeticVerticalOffset, -0.35F, 0.35F);
 
