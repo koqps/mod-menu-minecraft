@@ -144,6 +144,12 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
         poseStack.pushPose();
         head.translateAndRotate(poseStack);
 
+        // The source helmet is authored as an oversized head cosmetic. Fit it
+        // more tightly around Minecraft's 8x8 head while keeping all of the
+        // original high-detail geometry and side ornaments.
+        poseStack.scale(0.78F, 0.78F, 0.78F);
+        poseStack.translate(0.0F, 0.035F, 0.015F);
+
         for (PackedMeshLibrary.SubMesh subMesh : mesh.subMeshes()) {
             Identifier texture = subMesh.texture();
             int frames = 1;
@@ -159,14 +165,33 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
 
             final int frameIndex = frame;
             final int frameCount = frames;
+            final boolean visor = texture.equals(VALENTINE_GLASSES);
+
+            if (visor) {
+                // The two visor plates sit almost coplanar with the helmet
+                // front in the source model. Move only this animated submesh a
+                // little toward the camera so it cannot disappear into the
+                // face shell.
+                poseStack.pushPose();
+                poseStack.translate(0.0F, 0.0F, -0.045F);
+            }
 
             collector.submitCustomGeometry(
                     poseStack,
                     RenderTypes.entityTranslucent(texture),
                     (pose, vertices) -> emitAnimatedMesh(
-                            subMesh, pose, vertices, light, frameIndex, frameCount
+                            subMesh,
+                            pose,
+                            vertices,
+                            visor ? LightCoordsUtil.FULL_BRIGHT : light,
+                            frameIndex,
+                            frameCount
                     )
             );
+
+            if (visor) {
+                poseStack.popPose();
+            }
         }
 
         poseStack.popPose();
