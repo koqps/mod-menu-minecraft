@@ -1,0 +1,28 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "topka:weapon_theme",
+    "cases": [
+      {
+        "when": "valentine",
+        "model": {
+          "type": "minecraft:special",
+          "base": "topka:item/valentine_staff_base",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "valentine",
+            "model": "staff",
+            "scale": 1,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/blaze_rod"
+    }
+  }
+}
