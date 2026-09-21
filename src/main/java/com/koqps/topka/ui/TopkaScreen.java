@@ -123,8 +123,8 @@ public final class TopkaScreen extends Screen {
 
         addClickTarget(172, 426, 104, 30, () -> minecraft.gui.setScreen(new ThemeScreen(this)));
         addClickTarget(284, 426, 118, 30, () -> minecraft.gui.setScreen(new HudEditorScreen(this)));
-        addClickTarget(410, 426, 118, 30, () -> minecraft.gui.setScreen(new WaypointScreen(this)));
-        addClickTarget(536, 426, 104, 30, this::resetWindowPosition);
+        addClickTarget(410, 426, 118, 30, () -> minecraft.gui.setScreen(new CosmeticsScreen(this)));
+        addClickTarget(536, 426, 104, 30, () -> minecraft.gui.setScreen(new WaypointScreen(this)));
         addClickTarget(648, 426, 56, 30, this::disableAll);
     }
 
@@ -209,12 +209,12 @@ public final class TopkaScreen extends Screen {
 
         drawBottomButton(g, localMx, localMy, 172, 426, 104, "Theme");
         drawBottomButton(g, localMx, localMy, 284, 426, 118, "HUD Workspace");
-        drawBottomButton(g, localMx, localMy, 410, 426, 118, "Waypoints");
-        drawBottomButton(g, localMx, localMy, 536, 426, 104, "Reset Window");
+        drawBottomButton(g, localMx, localMy, 410, 426, 118, "Cosmetics");
+        drawBottomButton(g, localMx, localMy, 536, 426, 104, "Waypoints");
         drawBottomButton(g, localMx, localMy, 648, 426, 56, "Off");
 
         g.text(font, UiFont.text("Left click toggles • Right click settings • Mouse wheel scrolls"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Mod Menu 0.11.4"), 618, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Mod Menu 0.12.0"), 618, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
 
@@ -387,6 +387,8 @@ public final class TopkaScreen extends Screen {
                     Module selected = filtered.get(i);
                     if ("weapon_models".equals(selected.id())) {
                         minecraft.gui.setScreen(new ModuleSettingsScreen(this, selected));
+                    } else if ("wings".equals(selected.id()) || "armor_cosmetic".equals(selected.id())) {
+                        minecraft.gui.setScreen(new CosmeticsScreen(this));
                     } else {
                         selected.toggle();
                         TopkaClient.CONFIG.save();
