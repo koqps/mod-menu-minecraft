@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
-import net.minecraft.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -59,7 +58,7 @@ public final class ImportedCosmeticRenderer {
             // Keep only a small body clearance. User-configured back offset is
             // intentionally damped so old configs cannot push the rig far away.
             double backOffset = 0.075D + cfg.importedWingBackOffset * 0.20D;
-            float flap = (float) Math.sin(Util.getMillis() * 0.001D * Math.max(0.05F, cfg.wingsFlapSpeed) * 3.0D)
+            float flap = (float) Math.sin(System.nanoTime() * 1.0E-9D * Math.max(0.05F, cfg.wingsFlapSpeed) * 3.0D)
                     * Math.clamp(cfg.wingsFlapAmount, 0.0F, 1.0F) * 0.075F;
             int tint = multiplyAlpha(cfg.wingsPrimaryColorArgb, cfg.wingsOpacity);
 
