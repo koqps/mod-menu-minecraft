@@ -1,0 +1,44 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "topka:weapon_theme",
+    "cases": [
+      {
+        "when": "oni",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/diamond_axe",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "oni",
+            "model": "axe_513",
+            "scale": 0.72,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      },
+      {
+        "when": "ender",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/diamond_axe",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "ender",
+            "model": "model_11",
+            "scale": 0.72,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/diamond_axe"
+    }
+  }
+}
