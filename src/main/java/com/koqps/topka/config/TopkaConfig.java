@@ -149,7 +149,7 @@ public final class TopkaConfig {
     public float wingsFold = 0.0F;
 
     // Uploaded weapon model replacements
-    // 0 = vanilla, 1 = Oni, 2 = Ender Eye
+    // 0 = vanilla, 1 = Oni
     public int diamondWeaponTheme = 1;
     public int netheriteWeaponTheme = 1;
     public int utilityWeaponTheme = 1;
