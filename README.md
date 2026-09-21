@@ -1,4 +1,4 @@
-# Mod Menu 0.9.1
+# Mod Menu 0.10.0
 
 A polished client-side Minecraft Java mod for **Minecraft 26.3 + Fabric**, built for Java 25.
 
@@ -13,7 +13,48 @@ Mod Menu is an original visual/PvP/QoL client project. It is inspired by the pre
 - Default menu key: Right Shift
 - Config: `.minecraft/config/mod-menu.json`
 
-## 0.9.1 highlights
+## 0.10.0 highlights
+
+### Modeled cosmetics rewrite
+0.10.0 replaces the old flat wing-sheet path with a dedicated cosmetic framework:
+
+- `CosmeticAnchor` computes a stable body-yaw basis from the player torso.
+- `CosmeticAnimation` adds movement-aware idle, sprint, jump/fall and crouch behavior.
+- `WingCosmeticRenderer` renders real extruded pieces with front, back and edge faces instead of one transparent polygon per wing.
+- `CapeCosmeticRenderer` renders segmented articulated cloth strips with material thickness instead of one flat banner.
+
+### Wings
+Wing styles are now built as different geometry families instead of recolors:
+
+- ANGEL — overlapping extruded feather blades with a center back mount.
+- DEMON — solid bone prisms with separate membrane sections.
+- CRYSTAL — individual extruded shard pieces.
+- DRAGON — segmented membrane panels with raised scale plates.
+- TECH — floating solid blade segments and a mechanical outer blade.
+
+New wing controls:
+- detail
+- scale
+- spread
+- depth
+- bone width
+- vertical position
+- back offset
+- tilt
+- fold
+- flap speed
+- flap amount
+- opacity
+- primary / secondary colors
+- glow
+- rainbow
+- show others
+
+The renderer now adds actual edge faces to feather, membrane, crystal and structural pieces, so third-person edge views have visible thickness instead of exposing paper-thin planes.
+
+### Cape
+Capes now use multiple articulated textured sections with a small material depth. FABRIC, SPLIT, ROYAL and ENERGY keep their distinct silhouettes while following player movement.
+
 
 ### Textured solid wing renderer
 The old debug-quad look has been removed from Wings.
@@ -275,13 +316,13 @@ The normal mod JAR is generated in:
 build\libs\
 ```
 
-Install the normal `mod-menu-0.9.1.jar`, not `mod-menu-0.7.0-sources.jar`.
+Install the normal `mod-menu-0.10.0.jar`, not `mod-menu-0.7.0-sources.jar`.
 
 ## Install
 
 1. Install Fabric Loader for Minecraft 26.3.
 2. Put Fabric API matching Minecraft 26.3 in `%appdata%\.minecraft\mods`.
-3. Put `mod-menu-0.9.1.jar` in the same folder.
+3. Put `mod-menu-0.10.0.jar` in the same folder.
 4. Remove older Mod Menu / Topka development JARs so the internal mod id is not duplicated.
 5. Launch the Fabric 26.3 profile.
 6. Press Right Shift by default.
