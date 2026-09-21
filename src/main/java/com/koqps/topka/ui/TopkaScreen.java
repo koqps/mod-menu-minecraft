@@ -214,7 +214,7 @@ public final class TopkaScreen extends Screen {
         drawBottomButton(g, localMx, localMy, 648, 426, 56, "Off");
 
         g.text(font, UiFont.text("Left click toggles • Right click settings • Mouse wheel scrolls"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Mod Menu 0.13.3"), 618, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Mod Menu 0.14.0"), 618, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
 
