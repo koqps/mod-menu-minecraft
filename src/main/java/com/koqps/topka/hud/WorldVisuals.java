@@ -4,6 +4,7 @@ import com.koqps.topka.TopkaClient;
 import com.koqps.topka.config.WaypointConfig;
 import com.koqps.topka.cosmetic.WingCosmeticRenderer;
 import com.koqps.topka.cosmetic.CapeCosmeticRenderer;
+import com.koqps.topka.cosmetic.ImportedCosmeticRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
@@ -53,9 +54,16 @@ public final class WorldVisuals {
         if (TopkaClient.MODULES.byId("projectile_prediction").enabled()) renderProjectilePrediction(context, camera, client);
         if (TopkaClient.MODULES.byId("waypoints").enabled()) renderWaypointBeams(context, camera);
         if (TopkaClient.MODULES.byId("cape").enabled()) CapeCosmeticRenderer.render(context, camera, client);
-        if (TopkaClient.MODULES.byId("wings").enabled()) WingCosmeticRenderer.render(context, camera, client);
+        if (TopkaClient.MODULES.byId("wings").enabled()) {
+            if (TopkaClient.CONFIG.get().wingsStyle >= 5) {
+                ImportedCosmeticRenderer.renderWingPack(context, camera, client);
+            } else {
+                WingCosmeticRenderer.render(context, camera, client);
+            }
+        }
         if (TopkaClient.MODULES.byId("back_weapon").enabled()) renderBackWeapon(context, camera, client);
         if (TopkaClient.MODULES.byId("head_cosmetic").enabled()) renderHeadCosmetic(context, camera, client);
+        if (TopkaClient.MODULES.byId("little_demon").enabled()) ImportedCosmeticRenderer.renderLittleDemon(context, camera, client);
     }
 
     private static void renderHitboxes(LevelRenderContext context, Vec3 camera, Minecraft client) {
@@ -266,6 +274,10 @@ public final class WorldVisuals {
         if (client.options.getCameraType().isFirstPerson()) return;
 
         var cfg = TopkaClient.CONFIG.get();
+        if (cfg.haloStyle == 4) {
+            ImportedCosmeticRenderer.renderHaloPack(context, camera, client);
+            return;
+        }
         double bob = Math.sin(System.currentTimeMillis() / 350.0D) * 0.035D;
         double x = client.player.getX();
         double y = client.player.getBoundingBox().maxY + cfg.haloHeight + bob;
