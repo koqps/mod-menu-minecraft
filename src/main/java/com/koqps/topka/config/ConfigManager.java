@@ -288,9 +288,9 @@ public final class ConfigManager {
         config.wingsTilt = Math.clamp(config.wingsTilt, -35.0F, 35.0F);
         config.wingsFold = Math.clamp(config.wingsFold, 0.0F, 0.70F);
 
-        config.diamondWeaponTheme = Math.clamp(config.diamondWeaponTheme, 0, 1);
-        config.netheriteWeaponTheme = Math.clamp(config.netheriteWeaponTheme, 0, 1);
-        config.utilityWeaponTheme = Math.clamp(config.utilityWeaponTheme, 0, 1);
+        config.diamondWeaponTheme = Math.clamp(config.diamondWeaponTheme, 0, 2);
+        config.netheriteWeaponTheme = Math.clamp(config.netheriteWeaponTheme, 0, 2);
+        config.utilityWeaponTheme = Math.clamp(config.utilityWeaponTheme, 0, 2);
 
         config.importedWingScale = Math.clamp(config.importedWingScale, 0.35F, 2.5F);
         config.importedWingVerticalOffset = Math.clamp(config.importedWingVerticalOffset, -1.0F, 1.0F);
