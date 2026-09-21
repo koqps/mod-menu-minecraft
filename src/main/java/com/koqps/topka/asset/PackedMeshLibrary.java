@@ -128,7 +128,150 @@ public final class PackedMeshLibrary {
             models.put(name, new Model(name, List.copyOf(subMeshes)));
         }
 
+        if (pack == Pack.VALKYRIE_ARMOR) {
+            addArmorParts(models, "valkyrie");
+        } else if (pack == Pack.DEMONIC_ARMOR) {
+            addArmorParts(models, "demonic");
+        }
+
         return Map.copyOf(models);
+    }
+
+    private static void addArmorParts(Map<String, Model> models, String fullName) {
+        Model full = models.get(fullName);
+        if (full == null) return;
+
+        float minX = Float.POSITIVE_INFINITY;
+        float minY = Float.POSITIVE_INFINITY;
+        float minZ = Float.POSITIVE_INFINITY;
+        float maxX = Float.NEGATIVE_INFINITY;
+        float maxY = Float.NEGATIVE_INFINITY;
+        float maxZ = Float.NEGATIVE_INFINITY;
+
+        for (SubMesh subMesh : full.subMeshes()) {
+            for (Vertex vertex : subMesh.vertices()) {
+                minX = Math.min(minX, vertex.x());
+                minY = Math.min(minY, vertex.y());
+                minZ = Math.min(minZ, vertex.z());
+                maxX = Math.max(maxX, vertex.x());
+                maxY = Math.max(maxY, vertex.y());
+                maxZ = Math.max(maxZ, vertex.z());
+            }
+        }
+
+        float sourceHeight = Math.max(0.001F, maxY - minY);
+        float fitScale = 2.0F / sourceHeight;
+        float centerX = (minX + maxX) * 0.5F;
+        float centerZ = (minZ + maxZ) * 0.5F;
+
+        String[] parts = {
+                "helmet", "body", "left_arm", "right_arm",
+                "waist", "left_leg", "right_leg", "left_boot", "right_boot"
+        };
+
+        Map<String, List<SubMesh>> built = new HashMap<>();
+        for (String part : parts) built.put(part, new ArrayList<>());
+
+        for (SubMesh subMesh : full.subMeshes()) {
+            Map<String, List<Vertex>> byPart = new HashMap<>();
+            for (String part : parts) byPart.put(part, new ArrayList<>());
+
+            List<Vertex> vertices = subMesh.vertices();
+            for (int i = 0; i + 2 < vertices.size(); i += 3) {
+                Vertex a = vertices.get(i);
+                Vertex b = vertices.get(i + 1);
+                Vertex c = vertices.get(i + 2);
+
+                float cx = ((a.x() + b.x() + c.x()) / 3.0F - centerX) * fitScale;
+                float cy = ((a.y() + b.y() + c.y()) / 3.0F - minY) * fitScale;
+                String part = classifyArmorPart(cx, cy);
+
+                List<Vertex> target = byPart.get(part);
+                target.add(toArmorLocal(a, part, fitScale, centerX, minY, centerZ));
+                target.add(toArmorLocal(b, part, fitScale, centerX, minY, centerZ));
+                target.add(toArmorLocal(c, part, fitScale, centerX, minY, centerZ));
+            }
+
+            for (String part : parts) {
+                List<Vertex> partVertices = byPart.get(part);
+                if (!partVertices.isEmpty()) {
+                    built.get(part).add(new SubMesh(subMesh.texture(), List.copyOf(partVertices)));
+                }
+            }
+        }
+
+        for (String part : parts) {
+            List<SubMesh> subMeshes = built.get(part);
+            if (!subMeshes.isEmpty()) {
+                models.put(part, new Model(part, List.copyOf(subMeshes)));
+            }
+        }
+    }
+
+    private static String classifyArmorPart(float x, float y) {
+        if (y >= 1.50F && Math.abs(x) <= 0.43F) return "helmet";
+
+        if (y >= 0.78F) {
+            if (x > 0.30F) return "right_arm";
+            if (x < -0.30F) return "left_arm";
+            return "body";
+        }
+
+        if (y >= 0.38F) {
+            if (Math.abs(x) < 0.20F && y >= 0.68F) return "waist";
+            return x >= 0.0F ? "right_leg" : "left_leg";
+        }
+
+        return x >= 0.0F ? "right_boot" : "left_boot";
+    }
+
+    private static Vertex toArmorLocal(
+            Vertex vertex,
+            String part,
+            float fitScale,
+            float centerX,
+            float minY,
+            float centerZ
+    ) {
+        float worldX = (vertex.x() - centerX) * fitScale;
+        float worldY = (vertex.y() - minY) * fitScale;
+        float worldZ = (vertex.z() - centerZ) * fitScale;
+
+        float anchorX;
+        float anchorY;
+        switch (part) {
+            case "right_arm" -> {
+                anchorX = 0.3125F;
+                anchorY = 1.375F;
+            }
+            case "left_arm" -> {
+                anchorX = -0.3125F;
+                anchorY = 1.375F;
+            }
+            case "right_leg", "right_boot" -> {
+                anchorX = 0.11875F;
+                anchorY = 0.75F;
+            }
+            case "left_leg", "left_boot" -> {
+                anchorX = -0.11875F;
+                anchorY = 0.75F;
+            }
+            default -> {
+                anchorX = 0.0F;
+                anchorY = 1.5F;
+            }
+        }
+
+        return new Vertex(
+                -(worldX - anchorX),
+                -(worldY - anchorY),
+                worldZ,
+                vertex.u(),
+                vertex.v(),
+                -vertex.nx(),
+                -vertex.ny(),
+                vertex.nz()
+        );
     }
 
     private static String readString(ByteBuffer buffer) throws IOException {
