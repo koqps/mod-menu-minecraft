@@ -111,6 +111,20 @@ public final class ConfigManager {
             if (Math.abs(config.wingsBoneWidth - 3.2F) < 0.01F) config.wingsBoneWidth = 2.4F;
             config.cosmeticRendererVersion = 2;
         }
+
+        // v3 replaces the broad fan-like Angel profile with separated,
+        // pointed 3D feather solids. Reduce the old structural glow and depth
+        // automatically so existing configs do not preserve the mesh look.
+        if (config.cosmeticRendererVersion < 3) {
+            if (config.wingsStyle == 0) {
+                config.wingsGlow = false;
+                config.wingsDetail = Math.max(config.wingsDetail, 5);
+                config.wingsDepth = Math.min(config.wingsDepth <= 0.0F ? 0.12F : config.wingsDepth, 0.14F);
+                config.wingsBoneWidth = Math.min(config.wingsBoneWidth <= 0.0F ? 1.8F : config.wingsBoneWidth, 2.0F);
+                config.wingsOpacity = Math.max(config.wingsOpacity, 230);
+            }
+            config.cosmeticRendererVersion = 3;
+        }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
