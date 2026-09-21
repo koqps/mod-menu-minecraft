@@ -77,11 +77,7 @@ public record WeaponThemeProperty() implements SelectItemModelProperty<WeaponThe
         }
 
         public static Theme fromConfig(int value) {
-            return switch (Math.floorMod(value, 3)) {
-                case 1 -> ONI;
-                case 2 -> ENDER;
-                default -> VANILLA;
-            };
+            return value == 1 ? ONI : VANILLA;
         }
 
         @Override
