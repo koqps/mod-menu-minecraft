@@ -133,7 +133,7 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Show others", () -> c.chinaHatShowOthers ? "ON" : "OFF", () -> c.chinaHatShowOthers = !c.chinaHatShowOthers, () -> c.chinaHatShowOthers = !c.chinaHatShowOthers);
             }
             case "halo" -> {
-                row("Style", () -> haloStyleName(c.haloStyle), () -> c.haloStyle = Math.floorMod(c.haloStyle - 1, 4), () -> c.haloStyle = Math.floorMod(c.haloStyle + 1, 4));
+                row("Style", () -> haloStyleName(c.haloStyle), () -> c.haloStyle = Math.floorMod(c.haloStyle - 1, 5), () -> c.haloStyle = Math.floorMod(c.haloStyle + 1, 5));
                 row("Radius", () -> String.format("%.2f", c.haloRadius), () -> c.haloRadius = Math.max(0.2F, c.haloRadius - 0.04F), () -> c.haloRadius = Math.min(1F, c.haloRadius + 0.04F));
                 row("Height", () -> String.format("%.2f", c.haloHeight), () -> c.haloHeight = Math.max(0F, c.haloHeight - 0.03F), () -> c.haloHeight = Math.min(0.7F, c.haloHeight + 0.03F));
                 row("Line width", () -> String.format("%.1f", c.haloLineWidth), () -> c.haloLineWidth = Math.max(1F, c.haloLineWidth - 0.25F), () -> c.haloLineWidth = Math.min(7F, c.haloLineWidth + 0.25F));
@@ -216,7 +216,7 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Show others", () -> c.capeShowOthers ? "ON" : "OFF", () -> c.capeShowOthers = !c.capeShowOthers, () -> c.capeShowOthers = !c.capeShowOthers);
             }
             case "wings" -> {
-                row("Style", () -> wingStyleName(c.wingsStyle), () -> c.wingsStyle = Math.floorMod(c.wingsStyle - 1, 5), () -> c.wingsStyle = Math.floorMod(c.wingsStyle + 1, 5));
+                row("Style", () -> wingStyleName(c.wingsStyle), () -> c.wingsStyle = Math.floorMod(c.wingsStyle - 1, 9), () -> c.wingsStyle = Math.floorMod(c.wingsStyle + 1, 9));
                 row("Detail", () -> Integer.toString(c.wingsDetail), () -> c.wingsDetail = Math.max(1, c.wingsDetail - 1), () -> c.wingsDetail = Math.min(5, c.wingsDetail + 1));
                 row("Scale", () -> String.format("%.2f", c.wingsScale), () -> c.wingsScale = Math.max(0.45F, c.wingsScale - 0.05F), () -> c.wingsScale = Math.min(2.25F, c.wingsScale + 0.05F));
                 row("Spread", () -> String.format("%.2f", c.wingsSpread), () -> c.wingsSpread = Math.max(0.35F, c.wingsSpread - 0.05F), () -> c.wingsSpread = Math.min(1.65F, c.wingsSpread + 0.05F));
@@ -234,6 +234,22 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Glow", () -> c.wingsGlow ? "ON" : "OFF", () -> c.wingsGlow = !c.wingsGlow, () -> c.wingsGlow = !c.wingsGlow);
                 row("Rainbow", () -> c.wingsRainbow ? "ON" : "OFF", () -> c.wingsRainbow = !c.wingsRainbow, () -> c.wingsRainbow = !c.wingsRainbow);
                 row("Show others", () -> c.wingsShowOthers ? "ON" : "OFF", () -> c.wingsShowOthers = !c.wingsShowOthers, () -> c.wingsShowOthers = !c.wingsShowOthers);
+                row("Pack scale", () -> String.format("%.2f", c.importedWingScale), () -> c.importedWingScale = Math.max(0.35F, c.importedWingScale - 0.05F), () -> c.importedWingScale = Math.min(2.5F, c.importedWingScale + 0.05F));
+                row("Pack vertical", () -> String.format("%.2f", c.importedWingVerticalOffset), () -> c.importedWingVerticalOffset = Math.max(-1F, c.importedWingVerticalOffset - 0.05F), () -> c.importedWingVerticalOffset = Math.min(1F, c.importedWingVerticalOffset + 0.05F));
+                row("Pack back", () -> String.format("%.2f", c.importedWingBackOffset), () -> c.importedWingBackOffset = Math.max(-0.3F, c.importedWingBackOffset - 0.05F), () -> c.importedWingBackOffset = Math.min(1F, c.importedWingBackOffset + 0.05F));
+                row("Pack tint", () -> hex(c.importedWingTintArgb), () -> c.importedWingTintArgb = previousColor(c.importedWingTintArgb), () -> c.importedWingTintArgb = nextColor(c.importedWingTintArgb));
+            }
+            case "weapon_models" -> {
+                row("Diamond set", () -> weaponThemeName(c.diamondWeaponTheme), () -> c.diamondWeaponTheme = Math.floorMod(c.diamondWeaponTheme - 1, 3), () -> c.diamondWeaponTheme = Math.floorMod(c.diamondWeaponTheme + 1, 3));
+                row("Netherite set", () -> weaponThemeName(c.netheriteWeaponTheme), () -> c.netheriteWeaponTheme = Math.floorMod(c.netheriteWeaponTheme - 1, 3), () -> c.netheriteWeaponTheme = Math.floorMod(c.netheriteWeaponTheme + 1, 3));
+                row("Bow / Shield / Mace", () -> weaponThemeName(c.utilityWeaponTheme), () -> c.utilityWeaponTheme = Math.floorMod(c.utilityWeaponTheme - 1, 3), () -> c.utilityWeaponTheme = Math.floorMod(c.utilityWeaponTheme + 1, 3));
+            }
+            case "little_demon" -> {
+                row("Scale", () -> String.format("%.2f", c.littleDemonScale), () -> c.littleDemonScale = Math.max(0.35F, c.littleDemonScale - 0.05F), () -> c.littleDemonScale = Math.min(2.5F, c.littleDemonScale + 0.05F));
+                row("Vertical", () -> String.format("%.2f", c.littleDemonVerticalOffset), () -> c.littleDemonVerticalOffset = Math.max(-1F, c.littleDemonVerticalOffset - 0.05F), () -> c.littleDemonVerticalOffset = Math.min(1F, c.littleDemonVerticalOffset + 0.05F));
+                row("Back offset", () -> String.format("%.2f", c.littleDemonBackOffset), () -> c.littleDemonBackOffset = Math.max(-0.3F, c.littleDemonBackOffset - 0.05F), () -> c.littleDemonBackOffset = Math.min(1F, c.littleDemonBackOffset + 0.05F));
+                row("Tint", () -> hex(c.littleDemonTintArgb), () -> c.littleDemonTintArgb = previousColor(c.littleDemonTintArgb), () -> c.littleDemonTintArgb = nextColor(c.littleDemonTintArgb));
+                row("Show others", () -> c.littleDemonShowOthers ? "ON" : "OFF", () -> c.littleDemonShowOthers = !c.littleDemonShowOthers, () -> c.littleDemonShowOthers = !c.littleDemonShowOthers);
             }
             case "back_weapon" -> {
                 row("Style", () -> backWeaponStyleName(c.backWeaponStyle), () -> c.backWeaponStyle = Math.floorMod(c.backWeaponStyle - 1, 4), () -> c.backWeaponStyle = Math.floorMod(c.backWeaponStyle + 1, 4));
