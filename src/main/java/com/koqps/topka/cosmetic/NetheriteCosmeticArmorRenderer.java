@@ -34,6 +34,10 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
             Identifier.fromNamespaceAndPath("minecraft", "textures/entity/equipment/humanoid/netherite.png");
     private static final Identifier VANILLA_LEGGINGS =
             Identifier.fromNamespaceAndPath("minecraft", "textures/entity/equipment/humanoid_leggings/netherite.png");
+    private static final Identifier VALENTINE_OUTER =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentines_armor_layer_1.png");
+    private static final Identifier VALENTINE_LEGGINGS =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentines_armor_layer_2.png");
 
     private final ArmorModelSet<HumanoidModel<HumanoidRenderState>> armorModels;
 
@@ -66,14 +70,6 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
             HumanoidModel<HumanoidRenderState> contextModel
     ) {
         int style = styleFor(slot);
-
-        // Paladin is a real OBJ replacement. Do not draw vanilla netherite
-        // underneath it; split OBJ sections are attached directly to the
-        // animated Minecraft head/body/arm/leg ModelParts.
-        if (style == 3) {
-            renderPaladin(slot, contextModel, poseStack, submitNodeCollector, light);
-            return;
-        }
 
         Identifier texture = textureFor(style, slot);
         HumanoidModel<HumanoidRenderState> armorModel = armorModels.get(slot);
@@ -343,6 +339,7 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
             case 2 -> leggings
                     ? CosmeticTextures.DEMONIC_LEGGINGS
                     : CosmeticTextures.DEMONIC_ARMOR;
+            case 3 -> leggings ? VALENTINE_LEGGINGS : VALENTINE_OUTER;
             default -> leggings ? VANILLA_LEGGINGS : VANILLA_OUTER;
         };
     }
