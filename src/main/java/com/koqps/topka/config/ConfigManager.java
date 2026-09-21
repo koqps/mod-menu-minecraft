@@ -125,6 +125,22 @@ public final class ConfigManager {
             }
             config.cosmeticRendererVersion = 3;
         }
+
+        // v4 uses the uploaded Blockbench Angel model/texture as the visual
+        // reference. Only replace the old stock purple/cyan colors; user-made
+        // color choices remain untouched.
+        if (config.cosmeticRendererVersion < 4) {
+            if (config.wingsStyle == 0) {
+                if (config.wingsPrimaryColorArgb == 0xFF8B5CF6) config.wingsPrimaryColorArgb = 0xFFFFFFFF;
+                if (config.wingsSecondaryColorArgb == 0xFF41C7FF) config.wingsSecondaryColorArgb = 0xFFC8CDD8;
+                config.wingsGlow = false;
+                config.wingsDetail = 5;
+                config.wingsDepth = Math.min(config.wingsDepth, 0.12F);
+                config.wingsBoneWidth = Math.min(config.wingsBoneWidth, 1.8F);
+                config.wingsOpacity = Math.max(config.wingsOpacity, 235);
+            }
+            config.cosmeticRendererVersion = 4;
+        }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
