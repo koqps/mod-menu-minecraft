@@ -51,9 +51,10 @@ public final class WingCosmeticRenderer {
             poseStack.pushPose();
             poseStack.translate(-camera.x, -camera.y, -camera.z);
 
+            int style = Math.floorMod(cfg.wingsStyle, 5);
             context.submitNodeCollector().submitCustomGeometry(
                     poseStack,
-                    RenderTypes.entityTranslucent(CosmeticTextures.WINGS),
+                    RenderTypes.entityTranslucent(style == 0 ? CosmeticTextures.ANGEL_BASE : CosmeticTextures.WINGS),
                     (pose, vertices) -> {
                         renderSide(pose, vertices, anchor, animation, cfg, -1.0D, 0.0F);
                         renderSide(pose, vertices, anchor, animation, cfg, 1.0D, 0.5F);
@@ -536,7 +537,9 @@ public final class WingCosmeticRenderer {
     }
 
     private static void quad(PoseStack.Pose pose, VertexConsumer v, Vec3 a, Vec3 b, Vec3 c, Vec3 d, int color, int tile) {
-        float[] uv = UV_TILES[Math.floorMod(tile == 4 ? 2 : tile, UV_TILES.length)];
+        float[] uv = tile == 0
+                ? new float[]{0.0F, 0.0F, 1.0F, 1.0F}
+                : UV_TILES[Math.floorMod(tile == 4 ? 2 : tile, UV_TILES.length)];
         vertex(pose, v, a, color, uv[0], uv[1]);
         vertex(pose, v, b, color, uv[2], uv[1]);
         vertex(pose, v, c, color, uv[2], uv[3]);
