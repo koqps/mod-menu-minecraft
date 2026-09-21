@@ -1,0 +1,44 @@
+{
+  "model": {
+    "type": "minecraft:select",
+    "property": "topka:weapon_theme",
+    "cases": [
+      {
+        "when": "oni",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/shield",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "oni",
+            "model": "shield_308",
+            "scale": 0.7,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      },
+      {
+        "when": "ender",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/shield",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "ender",
+            "model": "model_9",
+            "scale": 0.7,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/shield"
+    }
+  }
+}
