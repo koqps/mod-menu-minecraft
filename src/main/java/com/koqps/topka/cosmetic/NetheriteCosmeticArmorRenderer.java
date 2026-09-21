@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -38,6 +39,21 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
             Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentines_armor_layer_1.png");
     private static final Identifier VALENTINE_LEGGINGS =
             Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentines_armor_layer_2.png");
+
+    private static final Identifier VALENTINE_TEX1 =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentine/valentine_tex1.png");
+    private static final Identifier VALENTINE_TEX2 =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentine/valentine_tex2.png");
+    private static final Identifier VALENTINE_TEX3 =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentine/valentine_tex3.png");
+    private static final Identifier VALENTINE_TEX8 =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentine/valentine_tex8.png");
+    private static final Identifier VALENTINE_GLASSES =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentine/glassese.png");
+    private static final Identifier VALENTINE_CLOUD_HEART =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentine/cloudheart.png");
+    private static final Identifier VALENTINE_HEART_NITRO =
+            Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/valentine/heartnitro.png");
 
     private final ArmorModelSet<HumanoidModel<HumanoidRenderState>> armorModels;
 
@@ -93,7 +109,166 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
         // horns/spikes/gems directly to the animated player bones.
         if (style == 2) {
             submitDemonicDetails(slot, contextModel, poseStack, submitNodeCollector, light);
+        } else if (style == 3) {
+            submitValentineDetails(slot, contextModel, poseStack, submitNodeCollector, light);
         }
+    }
+
+    private static void submitValentineDetails(
+            EquipmentSlot slot,
+            HumanoidModel<HumanoidRenderState> model,
+            PoseStack poseStack,
+            SubmitNodeCollector collector,
+            int light
+    ) {
+        if (slot == EquipmentSlot.HEAD) {
+            submitValentineHelmet(model.head, poseStack, collector, light);
+        } else if (slot == EquipmentSlot.CHEST) {
+            // The pack's actual armor_layer_1/2 files are static. Its real
+            // animated assets live in separate cosmetic textures, so add one
+            // of those source animations back as the chest's luminous heart.
+            submitAnimatedHeartPanel(model.body, poseStack, collector);
+        }
+    }
+
+    private static void submitValentineHelmet(
+            ModelPart head,
+            PoseStack poseStack,
+            SubmitNodeCollector collector,
+            int light
+    ) {
+        PackedMeshLibrary.Model mesh =
+                PackedMeshLibrary.get(PackedMeshLibrary.Pack.VALENTINE_HELMET, "helmet");
+        if (mesh == null) return;
+
+        poseStack.pushPose();
+        head.translateAndRotate(poseStack);
+
+        for (PackedMeshLibrary.SubMesh subMesh : mesh.subMeshes()) {
+            Identifier texture = subMesh.texture();
+            int frames = 1;
+            int frame = 0;
+
+            if (texture.equals(VALENTINE_GLASSES)) {
+                frames = 32;
+                frame = pingPongFrame(32, 100L);
+            } else if (texture.equals(VALENTINE_CLOUD_HEART)) {
+                frames = 26;
+                frame = loopFrame(26, 100L);
+            }
+
+            final int frameIndex = frame;
+            final int frameCount = frames;
+
+            collector.submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.entityTranslucent(texture),
+                    (pose, vertices) -> emitAnimatedMesh(
+                            subMesh, pose, vertices, light, frameIndex, frameCount
+                    )
+            );
+        }
+
+        poseStack.popPose();
+    }
+
+    private static void emitAnimatedMesh(
+            PackedMeshLibrary.SubMesh mesh,
+            PoseStack.Pose pose,
+            VertexConsumer consumer,
+            int light,
+            int frame,
+            int frames
+    ) {
+        var vertices = mesh.vertices();
+        for (int i = 0; i + 2 < vertices.size(); i += 3) {
+            animatedVertex(consumer, pose, vertices.get(i), light, frame, frames);
+            animatedVertex(consumer, pose, vertices.get(i + 1), light, frame, frames);
+            animatedVertex(consumer, pose, vertices.get(i + 2), light, frame, frames);
+            animatedVertex(consumer, pose, vertices.get(i + 2), light, frame, frames);
+        }
+    }
+
+    private static void animatedVertex(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            PackedMeshLibrary.Vertex vertex,
+            int light,
+            int frame,
+            int frames
+    ) {
+        float v = frames <= 1
+                ? vertex.v()
+                : (frame + vertex.v()) / frames;
+
+        consumer.addVertex(pose, vertex.x(), vertex.y(), vertex.z())
+                .setColor(0xFFFFFFFF)
+                .setUv(vertex.u(), v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(light)
+                .setNormal(pose, vertex.nx(), vertex.ny(), vertex.nz());
+    }
+
+    private static void submitAnimatedHeartPanel(
+            ModelPart body,
+            PoseStack poseStack,
+            SubmitNodeCollector collector
+    ) {
+        final int frames = 18;
+        final int frame = loopFrame(frames, 100L);
+        final float v0 = frame / (float) frames;
+        final float v1 = (frame + 1) / (float) frames;
+
+        poseStack.pushPose();
+        body.translateAndRotate(poseStack);
+
+        collector.submitCustomGeometry(
+                poseStack,
+                RenderTypes.entityTranslucent(VALENTINE_HEART_NITRO),
+                (pose, vertices) -> {
+                    float z = -0.218F;
+                    float x0 = -0.105F;
+                    float x1 = 0.105F;
+                    float y0 = 0.18F;
+                    float y1 = 0.39F;
+
+                    panelVertex(vertices, pose, x0, y1, z, 0.0F, v1);
+                    panelVertex(vertices, pose, x1, y1, z, 1.0F, v1);
+                    panelVertex(vertices, pose, x1, y0, z, 1.0F, v0);
+                    panelVertex(vertices, pose, x0, y0, z, 0.0F, v0);
+                }
+        );
+
+        poseStack.popPose();
+    }
+
+    private static void panelVertex(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            float x,
+            float y,
+            float z,
+            float u,
+            float v
+    ) {
+        consumer.addVertex(pose, x, y, z)
+                .setColor(0xFFFFFFFF)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightCoordsUtil.FULL_BRIGHT)
+                .setNormal(pose, 0.0F, 0.0F, -1.0F);
+    }
+
+    private static int loopFrame(int frames, long frameMillis) {
+        long step = Math.max(0L, System.currentTimeMillis() / Math.max(1L, frameMillis));
+        return (int) (step % Math.max(1, frames));
+    }
+
+    private static int pingPongFrame(int frames, long frameMillis) {
+        if (frames <= 1) return 0;
+        int period = frames * 2 - 2;
+        int step = (int) ((System.currentTimeMillis() / Math.max(1L, frameMillis)) % period);
+        return step < frames ? step : period - step;
     }
 
     private static void renderPaladin(
