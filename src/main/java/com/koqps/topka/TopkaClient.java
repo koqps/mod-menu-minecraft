@@ -23,6 +23,7 @@ import com.koqps.topka.module.ModuleManager;
 import com.koqps.topka.item.OniWeaponSpecialRenderer;
 import com.koqps.topka.item.WeaponMeshSpecialRenderer;
 import com.koqps.topka.item.WeaponThemeProperty;
+import com.koqps.topka.cosmetic.NetheriteCosmeticArmorRenderer;
 import com.koqps.topka.ui.TopkaScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
@@ -49,6 +50,7 @@ public final class TopkaClient implements ClientModInitializer {
         OniWeaponSpecialRenderer.init();
         WeaponThemeProperty.register();
         WeaponMeshSpecialRenderer.register();
+        NetheriteCosmeticArmorRenderer.register();
 
         HealthHud.register();
         ArmorHud.register();
