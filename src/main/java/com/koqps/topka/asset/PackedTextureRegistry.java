@@ -17,15 +17,13 @@ public final class PackedTextureRegistry {
     public static final Identifier ONI = Identifier.fromNamespaceAndPath("topka", "textures/weapons/oni_atlas.png");
     public static final Identifier LITTLE_DEMON = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/little_demon.png");
     public static final Identifier PLAIN_WHITE = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/plain_white.png");
-    public static final Identifier PALADIN = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/paladin_armor.png");
 
     private record TextureSpec(Identifier target, String folder, int chunks) { }
 
     private static final List<TextureSpec> SPECS = List.of(
             new TextureSpec(ONI, "oni_tex", 6),
             new TextureSpec(LITTLE_DEMON, "demon_tex", 1),
-            new TextureSpec(PLAIN_WHITE, "white_tex", 1),
-            new TextureSpec(PALADIN, "paladin_tex", 1)
+            new TextureSpec(PLAIN_WHITE, "white_tex", 1)
     );
 
     private static final List<DynamicTexture> OPEN_TEXTURES = new ArrayList<>();
