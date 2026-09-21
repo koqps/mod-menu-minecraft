@@ -30,34 +30,29 @@ jobs:
       - name: Build
         run: ./gradlew clean build --stacktrace
 
-      - name: Verify mod jar contents
+      - name: Verify compiled 0.11.0 systems
         shell: bash
         run: |
           JAR=$(find build/libs -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' | head -n 1)
-          if [ -z "$JAR" ]; then
-            echo "No normal mod jar found"
-            exit 1
-          fi
-          echo "Checking $JAR"
+          test -n "$JAR"
           jar tf "$JAR" > jar-contents.txt
           grep -q '^fabric.mod.json$' jar-contents.txt
           grep -q '^topka.client.mixins.json$' jar-contents.txt
           grep -q '^com/koqps/topka/TopkaClient.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/mixin/NoHurtCamMixin.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/mixin/ClientLevelTimeMixin.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/mixin/SkyRendererTimeMixin.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/ui/TopkaScreen.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/ui/UiFont.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/HealthHud.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/WorldVisuals.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/WorldLabels.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/hud/CosmeticTextures.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/cosmetic/CosmeticAnchor.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/cosmetic/CosmeticAnimation.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/asset/PackedMeshLibrary.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/asset/PackedTextureRegistry.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/asset/PackedMeshSubmitter.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/item/WeaponThemeProperty.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/item/WeaponMeshSpecialRenderer.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/cosmetic/ImportedCosmeticRenderer.class$' jar-contents.txt
           grep -q '^com/koqps/topka/cosmetic/WingCosmeticRenderer.class$' jar-contents.txt
           grep -q '^com/koqps/topka/cosmetic/CapeCosmeticRenderer.class$' jar-contents.txt
-          grep -q '^assets/topka/font/ui.json$' jar-contents.txt
-          grep -q '^assets/topka/textures/cosmetic/angel_wings.png$' jar-contents.txt
+          grep -q '^assets/minecraft/items/diamond_sword.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/netherite_sword.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/bow.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/shield.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/trident.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/mace.json$' jar-contents.txt
 
       - name: Upload normal mod jar
         uses: actions/upload-artifact@v4
