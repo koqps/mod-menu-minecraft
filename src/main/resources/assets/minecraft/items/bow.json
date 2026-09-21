@@ -38,23 +38,108 @@
       {
         "when": "valentine",
         "model": {
-          "type": "minecraft:special",
-          "base": "topka:item/valentine_bow_base",
-          "model": {
-            "type": "topka:weapon_mesh",
-            "pack": "valentine",
-            "model": "bow",
-            "scale": 1,
-            "rx": 0,
-            "ry": 0,
-            "rz": 0
+          "type": "minecraft:condition",
+          "property": "minecraft:using_item",
+          "on_false": {
+            "type": "minecraft:special",
+            "base": "topka:item/valentine_bow_base",
+            "model": {
+              "type": "topka:weapon_mesh",
+              "pack": "valentine",
+              "model": "bow",
+              "scale": 1,
+              "rx": 0,
+              "ry": 0,
+              "rz": 0
+            }
+          },
+          "on_true": {
+            "type": "minecraft:range_dispatch",
+            "property": "minecraft:use_duration",
+            "scale": 0.05,
+            "entries": [
+              {
+                "threshold": 0.65,
+                "model": {
+                  "type": "minecraft:special",
+                  "base": "topka:item/valentine_bow_base",
+                  "model": {
+                    "type": "topka:weapon_mesh",
+                    "pack": "valentine",
+                    "model": "bow_1",
+                    "scale": 1,
+                    "rx": 0,
+                    "ry": 0,
+                    "rz": 0
+                  }
+                }
+              },
+              {
+                "threshold": 0.9,
+                "model": {
+                  "type": "minecraft:special",
+                  "base": "topka:item/valentine_bow_base",
+                  "model": {
+                    "type": "topka:weapon_mesh",
+                    "pack": "valentine",
+                    "model": "bow_2",
+                    "scale": 1,
+                    "rx": 0,
+                    "ry": 0,
+                    "rz": 0
+                  }
+                }
+              }
+            ],
+            "fallback": {
+              "type": "minecraft:special",
+              "base": "topka:item/valentine_bow_base",
+              "model": {
+                "type": "topka:weapon_mesh",
+                "pack": "valentine",
+                "model": "bow_0",
+                "scale": 1,
+                "rx": 0,
+                "ry": 0,
+                "rz": 0
+              }
+            }
           }
         }
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "minecraft:item/bow"
+      "type": "minecraft:condition",
+      "property": "minecraft:using_item",
+      "on_false": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/bow"
+      },
+      "on_true": {
+        "type": "minecraft:range_dispatch",
+        "property": "minecraft:use_duration",
+        "scale": 0.05,
+        "entries": [
+          {
+            "threshold": 0.65,
+            "model": {
+              "type": "minecraft:model",
+              "model": "minecraft:item/bow_pulling_1"
+            }
+          },
+          {
+            "threshold": 0.9,
+            "model": {
+              "type": "minecraft:model",
+              "model": "minecraft:item/bow_pulling_2"
+            }
+          }
+        ],
+        "fallback": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/bow_pulling_0"
+        }
+      }
     }
   }
 }
