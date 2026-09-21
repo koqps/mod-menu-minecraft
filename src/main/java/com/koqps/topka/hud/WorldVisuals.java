@@ -55,11 +55,7 @@ public final class WorldVisuals {
         if (TopkaClient.MODULES.byId("waypoints").enabled()) renderWaypointBeams(context, camera);
         if (TopkaClient.MODULES.byId("cape").enabled()) CapeCosmeticRenderer.render(context, camera, client);
         if (TopkaClient.MODULES.byId("wings").enabled()) {
-            if (TopkaClient.CONFIG.get().wingsStyle >= 5) {
-                ImportedCosmeticRenderer.renderWingPack(context, camera, client);
-            } else {
-                WingCosmeticRenderer.render(context, camera, client);
-            }
+            WingCosmeticRenderer.render(context, camera, client);
         }
         if (TopkaClient.MODULES.byId("back_weapon").enabled()) renderBackWeapon(context, camera, client);
         if (TopkaClient.MODULES.byId("head_cosmetic").enabled()) renderHeadCosmetic(context, camera, client);
