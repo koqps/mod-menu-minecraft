@@ -58,8 +58,11 @@ public final class ImportedCosmeticRenderer {
             // Keep only a small body clearance. User-configured back offset is
             // intentionally damped so old configs cannot push the rig far away.
             double backOffset = 0.075D + cfg.importedWingBackOffset * 0.20D;
-            float flap = (float) Math.sin(System.nanoTime() * 1.0E-9D * Math.max(0.05F, cfg.wingsFlapSpeed) * 3.0D)
-                    * Math.clamp(cfg.wingsFlapAmount, 0.0F, 1.0F) * 0.075F;
+            // Forward/backward mechanical swoosh. The angle is applied around
+            // each shoulder root in the player's local X/Z plane, so the wing
+            // tips sweep toward/away from the body without moving the roots.
+            float flap = (float) Math.sin(System.nanoTime() * 1.0E-9D * Math.max(0.05F, cfg.wingsFlapSpeed) * 2.35D)
+                    * Math.clamp(cfg.wingsFlapAmount, 0.0F, 1.0F) * 0.30F;
             int tint = multiplyAlpha(cfg.wingsPrimaryColorArgb, cfg.wingsOpacity);
 
             PoseStack poseStack = context.poseStack();
@@ -134,19 +137,30 @@ public final class ImportedCosmeticRenderer {
         double ly = (source.y() - 1.20D) * scale;
         double lz = (source.z() - 0.58D) * scale + backOffset;
 
-        // Mechanical in-plane flex around the two center mounts. This changes
-        // shape without translating the complete rig away from the player.
+        // Rotate each half around a vertical shoulder root. Opposite signed
+        // angles on left/right make both wing tips travel forward/backward
+        // together while the central mount remains attached to the player.
         double side = Math.signum(lx);
+        double localNx = source.nx();
+        double localNy = source.ny();
+        double localNz = source.nz();
+
         if (side != 0.0D) {
-            double pivotX = side * 0.18D;
-            double pivotY = 0.08D;
-            double angle = -side * flap;
+            double pivotX = side * 0.16D;
+            double pivotZ = backOffset;
+            double angle = side * flap;
             double cos = Math.cos(angle);
             double sin = Math.sin(angle);
+
             double dx = lx - pivotX;
-            double dy = ly - pivotY;
-            lx = pivotX + dx * cos - dy * sin;
-            ly = pivotY + dx * sin + dy * cos;
+            double dz = lz - pivotZ;
+            lx = pivotX + dx * cos + dz * sin;
+            lz = pivotZ - dx * sin + dz * cos;
+
+            double rotatedNx = localNx * cos + localNz * sin;
+            double rotatedNz = -localNx * sin + localNz * cos;
+            localNx = rotatedNx;
+            localNz = rotatedNz;
         }
 
         Vec3 p = origin
@@ -154,9 +168,9 @@ public final class ImportedCosmeticRenderer {
                 .add(up.scale(ly))
                 .add(back.scale(lz));
 
-        Vec3 normal = right.scale(source.nx())
-                .add(up.scale(source.ny()))
-                .add(back.scale(source.nz()));
+        Vec3 normal = right.scale(localNx)
+                .add(up.scale(localNy))
+                .add(back.scale(localNz));
         if (normal.lengthSqr() > 1.0E-8D) normal = normal.normalize();
 
         vertices.addVertex(pose, (float) p.x, (float) p.y, (float) p.z)
