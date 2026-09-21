@@ -36,6 +36,22 @@
             "y": 0.504
           }
         }
+      },
+      {
+        "when": "valentine",
+        "model": {
+          "type": "minecraft:special",
+          "base": "topka:item/valentine_pickaxe_base",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "valentine",
+            "model": "pickaxe",
+            "scale": 1,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
       }
     ],
     "fallback": {
