@@ -14,6 +14,7 @@ import net.minecraft.resources.Identifier;
  */
 public final class CosmeticTextures {
     public static final Identifier WINGS = Identifier.fromNamespaceAndPath("topka", "dynamic/wings_atlas");
+    public static final Identifier ANGEL_BASE = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/angel_wings.png");
 
     private static DynamicTexture wingsTexture;
     private static boolean registered;
