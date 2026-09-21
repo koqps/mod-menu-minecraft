@@ -38,23 +38,102 @@
       {
         "when": "valentine",
         "model": {
-          "type": "minecraft:special",
-          "base": "topka:item/valentine_shield_base",
-          "model": {
-            "type": "topka:weapon_mesh",
-            "pack": "valentine",
-            "model": "shield",
-            "scale": 1,
-            "rx": 0,
-            "ry": 0,
-            "rz": 0
+          "type": "minecraft:condition",
+          "property": "minecraft:using_item",
+          "on_false": {
+            "type": "minecraft:special",
+            "base": "topka:item/valentine_shield_base",
+            "model": {
+              "type": "topka:weapon_mesh",
+              "pack": "valentine",
+              "model": "shield",
+              "scale": 1,
+              "rx": 0,
+              "ry": 0,
+              "rz": 0
+            }
+          },
+          "on_true": {
+            "type": "minecraft:special",
+            "base": "topka:item/valentine_shield_base",
+            "model": {
+              "type": "topka:weapon_mesh",
+              "pack": "valentine",
+              "model": "shield_blocking",
+              "scale": 1,
+              "rx": 0,
+              "ry": 0,
+              "rz": 0
+            }
+          },
+          "transformation": {
+            "left_rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "right_rotation": [
+              0,
+              0,
+              0,
+              1
+            ],
+            "scale": [
+              1,
+              -1,
+              -1
+            ],
+            "translation": [
+              0,
+              0,
+              0
+            ]
           }
         }
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "minecraft:item/shield"
+      "type": "minecraft:condition",
+      "property": "minecraft:using_item",
+      "on_false": {
+        "type": "minecraft:special",
+        "base": "minecraft:item/shield",
+        "model": {
+          "type": "minecraft:shield"
+        }
+      },
+      "on_true": {
+        "type": "minecraft:special",
+        "base": "minecraft:item/shield_blocking",
+        "model": {
+          "type": "minecraft:shield"
+        }
+      },
+      "transformation": {
+        "left_rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "right_rotation": [
+          0,
+          0,
+          0,
+          1
+        ],
+        "scale": [
+          1,
+          -1,
+          -1
+        ],
+        "translation": [
+          0,
+          0,
+          0
+        ]
+      }
     }
   }
 }
