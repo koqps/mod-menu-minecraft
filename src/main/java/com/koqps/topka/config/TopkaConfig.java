@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class TopkaConfig {
-    public int cosmeticRendererVersion = 6;
+    public int cosmeticRendererVersion = 7;
     public Map<String, Boolean> modules = new HashMap<>();
     public List<WaypointConfig> waypoints = new ArrayList<>();
     public List<String> highlightedItems = new ArrayList<>(List.of(
@@ -170,9 +170,13 @@ public final class TopkaConfig {
     public int littleDemonTintArgb = 0xFFFFFFFF;
     public boolean littleDemonShowOthers = false;
 
-    // Uploaded wearable armor cosmetics
-    // 1 = Valkyrie, 2 = Demonic
-    public int armorCosmeticStyle = 1;
+    // Uploaded wearable armor cosmetics.
+    // Each slot can be selected independently: 0 = none, 1 = Valkyrie, 2 = Demonic.
+    public int armorCosmeticStyle = 1; // legacy whole-set selector
+    public int armorHelmetStyle = 1;
+    public int armorChestStyle = 1;
+    public int armorLeggingsStyle = 1;
+    public int armorBootsStyle = 1;
     public float armorCosmeticScale = 1.0F;
     public float armorCosmeticVerticalOffset = 0.0F;
     public int armorCosmeticTintArgb = 0xFFFFFFFF;
