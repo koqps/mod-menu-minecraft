@@ -23,6 +23,7 @@ public final class ModuleManager {
         new Module("cape", "Cape", "Animated original cosmetic cape outline.", "▱", Module.Category.VISUAL, false),
         new Module("wings", "Wings", "Layered modeled wings with bones, feathers and membranes.", "✦", Module.Category.VISUAL, false),
         new Module("back_weapon", "Back Weapon", "Modeled sword, katana, crystal blade or scythe on your back.", "⚔", Module.Category.VISUAL, false),
+        new Module("weapon_models", "Weapon Models", "Replace Diamond/Netherite and utility weapons with uploaded Oni or Ender Eye sets.", "⚒", Module.Category.VISUAL, true),
         new Module("head_cosmetic", "Head Cosmetic", "Crown, horns, antlers or arcane crest.", "♛", Module.Category.VISUAL, false),
 
         new Module("drop_protection", "Drop Protection", "Press Drop twice before protected items leave your hand.", "⛨", Module.Category.PLAYER, false),
