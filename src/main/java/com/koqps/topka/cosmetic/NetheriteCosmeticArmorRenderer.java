@@ -76,8 +76,7 @@ public final class NetheriteCosmeticArmorRenderer implements ArmorRenderer {
                 RenderTypes.armorCutoutNoCull(texture),
                 light,
                 OverlayTexture.NO_OVERLAY,
-                humanoidRenderState.outlineColor,
-                null
+                humanoidRenderState.outlineColor
         );
     }
 
