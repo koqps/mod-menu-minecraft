@@ -44,11 +44,7 @@ public final class CosmeticsScreen extends Screen {
     private record CosmeticEntry(String name, String description, int style) { }
 
     private static final List<CosmeticEntry> WINGS = List.of(
-            new CosmeticEntry("Angel Wings", "Layered feather wings.", 0),
-            new CosmeticEntry("Demon Wings", "Dark membrane wings.", 1),
-            new CosmeticEntry("Crystal Wings", "Sharp faceted wings.", 2),
-            new CosmeticEntry("Dragon Wings", "Scaled dragon profile.", 3),
-            new CosmeticEntry("Tech Wings", "Mechanical neon profile.", 4)
+            new CosmeticEntry("Set Wings", "Uploaded five-piece OBJ wing set.", 0)
     );
 
     private static final List<CosmeticEntry> ARMOR = List.of(
@@ -212,7 +208,7 @@ public final class CosmeticsScreen extends Screen {
         drawBottomButton(g, mx, my, 648, 426, 56, "Reset");
 
         g.text(font, UiFont.text("Armor skins apply to equipped netherite pieces • slots are independent"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Cosmetics 0.12.6"), 616, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Cosmetics 0.12.7"), 616, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
@@ -353,7 +349,10 @@ public final class CosmeticsScreen extends Screen {
 
         switch (section) {
             case WINGS -> {
-                c.wingsStyle = entry.style;
+                c.wingsStyle = 0;
+                c.importedWingScale = 1.0F;
+                c.importedWingVerticalOffset = 0.0F;
+                c.importedWingBackOffset = 0.10F;
                 TopkaClient.MODULES.byId("wings").setEnabled(true);
             }
             case HELMETS -> c.armorHelmetStyle = entry.style;
@@ -387,7 +386,10 @@ public final class CosmeticsScreen extends Screen {
         var c = TopkaClient.CONFIG.get();
         int style = section == Section.WINGS ? 0 : selectedStyle();
         if (section == Section.WINGS) {
-            c.wingsStyle = style;
+            c.wingsStyle = 0;
+            c.importedWingScale = 1.0F;
+            c.importedWingVerticalOffset = 0.0F;
+            c.importedWingBackOffset = 0.10F;
             TopkaClient.MODULES.byId("wings").setEnabled(true);
         } else {
             c.armorHelmetStyle = style;
@@ -435,13 +437,7 @@ public final class CosmeticsScreen extends Screen {
     }
 
     private String wingName(int style) {
-        return switch (style) {
-            case 1 -> "Demon";
-            case 2 -> "Crystal";
-            case 3 -> "Dragon";
-            case 4 -> "Tech";
-            default -> "Angel";
-        };
+        return "Set Wings";
     }
 
     private String armorName(int style) {
