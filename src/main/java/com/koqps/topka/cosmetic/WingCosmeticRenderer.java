@@ -117,27 +117,115 @@ public final class WingCosmeticRenderer {
             Vec3 root, Vec3 shoulder, Vec3 elbow, Vec3 outer, Vec3 low, Vec3 lowerRoot,
             double side, float scale, float thickness, int primary, int secondary, TopkaConfig cfg
     ) {
-        // Central shoulder plate and two solid upper bones.
-        prismBetween(pose, v, root, shoulder, a.right(), a.back(), 0.10D * scale, 0.08D * scale, secondary, 0);
-        prismBetween(pose, v, shoulder, elbow, a.right(), a.back(), 0.085D * scale, 0.07D * scale, secondary, 0);
-        prismBetween(pose, v, elbow, outer, a.right(), a.back(), 0.065D * scale, 0.055D * scale, secondary, 0);
+        // Compact shoulder mount. The visible wing is made from separated
+        // feather solids, not from one continuous fan/sheet.
+        prismBetween(
+                pose, v,
+                root,
+                shoulder,
+                a.right(), a.back(),
+                0.075D * scale,
+                0.055D * scale,
+                shade(secondary, 0.90F),
+                0
+        );
 
-        int count = 7 + Math.clamp(cfg.wingsDetail, 1, 5) * 2;
-        for (int i = 0; i < count; i++) {
-            double t = i / (double) Math.max(1, count - 1);
-            Vec3 base = lerp(shoulder, lowerRoot, Math.min(0.95D, t * 0.98D));
-            double reach = scale * (1.15D + (1.0D - t) * 0.62D) * cfg.wingsSpread;
-            Vec3 tip = root
+        int detail = Math.clamp(cfg.wingsDetail, 1, 5);
+        int primaryCount = 5 + detail;
+        int secondaryCount = 4 + detail;
+
+        // Upper/outer flight feathers. Each feather has its own root, depth,
+        // width and pointed tip, leaving deliberate visible gaps.
+        for (int i = 0; i < primaryCount; i++) {
+            double t = i / (double) Math.max(1, primaryCount - 1);
+
+            Vec3 featherRoot = lerp(shoulder, lowerRoot, 0.10D + t * 0.66D)
+                    .add(a.back().scale((0.015D + t * 0.020D) * scale));
+
+            double reach = (1.20D + (1.0D - t) * 0.54D) * scale * Math.max(0.55F, cfg.wingsSpread);
+            double y = (0.69D - t * 1.30D) * scale;
+            double z = (0.15D + t * 0.34D) * scale;
+
+            Vec3 featherTip = root
                     .add(a.right().scale(side * reach))
-                    .add(a.up().scale((0.72D - t * 1.38D) * scale))
-                    .add(a.back().scale((0.16D + t * 0.42D) * scale));
+                    .add(a.up().scale(y))
+                    .add(a.back().scale(z));
 
-            double width = (0.085D + (1.0D - t) * 0.055D) * scale;
-            Vec3 base2 = base.add(a.right().scale(side * width));
-            Vec3 tip2 = tip.add(a.right().scale(-side * width * 0.55D)).add(a.up().scale(-0.13D * scale));
+            double baseHalf = (0.040D + (1.0D - t) * 0.022D) * scale;
+            double midHalf = (0.070D + (1.0D - t) * 0.030D) * scale;
+            double featherDepth = Math.max(0.018D, thickness * (0.20D + t * 0.05D));
 
-            int col = (i & 1) == 0 ? primary : secondary;
-            extrudedPanel(pose, v, base, base2, tip2, tip, a.back(), thickness * 0.42D, col, 0);
+            int col = (i & 1) == 0 ? primary : shade(primary, 0.94F);
+            taperedFeather(
+                    pose, v,
+                    featherRoot,
+                    featherTip,
+                    a.right().scale(side),
+                    a.back(),
+                    baseHalf,
+                    midHalf,
+                    featherDepth,
+                    col,
+                    0
+            );
+        }
+
+        // Inner coverts. Shorter row sits closer to the body and slightly in
+        // front of the long flight feathers, giving a layered bird-wing shape.
+        for (int i = 0; i < secondaryCount; i++) {
+            double t = i / (double) Math.max(1, secondaryCount - 1);
+
+            Vec3 featherRoot = lerp(root, lowerRoot, 0.08D + t * 0.74D)
+                    .add(a.back().scale(-0.018D * scale));
+
+            double reach = (0.66D + (1.0D - t) * 0.40D) * scale * Math.max(0.55F, cfg.wingsSpread);
+            Vec3 featherTip = root
+                    .add(a.right().scale(side * reach))
+                    .add(a.up().scale((0.42D - t * 0.92D) * scale))
+                    .add(a.back().scale((0.02D + t * 0.18D) * scale));
+
+            double baseHalf = 0.036D * scale;
+            double midHalf = (0.060D + (1.0D - t) * 0.018D) * scale;
+            int col = (i & 1) == 0 ? secondary : shade(secondary, 0.90F);
+
+            taperedFeather(
+                    pose, v,
+                    featherRoot,
+                    featherTip,
+                    a.right().scale(side),
+                    a.back(),
+                    baseHalf,
+                    midHalf,
+                    Math.max(0.016D, thickness * 0.16D),
+                    col,
+                    0
+            );
+        }
+
+        // Small tertiary feathers hide the shoulder mount without creating a
+        // broad rectangular plane.
+        for (int i = 0; i < 4; i++) {
+            double t = i / 3.0D;
+            Vec3 featherRoot = root
+                    .add(a.right().scale(side * (0.07D + t * 0.08D) * scale))
+                    .add(a.up().scale((0.12D - t * 0.17D) * scale));
+            Vec3 featherTip = root
+                    .add(a.right().scale(side * (0.42D + t * 0.14D) * scale))
+                    .add(a.up().scale((0.28D - t * 0.38D) * scale))
+                    .add(a.back().scale(0.035D * scale));
+
+            taperedFeather(
+                    pose, v,
+                    featherRoot,
+                    featherTip,
+                    a.right().scale(side),
+                    a.back(),
+                    0.030D * scale,
+                    0.052D * scale,
+                    Math.max(0.014D, thickness * 0.14D),
+                    shade(secondary, 0.84F + i * 0.03F),
+                    0
+            );
         }
     }
 
@@ -280,6 +368,69 @@ public final class WingCosmeticRenderer {
         float width = Math.max(1.0F, cfg.wingsBoneWidth * 0.68F);
         line(pose, v, root, shoulder, col, width);
         line(pose, v, shoulder, elbow, col, width);
+    }
+
+    private static void taperedFeather(
+            PoseStack.Pose pose,
+            VertexConsumer v,
+            Vec3 base,
+            Vec3 tip,
+            Vec3 widthAxis,
+            Vec3 depthAxis,
+            double baseHalfWidth,
+            double midHalfWidth,
+            double halfDepth,
+            int color,
+            int tile
+    ) {
+        Vec3 direction = tip.subtract(base);
+        Vec3 mid = base.add(direction.scale(0.56D));
+
+        Vec3 width = widthAxis.normalize();
+        Vec3 depth = depthAxis.normalize();
+
+        Vec3 baseL = base.subtract(width.scale(baseHalfWidth));
+        Vec3 baseR = base.add(width.scale(baseHalfWidth));
+        Vec3 midL = mid.subtract(width.scale(midHalfWidth));
+        Vec3 midR = mid.add(width.scale(midHalfWidth));
+
+        // Slightly bevel the pointed tip so the edge has real thickness.
+        Vec3 tipBase = tip.subtract(direction.normalize().scale(Math.max(0.015D, base.distanceTo(tip) * 0.025D)));
+        Vec3 tipL = tipBase.subtract(width.scale(baseHalfWidth * 0.14D));
+        Vec3 tipR = tipBase.add(width.scale(baseHalfWidth * 0.14D));
+
+        // Root -> widest part.
+        extrudedPanel(
+                pose, v,
+                baseL, baseR, midR, midL,
+                depth,
+                halfDepth * 2.0D,
+                color,
+                tile
+        );
+
+        // Widest part -> pointed tip.
+        extrudedPanel(
+                pose, v,
+                midL, midR, tipR, tipL,
+                depth,
+                halfDepth * 1.65D,
+                shade(color, 0.96F),
+                tile
+        );
+
+        // Tiny solid tip cap.
+        prismBetween(
+                pose, v,
+                tipBase,
+                tip,
+                width,
+                depth,
+                Math.max(0.006D, baseHalfWidth * 0.10D),
+                Math.max(0.006D, halfDepth * 0.55D),
+                shade(color, 0.88F),
+                tile
+        );
     }
 
     private static void prismBetween(
