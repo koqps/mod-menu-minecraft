@@ -64,7 +64,6 @@ public final class WorldVisuals {
         if (TopkaClient.MODULES.byId("back_weapon").enabled()) renderBackWeapon(context, camera, client);
         if (TopkaClient.MODULES.byId("head_cosmetic").enabled()) renderHeadCosmetic(context, camera, client);
         if (TopkaClient.MODULES.byId("little_demon").enabled()) ImportedCosmeticRenderer.renderLittleDemon(context, camera, client);
-        if (TopkaClient.MODULES.byId("armor_cosmetic").enabled()) ImportedCosmeticRenderer.renderArmorPack(context, camera, client);
     }
 
     private static void renderHitboxes(LevelRenderContext context, Vec3 camera, Minecraft client) {
