@@ -196,6 +196,20 @@ public final class ConfigManager {
             config.wingsDepth = Math.min(config.wingsDepth, 0.10F);
             config.cosmeticRendererVersion = 9;
         }
+
+        if (config.cosmeticRendererVersion < 10) {
+            // Use the user's replacement set-wings ZIP directly.
+            config.wingsStyle = 0;
+            config.wingsPrimaryColorArgb = 0xFFFFFFFF;
+            config.wingsSecondaryColorArgb = 0xFFC8CDD8;
+            config.wingsOpacity = 245;
+            config.wingsGlow = false;
+            config.wingsRainbow = false;
+            config.importedWingScale = 1.0F;
+            config.importedWingVerticalOffset = 0.0F;
+            config.importedWingBackOffset = 0.10F;
+            config.cosmeticRendererVersion = 10;
+        }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
