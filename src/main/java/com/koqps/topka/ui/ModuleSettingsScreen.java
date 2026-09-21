@@ -457,6 +457,7 @@ public final class ModuleSettingsScreen extends Screen {
             case "halo" -> {
                 c.haloRadius = 0.46F; c.haloHeight = 0.16F; c.haloLineWidth = 2.2F;
                 c.haloColorArgb = 0xFF41C7FF; c.haloStyle = 1; c.haloRainbow = false;
+                c.importedHaloScale = 1F; c.importedHaloHeight = 0.18F; c.importedHaloTintArgb = 0xFFFFFFFF;
             }
             case "trails" -> {
                 c.trailLifetimeMs = 900; c.trailLineWidth = 2.2F; c.trailColorArgb = 0xFF8B5CF6;
@@ -494,6 +495,15 @@ public final class ModuleSettingsScreen extends Screen {
                 c.wingsRainbow = false; c.wingsGlow = false; c.wingsShowOthers = false;
                 c.wingsDetail = 5; c.wingsDepth = 0.12F; c.wingsBoneWidth = 1.8F;
                 c.wingsVerticalOffset = 0F; c.wingsBackOffset = 0.12F; c.wingsTilt = 0F; c.wingsFold = 0F;
+                c.importedWingScale = 1F; c.importedWingVerticalOffset = 0F; c.importedWingBackOffset = 0.10F;
+                c.importedWingTintArgb = 0xFFFFFFFF;
+            }
+            case "weapon_models" -> {
+                c.diamondWeaponTheme = 2; c.netheriteWeaponTheme = 1; c.utilityWeaponTheme = 1;
+            }
+            case "little_demon" -> {
+                c.littleDemonScale = 1F; c.littleDemonVerticalOffset = 0F; c.littleDemonBackOffset = 0.08F;
+                c.littleDemonTintArgb = 0xFFFFFFFF; c.littleDemonShowOthers = false;
             }
             case "back_weapon" -> {
                 c.backWeaponStyle = 0; c.backWeaponScale = 1.0F; c.backWeaponAngle = 36F; c.backWeaponOffsetY = 0F;
@@ -629,12 +639,24 @@ public final class ModuleSettingsScreen extends Screen {
     }
 
     private static String wingStyleName(int style) {
-        return switch (Math.floorMod(style, 5)) {
+        return switch (Math.floorMod(style, 9)) {
             case 1 -> "DEMON";
             case 2 -> "CRYSTAL";
             case 3 -> "DRAGON";
             case 4 -> "TECH";
+            case 5 -> "PACK WING I";
+            case 6 -> "PACK WING II";
+            case 7 -> "PACK WING III";
+            case 8 -> "PACK WING IV";
             default -> "ANGEL";
+        };
+    }
+
+    private static String weaponThemeName(int theme) {
+        return switch (Math.floorMod(theme, 3)) {
+            case 1 -> "ONI";
+            case 2 -> "ENDER EYE";
+            default -> "VANILLA";
         };
     }
 
@@ -657,11 +679,12 @@ public final class ModuleSettingsScreen extends Screen {
     }
 
     private static String haloStyleName(int style) {
-        return switch (Math.floorMod(style, 4)) {
+        return switch (Math.floorMod(style, 5)) {
             case 0 -> "SINGLE";
             case 1 -> "GLOW";
             case 2 -> "TRIPLE";
-            default -> "PULSE";
+            case 3 -> "PULSE";
+            default -> "PACK HALO";
         };
     }
 
