@@ -1,10 +1,44 @@
 {
   "model": {
-    "type": "minecraft:special",
-    "base": "topka:item/oni_weapon_base",
-    "model": {
-      "type": "topka:oni_weapon",
-      "model_id": "netherite_axe"
+    "type": "minecraft:select",
+    "property": "topka:weapon_theme",
+    "cases": [
+      {
+        "when": "oni",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/netherite_axe",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "oni",
+            "model": "battle_axe_567",
+            "scale": 0.68,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      },
+      {
+        "when": "ender",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/netherite_axe",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "ender",
+            "model": "model_11",
+            "scale": 0.68,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_axe"
     }
   }
 }
