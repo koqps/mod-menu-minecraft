@@ -141,6 +141,15 @@ public final class ConfigManager {
             }
             config.cosmeticRendererVersion = 4;
         }
+
+        if (config.cosmeticRendererVersion < 5) {
+            // First uploaded-asset release: keep both material families available
+            // immediately while preserving the vanilla option.
+            config.diamondWeaponTheme = 2;
+            config.netheriteWeaponTheme = 1;
+            config.utilityWeaponTheme = 1;
+            config.cosmeticRendererVersion = 5;
+        }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
 
@@ -163,7 +172,7 @@ public final class ConfigManager {
         config.haloRadius = Math.clamp(config.haloRadius, 0.2F, 1.0F);
         config.haloHeight = Math.clamp(config.haloHeight, 0.0F, 0.7F);
         config.haloLineWidth = Math.clamp(config.haloLineWidth, 1.0F, 7.0F);
-        config.haloStyle = Math.clamp(config.haloStyle, 0, 3);
+        config.haloStyle = Math.clamp(config.haloStyle, 0, 4);
 
         config.trailLifetimeMs = Math.clamp(config.trailLifetimeMs, 250, 3000);
         config.trailLineWidth = Math.clamp(config.trailLineWidth, 1.0F, 12.0F);
@@ -205,7 +214,7 @@ public final class ConfigManager {
         config.capeStyle = Math.clamp(config.capeStyle, 0, 3);
         config.capeOpacity = Math.clamp(config.capeOpacity, 30, 235);
 
-        config.wingsStyle = Math.clamp(config.wingsStyle, 0, 4);
+        config.wingsStyle = Math.clamp(config.wingsStyle, 0, 8);
         config.wingsScale = Math.clamp(config.wingsScale, 0.45F, 2.25F);
         config.wingsSpread = Math.clamp(config.wingsSpread, 0.35F, 1.65F);
         config.wingsFlapSpeed = Math.clamp(config.wingsFlapSpeed, 0.10F, 3.0F);
@@ -218,6 +227,19 @@ public final class ConfigManager {
         config.wingsBackOffset = Math.clamp(config.wingsBackOffset, -0.20F, 0.75F);
         config.wingsTilt = Math.clamp(config.wingsTilt, -35.0F, 35.0F);
         config.wingsFold = Math.clamp(config.wingsFold, 0.0F, 0.70F);
+
+        config.diamondWeaponTheme = Math.clamp(config.diamondWeaponTheme, 0, 2);
+        config.netheriteWeaponTheme = Math.clamp(config.netheriteWeaponTheme, 0, 2);
+        config.utilityWeaponTheme = Math.clamp(config.utilityWeaponTheme, 0, 2);
+
+        config.importedWingScale = Math.clamp(config.importedWingScale, 0.35F, 2.5F);
+        config.importedWingVerticalOffset = Math.clamp(config.importedWingVerticalOffset, -1.0F, 1.0F);
+        config.importedWingBackOffset = Math.clamp(config.importedWingBackOffset, -0.3F, 1.0F);
+        config.importedHaloScale = Math.clamp(config.importedHaloScale, 0.35F, 2.5F);
+        config.importedHaloHeight = Math.clamp(config.importedHaloHeight, -0.5F, 1.5F);
+        config.littleDemonScale = Math.clamp(config.littleDemonScale, 0.35F, 2.5F);
+        config.littleDemonVerticalOffset = Math.clamp(config.littleDemonVerticalOffset, -1.0F, 1.0F);
+        config.littleDemonBackOffset = Math.clamp(config.littleDemonBackOffset, -0.3F, 1.0F);
 
         config.backWeaponStyle = Math.clamp(config.backWeaponStyle, 0, 3);
         config.backWeaponScale = Math.clamp(config.backWeaponScale, 0.45F, 2.25F);
