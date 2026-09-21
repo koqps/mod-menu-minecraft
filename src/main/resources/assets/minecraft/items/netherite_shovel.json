@@ -1,10 +1,44 @@
 {
   "model": {
-    "type": "minecraft:special",
-    "base": "topka:item/oni_weapon_base",
-    "model": {
-      "type": "topka:oni_weapon",
-      "model_id": "netherite_shovel"
+    "type": "minecraft:select",
+    "property": "topka:weapon_theme",
+    "cases": [
+      {
+        "when": "oni",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/netherite_shovel",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "oni",
+            "model": "shovel_437",
+            "scale": 0.72,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      },
+      {
+        "when": "ender",
+        "model": {
+          "type": "minecraft:special",
+          "base": "minecraft:item/netherite_shovel",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "ender",
+            "model": "model_25",
+            "scale": 0.72,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "minecraft:item/netherite_shovel"
     }
   }
 }
