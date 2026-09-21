@@ -129,6 +129,47 @@ public final class ImportedCosmeticRenderer {
         }
     }
 
+    public static void renderArmorPack(LevelRenderContext context, Vec3 camera, Minecraft client) {
+        var cfg = TopkaClient.CONFIG.get();
+        PackedMeshLibrary.Pack pack = cfg.armorCosmeticStyle == 2
+                ? PackedMeshLibrary.Pack.DEMONIC_ARMOR
+                : PackedMeshLibrary.Pack.VALKYRIE_ARMOR;
+        String modelName = cfg.armorCosmeticStyle == 2 ? "demonic" : "valkyrie";
+
+        for (Entity entity : client.level.entitiesForRendering()) {
+            if (!(entity instanceof Player player) || player.isRemoved()) continue;
+            if (player != client.player && !cfg.armorCosmeticShowOthers) continue;
+            if (player == client.player && client.options.getCameraType().isFirstPerson()) continue;
+            if (client.player.distanceToSqr(player) > 4096.0D) continue;
+
+            AABB box = player.getBoundingBox();
+            Vec3 center = new Vec3(
+                    (box.minX + box.maxX) * 0.5D,
+                    box.minY + cfg.armorCosmeticVerticalOffset,
+                    (box.minZ + box.maxZ) * 0.5D
+            );
+
+            double yaw = player.getVisualRotationYInDegrees();
+
+            PoseStack poseStack = context.poseStack();
+            poseStack.pushPose();
+            poseStack.translate(center.x - camera.x, center.y - camera.y, center.z - camera.z);
+            poseStack.rotateDegrees(Axis.YP, (float) (180.0D - yaw));
+            float scale = cfg.armorCosmeticScale;
+            poseStack.scale(scale, scale, scale);
+
+            PackedMeshSubmitter.submit(
+                    PackedMeshLibrary.get(pack, modelName),
+                    poseStack,
+                    context.submitNodeCollector(),
+                    LightCoordsUtil.FULL_BRIGHT,
+                    OverlayTexture.NO_OVERLAY,
+                    cfg.armorCosmeticTintArgb
+            );
+            poseStack.popPose();
+        }
+    }
+
     private static int multiplyAlpha(int argb, int alpha) {
         int sourceAlpha = (argb >>> 24) & 0xFF;
         int combined = Math.clamp(Math.round(sourceAlpha * (alpha / 255.0F)), 0, 255);
