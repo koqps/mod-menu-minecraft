@@ -52,9 +52,9 @@ public final class CosmeticsScreen extends Screen {
     );
 
     private static final List<CosmeticEntry> ARMOR = List.of(
-            new CosmeticEntry("None", "Hide this armor slot.", 0),
-            new CosmeticEntry("Valkyrie", "Silver and gold cosmetic armor.", 1),
-            new CosmeticEntry("Demonic", "Black and crimson cosmetic armor.", 2)
+            new CosmeticEntry("Default Netherite", "Use Minecraft's normal netherite look.", 0),
+            new CosmeticEntry("Valkyrie", "Silver and gold skin on netherite armor.", 1),
+            new CosmeticEntry("Demonic", "Black and crimson skin on netherite armor.", 2)
     );
 
     private final Screen parent;
@@ -211,8 +211,8 @@ public final class CosmeticsScreen extends Screen {
         drawBottomButton(g, mx, my, 536, 426, 104, "Clear Armor");
         drawBottomButton(g, mx, my, 648, 426, 56, "Reset");
 
-        g.text(font, UiFont.text("Left click selects • Search stays focused • Armor slots are independent"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Cosmetics 0.12.4"), 616, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Armor skins apply to equipped netherite pieces • slots are independent"), 172, 477, 0xFF686879, false);
+        g.text(font, UiFont.text("Cosmetics 0.12.6"), 616, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
@@ -242,8 +242,8 @@ public final class CosmeticsScreen extends Screen {
         g.text(font, UiFont.text("Boots: " + armorName(c.armorBootsStyle)), 18, 342, 0xFFB7B7C4, false);
 
         g.text(font, UiFont.text("TIP"), 18, 448, 0xFF646476, false);
-        g.text(font, UiFont.text("Mix Valkyrie + Demonic"), 18, 464, 0xFF686879, false);
-        g.text(font, UiFont.text("pieces independently."), 18, 478, 0xFF686879, false);
+        g.text(font, UiFont.text("Wear netherite armor, then"), 18, 464, 0xFF686879, false);
+        g.text(font, UiFont.text("choose each slot's skin."), 18, 478, 0xFF686879, false);
     }
 
     private void drawSection(GuiGraphicsExtractor g, int mx, int my, int index, Section value) {
@@ -385,7 +385,7 @@ public final class CosmeticsScreen extends Screen {
 
     private void equipWholeSet() {
         var c = TopkaClient.CONFIG.get();
-        int style = section == Section.WINGS ? 1 : Math.max(1, selectedStyle());
+        int style = section == Section.WINGS ? 0 : selectedStyle();
         if (section == Section.WINGS) {
             c.wingsStyle = style;
             TopkaClient.MODULES.byId("wings").setEnabled(true);
@@ -448,7 +448,7 @@ public final class CosmeticsScreen extends Screen {
         return switch (style) {
             case 1 -> "Valkyrie";
             case 2 -> "Demonic";
-            default -> "None";
+            default -> "Netherite";
         };
     }
 
