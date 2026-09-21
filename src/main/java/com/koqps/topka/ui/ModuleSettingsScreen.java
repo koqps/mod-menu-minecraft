@@ -216,12 +216,16 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Show others", () -> c.capeShowOthers ? "ON" : "OFF", () -> c.capeShowOthers = !c.capeShowOthers, () -> c.capeShowOthers = !c.capeShowOthers);
             }
             case "wings" -> {
-                row("Style", () -> wingStyleName(c.wingsStyle), () -> c.wingsStyle = Math.floorMod(c.wingsStyle - 1, 4), () -> c.wingsStyle = Math.floorMod(c.wingsStyle + 1, 4));
+                row("Style", () -> wingStyleName(c.wingsStyle), () -> c.wingsStyle = Math.floorMod(c.wingsStyle - 1, 5), () -> c.wingsStyle = Math.floorMod(c.wingsStyle + 1, 5));
                 row("Detail", () -> Integer.toString(c.wingsDetail), () -> c.wingsDetail = Math.max(1, c.wingsDetail - 1), () -> c.wingsDetail = Math.min(5, c.wingsDetail + 1));
                 row("Scale", () -> String.format("%.2f", c.wingsScale), () -> c.wingsScale = Math.max(0.45F, c.wingsScale - 0.05F), () -> c.wingsScale = Math.min(2.25F, c.wingsScale + 0.05F));
                 row("Spread", () -> String.format("%.2f", c.wingsSpread), () -> c.wingsSpread = Math.max(0.35F, c.wingsSpread - 0.05F), () -> c.wingsSpread = Math.min(1.65F, c.wingsSpread + 0.05F));
                 row("Depth", () -> String.format("%.2f", c.wingsDepth), () -> c.wingsDepth = Math.max(0.02F, c.wingsDepth - 0.02F), () -> c.wingsDepth = Math.min(0.42F, c.wingsDepth + 0.02F));
                 row("Bone width", () -> String.format("%.1f", c.wingsBoneWidth), () -> c.wingsBoneWidth = Math.max(1F, c.wingsBoneWidth - 0.25F), () -> c.wingsBoneWidth = Math.min(8F, c.wingsBoneWidth + 0.25F));
+                row("Vertical", () -> String.format("%.2f", c.wingsVerticalOffset), () -> c.wingsVerticalOffset = Math.max(-0.75F, c.wingsVerticalOffset - 0.05F), () -> c.wingsVerticalOffset = Math.min(0.75F, c.wingsVerticalOffset + 0.05F));
+                row("Back offset", () -> String.format("%.2f", c.wingsBackOffset), () -> c.wingsBackOffset = Math.max(-0.20F, c.wingsBackOffset - 0.05F), () -> c.wingsBackOffset = Math.min(0.75F, c.wingsBackOffset + 0.05F));
+                row("Tilt", () -> String.format("%.0f°", c.wingsTilt), () -> c.wingsTilt = Math.max(-35F, c.wingsTilt - 5F), () -> c.wingsTilt = Math.min(35F, c.wingsTilt + 5F));
+                row("Fold", () -> String.format("%.2f", c.wingsFold), () -> c.wingsFold = Math.max(0F, c.wingsFold - 0.05F), () -> c.wingsFold = Math.min(0.70F, c.wingsFold + 0.05F));
                 row("Flap speed", () -> String.format("%.2f", c.wingsFlapSpeed), () -> c.wingsFlapSpeed = Math.max(0.10F, c.wingsFlapSpeed - 0.10F), () -> c.wingsFlapSpeed = Math.min(3.0F, c.wingsFlapSpeed + 0.10F));
                 row("Flap amount", () -> String.format("%.2f", c.wingsFlapAmount), () -> c.wingsFlapAmount = Math.max(0.0F, c.wingsFlapAmount - 0.03F), () -> c.wingsFlapAmount = Math.min(0.55F, c.wingsFlapAmount + 0.03F));
                 row("Opacity", () -> Integer.toString(c.wingsOpacity), () -> c.wingsOpacity = Math.max(30, c.wingsOpacity - 10), () -> c.wingsOpacity = Math.min(235, c.wingsOpacity + 10));
@@ -473,6 +477,7 @@ public final class ModuleSettingsScreen extends Screen {
                 c.wingsPrimaryColorArgb = 0xFF8B5CF6; c.wingsSecondaryColorArgb = 0xFF41C7FF;
                 c.wingsRainbow = false; c.wingsGlow = true; c.wingsShowOthers = false;
                 c.wingsDetail = 4; c.wingsDepth = 0.16F; c.wingsBoneWidth = 2.4F;
+                c.wingsVerticalOffset = 0F; c.wingsBackOffset = 0.12F; c.wingsTilt = 0F; c.wingsFold = 0F;
             }
             case "back_weapon" -> {
                 c.backWeaponStyle = 0; c.backWeaponScale = 1.0F; c.backWeaponAngle = 36F; c.backWeaponOffsetY = 0F;
@@ -608,10 +613,11 @@ public final class ModuleSettingsScreen extends Screen {
     }
 
     private static String wingStyleName(int style) {
-        return switch (Math.floorMod(style, 4)) {
+        return switch (Math.floorMod(style, 5)) {
             case 1 -> "DEMON";
             case 2 -> "CRYSTAL";
             case 3 -> "DRAGON";
+            case 4 -> "TECH";
             default -> "ANGEL";
         };
     }
