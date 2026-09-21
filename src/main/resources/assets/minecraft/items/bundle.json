@@ -21,8 +21,41 @@
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "minecraft:item/bundle"
+      "type": "minecraft:select",
+      "property": "minecraft:display_context",
+      "cases": [
+        {
+          "when": "gui",
+          "model": {
+            "type": "minecraft:condition",
+            "property": "minecraft:bundle/has_selected_item",
+            "on_false": {
+              "type": "minecraft:model",
+              "model": "minecraft:item/bundle"
+            },
+            "on_true": {
+              "type": "minecraft:composite",
+              "models": [
+                {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/bundle_open_back"
+                },
+                {
+                  "type": "minecraft:bundle/selected_item"
+                },
+                {
+                  "type": "minecraft:model",
+                  "model": "minecraft:item/bundle_open_front"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/bundle"
+      }
     }
   }
 }
