@@ -260,6 +260,23 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Tint", () -> hex(c.littleDemonTintArgb), () -> c.littleDemonTintArgb = previousColor(c.littleDemonTintArgb), () -> c.littleDemonTintArgb = nextColor(c.littleDemonTintArgb));
                 row("Show others", () -> c.littleDemonShowOthers ? "ON" : "OFF", () -> c.littleDemonShowOthers = !c.littleDemonShowOthers, () -> c.littleDemonShowOthers = !c.littleDemonShowOthers);
             }
+            case "armor_cosmetic" -> {
+                row("Set", () -> c.armorCosmeticStyle == 2 ? "DEMONIC" : "VALKYRIE",
+                        () -> c.armorCosmeticStyle = c.armorCosmeticStyle == 2 ? 1 : 2,
+                        () -> c.armorCosmeticStyle = c.armorCosmeticStyle == 2 ? 1 : 2);
+                row("Scale", () -> String.format("%.2f", c.armorCosmeticScale),
+                        () -> c.armorCosmeticScale = Math.max(0.70F, c.armorCosmeticScale - 0.05F),
+                        () -> c.armorCosmeticScale = Math.min(1.35F, c.armorCosmeticScale + 0.05F));
+                row("Vertical", () -> String.format("%.2f", c.armorCosmeticVerticalOffset),
+                        () -> c.armorCosmeticVerticalOffset = Math.max(-0.35F, c.armorCosmeticVerticalOffset - 0.025F),
+                        () -> c.armorCosmeticVerticalOffset = Math.min(0.35F, c.armorCosmeticVerticalOffset + 0.025F));
+                row("Tint", () -> hex(c.armorCosmeticTintArgb),
+                        () -> c.armorCosmeticTintArgb = previousColor(c.armorCosmeticTintArgb),
+                        () -> c.armorCosmeticTintArgb = nextColor(c.armorCosmeticTintArgb));
+                row("Show others", () -> c.armorCosmeticShowOthers ? "ON" : "OFF",
+                        () -> c.armorCosmeticShowOthers = !c.armorCosmeticShowOthers,
+                        () -> c.armorCosmeticShowOthers = !c.armorCosmeticShowOthers);
+            }
             case "back_weapon" -> {
                 row("Style", () -> backWeaponStyleName(c.backWeaponStyle), () -> c.backWeaponStyle = Math.floorMod(c.backWeaponStyle - 1, 4), () -> c.backWeaponStyle = Math.floorMod(c.backWeaponStyle + 1, 4));
                 row("Scale", () -> String.format("%.2f", c.backWeaponScale), () -> c.backWeaponScale = Math.max(0.45F, c.backWeaponScale - 0.05F), () -> c.backWeaponScale = Math.min(2.25F, c.backWeaponScale + 0.05F));
@@ -410,10 +427,10 @@ public final class ModuleSettingsScreen extends Screen {
     }
 
     private void addWeaponPickerTargets() {
-        final int[] xs = {32, 205, 378};
+        final int[] xs = {120, 320};
         final int[] ys = {100, 206, 312};
         for (int group = 0; group < 3; group++) {
-            for (int theme = 0; theme < 3; theme++) {
+            for (int theme = 0; theme < 2; theme++) {
                 final int selectedGroup = group;
                 final int selectedTheme = theme;
                 addLocalClickTarget(xs[theme], ys[group], 150, 70,
@@ -452,9 +469,8 @@ public final class ModuleSettingsScreen extends Screen {
             int selectedTheme
     ) {
         g.text(font, UiFont.text(title), 32, titleY, 0xFFB9B9C6, true);
-        drawWeaponCard(g, mx, my, 32, cardY, 0, selectedTheme, "VANILLA", "Minecraft");
-        drawWeaponCard(g, mx, my, 205, cardY, 1, selectedTheme, "ONI", "Animated set");
-        drawWeaponCard(g, mx, my, 378, cardY, 2, selectedTheme, "ENDER EYE", "Animated set");
+        drawWeaponCard(g, mx, my, 120, cardY, 0, selectedTheme, "VANILLA", "Minecraft");
+        drawWeaponCard(g, mx, my, 320, cardY, 1, selectedTheme, "ONI", "Uploaded set");
     }
 
     private void drawWeaponCard(
@@ -468,7 +484,7 @@ public final class ModuleSettingsScreen extends Screen {
             String title,
             String subtitle
     ) {
-        boolean selected = Math.floorMod(selectedTheme, 3) == theme;
+        boolean selected = Math.floorMod(selectedTheme, 2) == theme;
         boolean hover = mx >= x && mx < x + 150 && my >= y && my < y + 70;
         int background = selected ? Theme.withAlpha(Theme.accent(), 44)
                 : (hover ? 0xFF282833 : 0xFF181821);
@@ -483,7 +499,7 @@ public final class ModuleSettingsScreen extends Screen {
         int badge = selected ? Theme.accent() : 0xFF4D4D5B;
         g.fill(x + 12, y + 12, x + 42, y + 42,
                 selected ? Theme.withAlpha(Theme.accent(), 70) : 0xFF23232C);
-        g.centeredText(font, UiFont.text(theme == 0 ? "V" : theme == 1 ? "O" : "E"),
+        g.centeredText(font, UiFont.text(theme == 0 ? "V" : "O"),
                 x + 27, y + 23, badge);
 
         g.text(font, UiFont.text(title), x + 50, y + 13,
@@ -607,11 +623,15 @@ public final class ModuleSettingsScreen extends Screen {
                 c.importedWingTintArgb = 0xFFFFFFFF;
             }
             case "weapon_models" -> {
-                c.diamondWeaponTheme = 2; c.netheriteWeaponTheme = 1; c.utilityWeaponTheme = 1;
+                c.diamondWeaponTheme = 1; c.netheriteWeaponTheme = 1; c.utilityWeaponTheme = 1;
             }
             case "little_demon" -> {
                 c.littleDemonScale = 1F; c.littleDemonVerticalOffset = 0F; c.littleDemonBackOffset = 0.08F;
                 c.littleDemonTintArgb = 0xFFFFFFFF; c.littleDemonShowOthers = false;
+            }
+            case "armor_cosmetic" -> {
+                c.armorCosmeticStyle = 1; c.armorCosmeticScale = 1F; c.armorCosmeticVerticalOffset = 0F;
+                c.armorCosmeticTintArgb = 0xFFFFFFFF; c.armorCosmeticShowOthers = false;
             }
             case "back_weapon" -> {
                 c.backWeaponStyle = 0; c.backWeaponScale = 1.0F; c.backWeaponAngle = 36F; c.backWeaponOffsetY = 0F;
@@ -761,11 +781,7 @@ public final class ModuleSettingsScreen extends Screen {
     }
 
     private static String weaponThemeName(int theme) {
-        return switch (Math.floorMod(theme, 3)) {
-            case 1 -> "ONI";
-            case 2 -> "ENDER EYE";
-            default -> "VANILLA";
-        };
+        return theme == 1 ? "ONI" : "VANILLA";
     }
 
     private static String crosshairStyleName(int style) {
