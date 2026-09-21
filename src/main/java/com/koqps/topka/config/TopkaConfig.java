@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class TopkaConfig {
-    public int cosmeticRendererVersion = 5;
+    public int cosmeticRendererVersion = 6;
     public Map<String, Boolean> modules = new HashMap<>();
     public List<WaypointConfig> waypoints = new ArrayList<>();
     public List<String> highlightedItems = new ArrayList<>(List.of(
@@ -150,7 +150,7 @@ public final class TopkaConfig {
 
     // Uploaded weapon model replacements
     // 0 = vanilla, 1 = Oni, 2 = Ender Eye
-    public int diamondWeaponTheme = 2;
+    public int diamondWeaponTheme = 1;
     public int netheriteWeaponTheme = 1;
     public int utilityWeaponTheme = 1;
 
@@ -169,6 +169,14 @@ public final class TopkaConfig {
     public float littleDemonBackOffset = 0.08F;
     public int littleDemonTintArgb = 0xFFFFFFFF;
     public boolean littleDemonShowOthers = false;
+
+    // Uploaded wearable armor cosmetics
+    // 1 = Valkyrie, 2 = Demonic
+    public int armorCosmeticStyle = 1;
+    public float armorCosmeticScale = 1.0F;
+    public float armorCosmeticVerticalOffset = 0.0F;
+    public int armorCosmeticTintArgb = 0xFFFFFFFF;
+    public boolean armorCosmeticShowOthers = false;
 
     // Back weapon
     public int backWeaponStyle = 0;
