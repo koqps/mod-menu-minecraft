@@ -1,24 +1,24 @@
 package com.koqps.topka.cosmetic;
 
 import com.koqps.topka.TopkaClient;
-import com.koqps.topka.asset.PackedMeshLibrary;
-import com.koqps.topka.asset.PackedMeshSubmitter;
+import com.koqps.topka.hud.CosmeticTextures;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.player.PlayerModel;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 
 /**
- * Renders uploaded cosmetic armor on the real animated Minecraft player bones.
+ * Cosmetic armor rendered directly on Minecraft's animated player bones.
  *
- * Unlike the previous rigid full-body OBJ pass, every piece is transformed by
- * the same ModelPart that vanilla player/armor rendering uses. Head rotation,
- * arm swings, crouching and leg movement therefore carry the cosmetic geometry.
+ * This deliberately uses Minecraft-proportioned armor shells instead of trying
+ * to keep an imported full-body OBJ rigidly wrapped around the player. Each
+ * slot follows the same head/body/arm/leg ModelPart transforms as the player.
  */
 public final class CosmeticArmorLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
     public CosmeticArmorLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
@@ -37,151 +37,209 @@ public final class CosmeticArmorLayer extends RenderLayer<AvatarRenderState, Pla
         if (!TopkaClient.MODULES.byId("armor_cosmetic").enabled()) return;
         if (state.isSpectator) return;
 
-        Minecraft client = Minecraft.getInstance();
         var cfg = TopkaClient.CONFIG.get();
-
-        boolean self = client.player != null && state.id == client.player.getId();
-        if (!self && !cfg.armorCosmeticShowOthers) return;
-        if (self && client.options.getCameraType().isFirstPerson()) return;
-
         PlayerModel model = getParentModel();
+        float scale = Math.clamp(cfg.armorCosmeticScale, 0.70F, 1.35F);
+        int tint = cfg.armorCosmeticTintArgb;
 
         poseStack.pushPose();
-        // Minecraft's humanoid render space points down in +Y, so a positive
-        // user vertical offset is inverted here.
         poseStack.translate(0.0F, -cfg.armorCosmeticVerticalOffset, 0.0F);
 
-        renderSlot(
-                cfg.armorHelmetStyle,
-                "helmet",
-                model.head,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
+        // Helmet: actual head bone.
+        if (cfg.armorHelmetStyle != 0) {
+            submitBox(model.head, cfg.armorHelmetStyle, poseStack, collector, light, tint, scale,
+                    -0.270F, -0.535F, -0.270F,
+                     0.270F,  0.020F,  0.270F);
 
-        renderSlot(
-                cfg.armorChestStyle,
-                "body",
-                model.body,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
-        renderSlot(
-                cfg.armorChestStyle,
-                "left_arm",
-                model.leftArm,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
-        renderSlot(
-                cfg.armorChestStyle,
-                "right_arm",
-                model.rightArm,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
+            // Small set-specific crown/horn details, still attached to the head.
+            if (cfg.armorHelmetStyle == 1) {
+                submitBox(model.head, 1, poseStack, collector, light, tint, scale,
+                        -0.055F, -0.640F, -0.070F,
+                         0.055F, -0.520F,  0.070F);
+            } else {
+                submitBox(model.head, 2, poseStack, collector, light, tint, scale,
+                        -0.255F, -0.675F, -0.060F,
+                        -0.145F, -0.505F,  0.060F);
+                submitBox(model.head, 2, poseStack, collector, light, tint, scale,
+                         0.145F, -0.675F, -0.060F,
+                         0.255F, -0.505F,  0.060F);
+            }
+        }
 
-        renderSlot(
-                cfg.armorLeggingsStyle,
-                "waist",
-                model.body,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
-        renderSlot(
-                cfg.armorLeggingsStyle,
-                "left_leg",
-                model.leftLeg,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
-        renderSlot(
-                cfg.armorLeggingsStyle,
-                "right_leg",
-                model.rightLeg,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
+        // Chestplate: torso and both animated arms.
+        if (cfg.armorChestStyle != 0) {
+            submitBox(model.body, cfg.armorChestStyle, poseStack, collector, light, tint, scale,
+                    -0.285F, -0.020F, -0.165F,
+                     0.285F,  0.770F,  0.165F);
 
-        renderSlot(
-                cfg.armorBootsStyle,
-                "left_boot",
-                model.leftLeg,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
-        renderSlot(
-                cfg.armorBootsStyle,
-                "right_boot",
-                model.rightLeg,
-                poseStack,
-                collector,
-                light,
-                cfg.armorCosmeticTintArgb,
-                cfg.armorCosmeticScale
-        );
+            submitBox(model.leftArm, cfg.armorChestStyle, poseStack, collector, light, tint, scale,
+                    -0.160F, -0.145F, -0.160F,
+                     0.160F,  0.765F,  0.160F);
+            submitBox(model.rightArm, cfg.armorChestStyle, poseStack, collector, light, tint, scale,
+                    -0.160F, -0.145F, -0.160F,
+                     0.160F,  0.765F,  0.160F);
+
+            // Shoulder caps.
+            submitBox(model.leftArm, cfg.armorChestStyle, poseStack, collector, light, tint, scale,
+                    -0.205F, -0.170F, -0.205F,
+                     0.205F,  0.120F,  0.205F);
+            submitBox(model.rightArm, cfg.armorChestStyle, poseStack, collector, light, tint, scale,
+                    -0.205F, -0.170F, -0.205F,
+                     0.205F,  0.120F,  0.205F);
+        }
+
+        // Leggings: waist plus upper legs.
+        if (cfg.armorLeggingsStyle != 0) {
+            submitBox(model.body, cfg.armorLeggingsStyle, poseStack, collector, light, tint, scale,
+                    -0.290F, 0.510F, -0.170F,
+                     0.290F, 0.790F,  0.170F);
+
+            submitBox(model.leftLeg, cfg.armorLeggingsStyle, poseStack, collector, light, tint, scale,
+                    -0.155F, -0.020F, -0.155F,
+                     0.155F,  0.500F,  0.155F);
+            submitBox(model.rightLeg, cfg.armorLeggingsStyle, poseStack, collector, light, tint, scale,
+                    -0.155F, -0.020F, -0.155F,
+                     0.155F,  0.500F,  0.155F);
+        }
+
+        // Boots: lower half of each animated leg.
+        if (cfg.armorBootsStyle != 0) {
+            submitBox(model.leftLeg, cfg.armorBootsStyle, poseStack, collector, light, tint, scale,
+                    -0.170F, 0.390F, -0.185F,
+                     0.170F, 0.790F,  0.185F);
+            submitBox(model.rightLeg, cfg.armorBootsStyle, poseStack, collector, light, tint, scale,
+                    -0.170F, 0.390F, -0.185F,
+                     0.170F, 0.790F,  0.185F);
+        }
 
         poseStack.popPose();
     }
 
-    private static void renderSlot(
+    private static void submitBox(
+            ModelPart part,
             int style,
-            String modelName,
-            ModelPart bodyPart,
             PoseStack poseStack,
             SubmitNodeCollector collector,
             int light,
-            int tintArgb,
-            float scale
+            int tint,
+            float scale,
+            float minX,
+            float minY,
+            float minZ,
+            float maxX,
+            float maxY,
+            float maxZ
     ) {
-        PackedMeshLibrary.Pack pack = packForStyle(style);
-        if (pack == null) return;
-
         poseStack.pushPose();
-        bodyPart.translateAndRotate(poseStack);
-        float fittedScale = Math.clamp(scale, 0.70F, 1.35F);
-        poseStack.scale(fittedScale, fittedScale, fittedScale);
+        part.translateAndRotate(poseStack);
+        poseStack.scale(scale, scale, scale);
 
-        PackedMeshSubmitter.submit(
-                PackedMeshLibrary.get(pack, modelName),
+        float u0 = style == 2 ? 0.50F : 0.00F;
+        float u1 = style == 2 ? 1.00F : 0.50F;
+
+        collector.submitCustomGeometry(
                 poseStack,
-                collector,
-                light,
-                OverlayTexture.NO_OVERLAY,
-                tintArgb
+                RenderTypes.entityTranslucent(CosmeticTextures.ARMOR),
+                (pose, vertices) -> emitCuboid(
+                        pose,
+                        vertices,
+                        light,
+                        tint,
+                        u0,
+                        u1,
+                        minX,
+                        minY,
+                        minZ,
+                        maxX,
+                        maxY,
+                        maxZ
+                )
         );
         poseStack.popPose();
     }
 
-    private static PackedMeshLibrary.Pack packForStyle(int style) {
-        return switch (style) {
-            case 1 -> PackedMeshLibrary.Pack.VALKYRIE_ARMOR;
-            case 2 -> PackedMeshLibrary.Pack.DEMONIC_ARMOR;
-            default -> null;
-        };
+    private static void emitCuboid(
+            PoseStack.Pose pose,
+            VertexConsumer v,
+            int light,
+            int tint,
+            float u0,
+            float u1,
+            float minX,
+            float minY,
+            float minZ,
+            float maxX,
+            float maxY,
+            float maxZ
+    ) {
+        // front / back
+        quad(v, pose, light, tint, u0, 0F, u1, 1F,
+                minX, minY, minZ, maxX, minY, minZ, maxX, maxY, minZ, minX, maxY, minZ,
+                0F, 0F, -1F);
+        quad(v, pose, light, tint, u0, 0F, u1, 1F,
+                maxX, minY, maxZ, minX, minY, maxZ, minX, maxY, maxZ, maxX, maxY, maxZ,
+                0F, 0F, 1F);
+
+        // left / right
+        quad(v, pose, light, tint, u0, 0F, u1, 1F,
+                minX, minY, maxZ, minX, minY, minZ, minX, maxY, minZ, minX, maxY, maxZ,
+                -1F, 0F, 0F);
+        quad(v, pose, light, tint, u0, 0F, u1, 1F,
+                maxX, minY, minZ, maxX, minY, maxZ, maxX, maxY, maxZ, maxX, maxY, minZ,
+                1F, 0F, 0F);
+
+        // top / bottom
+        quad(v, pose, light, tint, u0, 0F, u1, 1F,
+                minX, minY, maxZ, maxX, minY, maxZ, maxX, minY, minZ, minX, minY, minZ,
+                0F, -1F, 0F);
+        quad(v, pose, light, tint, u0, 0F, u1, 1F,
+                minX, maxY, minZ, maxX, maxY, minZ, maxX, maxY, maxZ, minX, maxY, maxZ,
+                0F, 1F, 0F);
+    }
+
+    private static void quad(
+            VertexConsumer v,
+            PoseStack.Pose pose,
+            int light,
+            int tint,
+            float u0,
+            float v0,
+            float u1,
+            float v1,
+            float ax, float ay, float az,
+            float bx, float by, float bz,
+            float cx, float cy, float cz,
+            float dx, float dy, float dz,
+            float nx, float ny, float nz
+    ) {
+        vertex(v, pose, ax, ay, az, tint, u0, v0, light, nx, ny, nz);
+        vertex(v, pose, bx, by, bz, tint, u1, v0, light, nx, ny, nz);
+        vertex(v, pose, cx, cy, cz, tint, u1, v1, light, nx, ny, nz);
+
+        vertex(v, pose, ax, ay, az, tint, u0, v0, light, nx, ny, nz);
+        vertex(v, pose, cx, cy, cz, tint, u1, v1, light, nx, ny, nz);
+        vertex(v, pose, dx, dy, dz, tint, u0, v1, light, nx, ny, nz);
+    }
+
+    private static void vertex(
+            VertexConsumer v,
+            PoseStack.Pose pose,
+            float x,
+            float y,
+            float z,
+            int tint,
+            float u,
+            float texV,
+            int light,
+            float nx,
+            float ny,
+            float nz
+    ) {
+        v.addVertex(pose, x, y, z)
+                .setColor(tint)
+                .setUv(u, texV)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(light)
+                .setNormal(pose, nx, ny, nz);
     }
 }
