@@ -68,6 +68,7 @@ public record WeaponThemeProperty() implements SelectItemModelProperty<WeaponThe
     public enum Theme implements StringRepresentable {
         VANILLA("vanilla"),
         ONI("oni"),
+        VALENTINE("valentine"),
         ENDER("ender");
 
         private final String serializedName;
@@ -77,7 +78,11 @@ public record WeaponThemeProperty() implements SelectItemModelProperty<WeaponThe
         }
 
         public static Theme fromConfig(int value) {
-            return value == 1 ? ONI : VANILLA;
+            return switch (value) {
+                case 1 -> ONI;
+                case 2 -> VALENTINE;
+                default -> VANILLA;
+            };
         }
 
         @Override
