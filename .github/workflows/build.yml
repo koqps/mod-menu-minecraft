@@ -30,7 +30,7 @@ jobs:
       - name: Build
         run: ./gradlew clean build --stacktrace
 
-      - name: Verify compiled 0.12.4 systems
+      - name: Verify compiled 0.12.5 systems
         shell: bash
         run: |
           JAR=$(find build/libs -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' | head -n 1)
