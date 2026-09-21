@@ -49,8 +49,11 @@ public final class ImportedCosmeticRenderer {
                     (box.minZ + box.maxZ) * 0.5D
             );
 
-            float sourceScale = 0.58F * cfg.importedWingScale * cfg.wingsScale;
-            double backOffset = 0.13D + cfg.importedWingBackOffset;
+            // Keep the supplied five-piece wing set clearly behind the armor
+            // and a little tighter to the player. In 0.13.2 its near-camera
+            // panels visually merged into the Paladin shoulder silhouette.
+            float sourceScale = 0.50F * cfg.importedWingScale * cfg.wingsScale;
+            double backOffset = 0.26D + cfg.importedWingBackOffset;
             int tint = multiplyAlpha(cfg.wingsPrimaryColorArgb, cfg.wingsOpacity);
 
             PoseStack poseStack = context.poseStack();
