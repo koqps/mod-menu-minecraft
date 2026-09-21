@@ -30,7 +30,8 @@ public final class PackedMeshLibrary {
         LITTLE_DEMON("demon_pack", 1),
         VALKYRIE_ARMOR("valkyrie_armor", 1),
         DEMONIC_ARMOR("demonic_armor", 1),
-        PALADIN_ARMOR("paladin_armor", 1);
+        PALADIN_ARMOR("paladin_armor", 1),
+        VALENTINE_HELMET("valentine_helmet", 1);
 
         private final String folder;
         private final int chunks;
