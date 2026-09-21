@@ -5,6 +5,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.Identifier;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * Runtime-generated cosmetic texture atlas.
  *
@@ -15,10 +18,23 @@ import net.minecraft.resources.Identifier;
 public final class CosmeticTextures {
     public static final Identifier WINGS = Identifier.fromNamespaceAndPath("topka", "dynamic/wings_atlas");
     public static final Identifier ARMOR = Identifier.fromNamespaceAndPath("topka", "dynamic/armor_atlas");
+    public static final Identifier VALKYRIE_ARMOR = Identifier.fromNamespaceAndPath("topka", "dynamic/valkyrie_armor");
+    public static final Identifier VALKYRIE_LEGGINGS = Identifier.fromNamespaceAndPath("topka", "dynamic/valkyrie_leggings");
+    public static final Identifier DEMONIC_ARMOR = Identifier.fromNamespaceAndPath("topka", "dynamic/demonic_armor");
+    public static final Identifier DEMONIC_LEGGINGS = Identifier.fromNamespaceAndPath("topka", "dynamic/demonic_leggings");
     public static final Identifier ANGEL_BASE = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/angel_wings.png");
+
+    private static final Identifier NETHERITE_ARMOR =
+            Identifier.fromNamespaceAndPath("minecraft", "textures/entity/equipment/humanoid/netherite.png");
+    private static final Identifier NETHERITE_LEGGINGS =
+            Identifier.fromNamespaceAndPath("minecraft", "textures/entity/equipment/humanoid_leggings/netherite.png");
 
     private static DynamicTexture wingsTexture;
     private static DynamicTexture armorTexture;
+    private static DynamicTexture valkyrieArmorTexture;
+    private static DynamicTexture valkyrieLeggingsTexture;
+    private static DynamicTexture demonicArmorTexture;
+    private static DynamicTexture demonicLeggingsTexture;
     private static boolean registered;
 
     private CosmeticTextures() { }
@@ -37,6 +53,18 @@ public final class CosmeticTextures {
         armorTexture = new DynamicTexture(() -> "Mod Menu armor atlas", armor);
         client.getTextureManager().register(ARMOR, armorTexture);
 
+        // Build cosmetic armor skins directly from Minecraft's own netherite
+        // texture. This guarantees the UV layout matches the vanilla armor
+        // model exactly while letting the client switch visual themes.
+        valkyrieArmorTexture = registerArmorVariant(
+                client, NETHERITE_ARMOR, VALKYRIE_ARMOR, 1, "Valkyrie armor");
+        valkyrieLeggingsTexture = registerArmorVariant(
+                client, NETHERITE_LEGGINGS, VALKYRIE_LEGGINGS, 1, "Valkyrie leggings");
+        demonicArmorTexture = registerArmorVariant(
+                client, NETHERITE_ARMOR, DEMONIC_ARMOR, 2, "Demonic armor");
+        demonicLeggingsTexture = registerArmorVariant(
+                client, NETHERITE_LEGGINGS, DEMONIC_LEGGINGS, 2, "Demonic leggings");
+
         registered = true;
     }
 
@@ -49,7 +77,97 @@ public final class CosmeticTextures {
             armorTexture.close();
             armorTexture = null;
         }
+        if (valkyrieArmorTexture != null) {
+            valkyrieArmorTexture.close();
+            valkyrieArmorTexture = null;
+        }
+        if (valkyrieLeggingsTexture != null) {
+            valkyrieLeggingsTexture.close();
+            valkyrieLeggingsTexture = null;
+        }
+        if (demonicArmorTexture != null) {
+            demonicArmorTexture.close();
+            demonicArmorTexture = null;
+        }
+        if (demonicLeggingsTexture != null) {
+            demonicLeggingsTexture.close();
+            demonicLeggingsTexture = null;
+        }
         registered = false;
+    }
+
+    private static DynamicTexture registerArmorVariant(
+            Minecraft client,
+            Identifier sourceId,
+            Identifier targetId,
+            int style,
+            String debugName
+    ) {
+        NativeImage source = null;
+        try (InputStream input = client.getResourceManager().open(sourceId)) {
+            source = NativeImage.read(input);
+            NativeImage recolored = new NativeImage(source.getWidth(), source.getHeight(), false);
+
+            for (int y = 0; y < source.getHeight(); y++) {
+                for (int x = 0; x < source.getWidth(); x++) {
+                    recolored.setPixel(x, y, recolorArmorPixel(source.getPixel(x, y), x, y, style));
+                }
+            }
+
+            DynamicTexture texture = new DynamicTexture(() -> "Mod Menu " + debugName, recolored);
+            client.getTextureManager().register(targetId, texture);
+            return texture;
+        } catch (IOException exception) {
+            // Never crash startup because a resource pack moved a vanilla
+            // texture. A small transparent fallback keeps the client bootable.
+            NativeImage fallback = new NativeImage(64, 32, false);
+            clear(fallback);
+            DynamicTexture texture = new DynamicTexture(() -> "Mod Menu " + debugName + " fallback", fallback);
+            client.getTextureManager().register(targetId, texture);
+            return texture;
+        } finally {
+            if (source != null) source.close();
+        }
+    }
+
+    private static int recolorArmorPixel(int argb, int x, int y, int style) {
+        int alpha = (argb >>> 24) & 0xFF;
+        if (alpha == 0) return 0;
+
+        int r = (argb >>> 16) & 0xFF;
+        int g = (argb >>> 8) & 0xFF;
+        int b = argb & 0xFF;
+        int luma = Math.clamp((r * 54 + g * 183 + b * 19) >> 8, 0, 255);
+
+        if (style == 1) {
+            // Valkyrie: bright steel body with restrained gold ridges.
+            boolean gold = luma >= 132 || ((x * 3 + y * 5) % 29 == 0 && luma > 55);
+            if (gold) {
+                int rr = Math.clamp(128 + luma / 2, 0, 255);
+                int gg = Math.clamp(98 + luma / 2, 0, 242);
+                int bb = Math.clamp(28 + luma / 5, 0, 150);
+                return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
+            }
+
+            int rr = Math.clamp(64 + luma * 3 / 4, 0, 240);
+            int gg = Math.clamp(72 + luma * 3 / 4, 0, 245);
+            int bb = Math.clamp(88 + luma * 3 / 4, 0, 255);
+            return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
+        }
+
+        // Demonic: blackened netherite with crimson/purple highlights.
+        boolean ember = luma >= 126 || ((x * 7 + y * 11) % 37 == 0 && luma > 60);
+        if (ember) {
+            int rr = Math.clamp(84 + luma / 2, 0, 235);
+            int gg = Math.clamp(12 + luma / 10, 0, 90);
+            int bb = Math.clamp(24 + luma / 5, 0, 140);
+            return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
+        }
+
+        int rr = Math.clamp(18 + luma / 5, 0, 95);
+        int gg = Math.clamp(12 + luma / 8, 0, 70);
+        int bb = Math.clamp(24 + luma / 3, 0, 145);
+        return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
     }
 
     private static void paintAtlas(NativeImage image) {
