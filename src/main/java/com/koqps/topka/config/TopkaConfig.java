@@ -143,6 +143,10 @@ public final class TopkaConfig {
     public int wingsDetail = 4;
     public float wingsDepth = 0.16F;
     public float wingsBoneWidth = 2.4F;
+    public float wingsVerticalOffset = 0.0F;
+    public float wingsBackOffset = 0.12F;
+    public float wingsTilt = 0.0F;
+    public float wingsFold = 0.0F;
 
     // Back weapon
     public int backWeaponStyle = 0;
