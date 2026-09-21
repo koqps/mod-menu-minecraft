@@ -26,6 +26,7 @@ public final class ModuleManager {
         new Module("weapon_models", "Weapon Models", "Replace Diamond/Netherite and utility weapons with uploaded Oni or Ender Eye sets.", "⚒", Module.Category.VISUAL, true),
         new Module("head_cosmetic", "Head Cosmetic", "Crown, horns, antlers or arcane crest.", "♛", Module.Category.VISUAL, false),
         new Module("little_demon", "Little Demon Set", "Full uploaded Little Demon cosmetic OBJ set.", "♠", Module.Category.VISUAL, false),
+        new Module("armor_cosmetic", "Cosmetic Armor", "Wear Valkyrie or Demonic uploaded 3D armor sets.", "◆", Module.Category.VISUAL, false),
 
         new Module("drop_protection", "Drop Protection", "Press Drop twice before protected items leave your hand.", "⛨", Module.Category.PLAYER, false),
 
