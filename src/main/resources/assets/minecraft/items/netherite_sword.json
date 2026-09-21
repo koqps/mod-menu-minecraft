@@ -1,0 +1,10 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "topka:item/oni_weapon_base",
+    "model": {
+      "type": "topka:oni_weapon",
+      "model_id": "netherite_sword"
+    }
+  }
+}
