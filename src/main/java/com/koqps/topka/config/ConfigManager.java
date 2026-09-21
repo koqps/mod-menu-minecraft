@@ -143,12 +143,20 @@ public final class ConfigManager {
         }
 
         if (config.cosmeticRendererVersion < 5) {
-            // First uploaded-asset release: keep both material families available
-            // immediately while preserving the vanilla option.
-            config.diamondWeaponTheme = 2;
+            config.diamondWeaponTheme = 1;
             config.netheriteWeaponTheme = 1;
             config.utilityWeaponTheme = 1;
             config.cosmeticRendererVersion = 5;
+        }
+
+        if (config.cosmeticRendererVersion < 6) {
+            // The Ender Eye item pack is retired because several tool meshes use
+            // incompatible pivots. Existing Ender selections migrate to Oni.
+            if (config.diamondWeaponTheme == 2) config.diamondWeaponTheme = 1;
+            if (config.netheriteWeaponTheme == 2) config.netheriteWeaponTheme = 1;
+            if (config.utilityWeaponTheme == 2) config.utilityWeaponTheme = 1;
+            config.armorCosmeticStyle = Math.clamp(config.armorCosmeticStyle, 1, 2);
+            config.cosmeticRendererVersion = 6;
         }
         if (config.waypoints == null) config.waypoints = new ArrayList<>();
         if (config.highlightedItems == null) config.highlightedItems = new ArrayList<>();
@@ -228,9 +236,9 @@ public final class ConfigManager {
         config.wingsTilt = Math.clamp(config.wingsTilt, -35.0F, 35.0F);
         config.wingsFold = Math.clamp(config.wingsFold, 0.0F, 0.70F);
 
-        config.diamondWeaponTheme = Math.clamp(config.diamondWeaponTheme, 0, 2);
-        config.netheriteWeaponTheme = Math.clamp(config.netheriteWeaponTheme, 0, 2);
-        config.utilityWeaponTheme = Math.clamp(config.utilityWeaponTheme, 0, 2);
+        config.diamondWeaponTheme = Math.clamp(config.diamondWeaponTheme, 0, 1);
+        config.netheriteWeaponTheme = Math.clamp(config.netheriteWeaponTheme, 0, 1);
+        config.utilityWeaponTheme = Math.clamp(config.utilityWeaponTheme, 0, 1);
 
         config.importedWingScale = Math.clamp(config.importedWingScale, 0.35F, 2.5F);
         config.importedWingVerticalOffset = Math.clamp(config.importedWingVerticalOffset, -1.0F, 1.0F);
@@ -240,6 +248,10 @@ public final class ConfigManager {
         config.littleDemonScale = Math.clamp(config.littleDemonScale, 0.35F, 2.5F);
         config.littleDemonVerticalOffset = Math.clamp(config.littleDemonVerticalOffset, -1.0F, 1.0F);
         config.littleDemonBackOffset = Math.clamp(config.littleDemonBackOffset, -0.3F, 1.0F);
+
+        config.armorCosmeticStyle = Math.clamp(config.armorCosmeticStyle, 1, 2);
+        config.armorCosmeticScale = Math.clamp(config.armorCosmeticScale, 0.70F, 1.35F);
+        config.armorCosmeticVerticalOffset = Math.clamp(config.armorCosmeticVerticalOffset, -0.35F, 0.35F);
 
         config.backWeaponStyle = Math.clamp(config.backWeaponStyle, 0, 3);
         config.backWeaponScale = Math.clamp(config.backWeaponScale, 0.45F, 2.25F);
