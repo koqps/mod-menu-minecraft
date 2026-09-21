@@ -50,7 +50,8 @@ public final class CosmeticsScreen extends Screen {
     private static final List<CosmeticEntry> ARMOR = List.of(
             new CosmeticEntry("Default Netherite", "Use Minecraft's normal netherite look.", 0),
             new CosmeticEntry("Valkyrie", "Silver and gold skin on netherite armor.", 1),
-            new CosmeticEntry("Demonic", "Black and crimson skin on netherite armor.", 2)
+            new CosmeticEntry("Demonic", "Black and crimson skin on netherite armor.", 2),
+            new CosmeticEntry("Paladin", "Direct OBJ replacement from Paladin Armor commission.zip.", 3)
     );
 
     private final Screen parent;
@@ -316,7 +317,11 @@ public final class CosmeticsScreen extends Screen {
                 default -> 0xFFF2F2F6;
             };
         }
-        return style == 2 ? 0xFF9B2135 : 0xFFE5C45C;
+        return switch (style) {
+            case 2 -> 0xFF9B2135;
+            case 3 -> 0xFFD7D7D7;
+            default -> 0xFFE5C45C;
+        };
     }
 
     private List<CosmeticEntry> filteredEntries() {
@@ -444,6 +449,7 @@ public final class CosmeticsScreen extends Screen {
         return switch (style) {
             case 1 -> "Valkyrie";
             case 2 -> "Demonic";
+            case 3 -> "Paladin";
             default -> "Netherite";
         };
     }
