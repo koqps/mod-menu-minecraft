@@ -103,18 +103,18 @@ public final class ImportedCosmeticRenderer {
             PackedMeshLibrary.Vertex b = source.get(i + 1);
             PackedMeshLibrary.Vertex c = source.get(i + 2);
 
-            wingVertex(pose, vertices, a, origin, right, up, back, scale, backOffset, color);
-            wingVertex(pose, vertices, b, origin, right, up, back, scale, backOffset, color);
-            wingVertex(pose, vertices, c, origin, right, up, back, scale, backOffset, color);
-            wingVertex(pose, vertices, c, origin, right, up, back, scale, backOffset, color);
+            wingVertex(pose, vertices, a, origin, right, up, back, scale, backOffset, flap, color);
+            wingVertex(pose, vertices, b, origin, right, up, back, scale, backOffset, flap, color);
+            wingVertex(pose, vertices, c, origin, right, up, back, scale, backOffset, flap, color);
+            wingVertex(pose, vertices, c, origin, right, up, back, scale, backOffset, flap, color);
 
             // Render the reverse winding as well. The uploaded OBJ contains
             // several thin plates, and this keeps the complete set visible
             // from both third-person front and third-person back cameras.
-            wingVertex(pose, vertices, c, origin, right, up, back, scale, backOffset, color);
-            wingVertex(pose, vertices, b, origin, right, up, back, scale, backOffset, color);
-            wingVertex(pose, vertices, a, origin, right, up, back, scale, backOffset, color);
-            wingVertex(pose, vertices, a, origin, right, up, back, scale, backOffset, color);
+            wingVertex(pose, vertices, c, origin, right, up, back, scale, backOffset, flap, color);
+            wingVertex(pose, vertices, b, origin, right, up, back, scale, backOffset, flap, color);
+            wingVertex(pose, vertices, a, origin, right, up, back, scale, backOffset, flap, color);
+            wingVertex(pose, vertices, a, origin, right, up, back, scale, backOffset, flap, color);
         }
     }
 
