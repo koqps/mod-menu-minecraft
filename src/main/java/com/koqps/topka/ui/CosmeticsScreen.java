@@ -52,14 +52,14 @@ public final class CosmeticsScreen extends Screen {
     private static final List<CosmeticEntry> ARMOR_SETS = List.of(
             new CosmeticEntry("Valkyrie Armor Set", "Equip Valkyrie on all four armor slots.", 1),
             new CosmeticEntry("Demonic Armor Set", "Equip Demonic on all four armor slots.", 2),
-            new CosmeticEntry("Paladin Armor Set", "Direct OBJ replacement on all four netherite slots.", 3)
+            new CosmeticEntry("Valentine Armor Set", "Full Valentine texture on all four netherite slots.", 3)
     );
 
     private static final List<CosmeticEntry> ARMOR = List.of(
             new CosmeticEntry("Default Netherite", "Use Minecraft's normal netherite look.", 0),
             new CosmeticEntry("Valkyrie", "Silver and gold skin on netherite armor.", 1),
             new CosmeticEntry("Demonic", "Black and crimson skin on netherite armor.", 2),
-            new CosmeticEntry("Paladin", "Direct OBJ replacement from Paladin Armor commission.zip.", 3)
+            new CosmeticEntry("Valentine", "Pink, gold and purple Valentine armor texture.", 3)
     );
 
     private final Screen parent;
@@ -218,7 +218,7 @@ public final class CosmeticsScreen extends Screen {
         drawBottomButton(g, mx, my, 648, 426, 56, "Reset");
 
         g.text(font, UiFont.text("Armor skins apply to equipped netherite pieces • slots are independent"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Cosmetics 0.13.3"), 616, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Cosmetics 0.14.0"), 616, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
@@ -482,7 +482,7 @@ public final class CosmeticsScreen extends Screen {
         return switch (style) {
             case 1 -> "Valkyrie";
             case 2 -> "Demonic";
-            case 3 -> "Paladin";
+            case 3 -> "Valentine";
             default -> "Netherite";
         };
     }
