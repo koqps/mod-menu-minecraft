@@ -130,20 +130,20 @@ public final class PackedMeshLibrary {
         }
 
         if (pack == Pack.VALKYRIE_ARMOR) {
-            addArmorParts(models, "valkyrie");
+            addArmorParts(models, "valkyrie", false);
         } else if (pack == Pack.DEMONIC_ARMOR) {
-            addArmorParts(models, "demonic");
+            addArmorParts(models, "demonic", false);
         } else if (pack == Pack.PALADIN_ARMOR) {
             // Paladin is stored as the untouched source OBJ. Split/re-center
             // it here so every generated section is local to the Minecraft
             // body bone it will animate with.
-            addArmorParts(models, "paladin");
+            addArmorParts(models, "paladin", true);
         }
 
         return Map.copyOf(models);
     }
 
-    private static void addArmorParts(Map<String, Model> models, String fullName) {
+    private static void addArmorParts(Map<String, Model> models, String fullName, boolean paladin) {
         Model full = models.get(fullName);
         if (full == null) return;
 
@@ -153,6 +153,9 @@ public final class PackedMeshLibrary {
         float maxX = Float.NEGATIVE_INFINITY;
         float maxY = Float.NEGATIVE_INFINITY;
         float maxZ = Float.NEGATIVE_INFINITY;
+        double sumX = 0.0D;
+        double sumZ = 0.0D;
+        long sampledVertices = 0L;
 
         for (SubMesh subMesh : full.subMeshes()) {
             for (Vertex vertex : subMesh.vertices()) {
@@ -162,13 +165,26 @@ public final class PackedMeshLibrary {
                 maxX = Math.max(maxX, vertex.x());
                 maxY = Math.max(maxY, vertex.y());
                 maxZ = Math.max(maxZ, vertex.z());
+                sumX += vertex.x();
+                sumZ += vertex.z();
+                sampledVertices++;
             }
         }
 
         float sourceHeight = Math.max(0.001F, maxY - minY);
-        float fitScale = 2.0F / sourceHeight;
-        float centerX = (minX + maxX) * 0.5F;
-        float centerZ = (minZ + maxZ) * 0.5F;
+
+        // The Paladin mesh has long asymmetric protrusions, so using its
+        // min/max bounding-box midpoint shifts the whole suit off the player.
+        // Use the mesh-average X/Z center instead, and fit it slightly under
+        // two blocks tall so the helmet/shoulders don't engulf the player.
+        float targetHeight = paladin ? 1.82F : 2.0F;
+        float fitScale = targetHeight / sourceHeight;
+        float centerX = paladin && sampledVertices > 0
+                ? (float) (sumX / sampledVertices)
+                : (minX + maxX) * 0.5F;
+        float centerZ = paladin && sampledVertices > 0
+                ? (float) (sumZ / sampledVertices)
+                : (minZ + maxZ) * 0.5F;
 
         String[] parts = {
                 "helmet", "body", "left_arm", "right_arm",
@@ -190,7 +206,9 @@ public final class PackedMeshLibrary {
 
                 float cx = ((a.x() + b.x() + c.x()) / 3.0F - centerX) * fitScale;
                 float cy = ((a.y() + b.y() + c.y()) / 3.0F - minY) * fitScale;
-                String part = classifyArmorPart(cx, cy);
+                String part = paladin
+                        ? classifyPaladinPart(cx, cy)
+                        : classifyArmorPart(cx, cy);
 
                 List<Vertex> target = byPart.get(part);
                 target.add(toArmorLocal(a, part, fitScale, centerX, minY, centerZ));
@@ -212,6 +230,27 @@ public final class PackedMeshLibrary {
                 models.put(part, new Model(part, List.copyOf(subMeshes)));
             }
         }
+    }
+
+    private static String classifyPaladinPart(float x, float y) {
+        // Tighter boundaries than the older generic OBJ slicer. The Paladin
+        // source has broad decorative shoulder/helmet geometry, so keeping the
+        // central torso narrower prevents those triangles from being assigned
+        // to the wrong animated bone.
+        if (y >= 1.42F && Math.abs(x) <= 0.39F) return "helmet";
+
+        if (y >= 0.80F) {
+            if (x > 0.285F) return "right_arm";
+            if (x < -0.285F) return "left_arm";
+            return "body";
+        }
+
+        if (y >= 0.34F) {
+            if (Math.abs(x) < 0.19F && y >= 0.66F) return "waist";
+            return x >= 0.0F ? "right_leg" : "left_leg";
+        }
+
+        return x >= 0.0F ? "right_boot" : "left_boot";
     }
 
     private static String classifyArmorPart(float x, float y) {
