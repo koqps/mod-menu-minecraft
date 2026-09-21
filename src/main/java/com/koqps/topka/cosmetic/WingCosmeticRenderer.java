@@ -40,7 +40,11 @@ public final class WingCosmeticRenderer {
             if (player == client.player && client.options.getCameraType().isFirstPerson()) continue;
             if (client.player.distanceToSqr(player) > 4096.0D) continue;
 
-            CosmeticAnchor anchor = CosmeticAnchor.forBack(player, -0.58D, 0.12D);
+            CosmeticAnchor anchor = CosmeticAnchor.forBack(
+                    player,
+                    -0.58D + cfg.wingsVerticalOffset,
+                    cfg.wingsBackOffset
+            );
             CosmeticAnimation animation = CosmeticAnimation.sample(player, cfg.wingsFlapSpeed, cfg.wingsFlapAmount);
 
             PoseStack poseStack = context.poseStack();
@@ -81,18 +85,20 @@ public final class WingCosmeticRenderer {
             double side,
             float hueOffset
     ) {
-        int style = Math.floorMod(cfg.wingsStyle, 4);
+        int style = Math.floorMod(cfg.wingsStyle, 5);
         float scale = Math.clamp(cfg.wingsScale, 0.45F, 2.25F);
         float spread = Math.clamp(cfg.wingsSpread, 0.35F, 1.65F) + (float) anim.spreadBoost();
+        spread *= 1.0F - Math.clamp(cfg.wingsFold, 0.0F, 0.70F) * 0.58F;
         float thickness = Math.clamp(cfg.wingsDepth, 0.02F, 0.42F) * scale;
         int opacity = Math.clamp(cfg.wingsOpacity, 80, 255);
 
+        double tilt = Math.toRadians(cfg.wingsTilt);
         Vec3 root = a.local(side * 0.07D * scale, 0.05D * scale + anim.sway(), 0.0D);
-        Vec3 shoulder = a.local(side * 0.42D * spread * scale, 0.33D * scale + anim.flap() * 0.24D, thickness * 0.10D);
-        Vec3 elbow = a.local(side * 0.88D * spread * scale, 0.62D * scale + anim.flap() * 0.55D + anim.lift(), thickness * 0.30D);
-        Vec3 outer = a.local(side * 1.38D * spread * scale, 0.66D * scale + anim.flap() * 0.82D + anim.lift(), thickness * 0.58D);
-        Vec3 low = a.local(side * 1.18D * spread * scale, -0.27D * scale + anim.flap() * 0.30D, thickness * 0.95D);
-        Vec3 lowerRoot = a.local(side * 0.14D * scale, -0.54D * scale, thickness * 0.42D);
+        Vec3 shoulder = tilted(a, side * 0.42D * spread * scale, 0.33D * scale + anim.flap() * 0.24D, thickness * 0.10D, tilt);
+        Vec3 elbow = tilted(a, side * 0.88D * spread * scale, 0.62D * scale + anim.flap() * 0.55D + anim.lift(), thickness * 0.30D, tilt);
+        Vec3 outer = tilted(a, side * 1.38D * spread * scale, 0.66D * scale + anim.flap() * 0.82D + anim.lift(), thickness * 0.58D, tilt);
+        Vec3 low = tilted(a, side * 1.18D * spread * scale, -0.27D * scale + anim.flap() * 0.30D, thickness * 0.95D, tilt);
+        Vec3 lowerRoot = tilted(a, side * 0.14D * scale, -0.54D * scale, thickness * 0.42D, tilt);
 
         int primary = color(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, hueOffset, opacity);
         int secondary = color(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, hueOffset + 0.14F, Math.max(80, opacity - 10));
@@ -101,6 +107,7 @@ public final class WingCosmeticRenderer {
             case 1 -> renderDemon(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
             case 2 -> renderCrystal(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
             case 3 -> renderDragon(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
+            case 4 -> renderTech(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
             default -> renderAngel(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
         }
     }
@@ -220,6 +227,37 @@ public final class WingCosmeticRenderer {
         }
     }
 
+    private static void renderTech(
+            PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a,
+            Vec3 root, Vec3 shoulder, Vec3 elbow, Vec3 outer, Vec3 low, Vec3 lowerRoot,
+            double side, float scale, float thickness, int primary, int secondary, TopkaConfig cfg
+    ) {
+        prismBetween(pose, v, root, shoulder, a.right(), a.back(), 0.09D * scale, 0.065D * scale, secondary, 2);
+
+        int segments = 4 + Math.clamp(cfg.wingsDetail, 1, 5);
+        for (int i = 0; i < segments; i++) {
+            double t = i / (double) Math.max(1, segments - 1);
+            Vec3 center = lerp(shoulder, low, t * 0.86D)
+                    .add(a.right().scale(side * (0.18D + t * 0.16D) * scale));
+            Vec3 dir = lerp(elbow, outer, 0.30D + t * 0.60D).subtract(center).normalize();
+            Vec3 end = center.add(dir.scale((0.42D + (1.0D - t) * 0.22D) * scale));
+            int col = (i & 1) == 0 ? primary : secondary;
+            prismBetween(
+                    pose, v,
+                    center, end,
+                    a.up(), a.back(),
+                    (0.055D + (1.0D - t) * 0.025D) * scale,
+                    Math.max(0.018D, thickness * 0.26D),
+                    col, 2
+            );
+        }
+
+        // Floating outer blade for a server-cosmetic silhouette.
+        Vec3 bladeA = outer.add(a.right().scale(side * 0.10D * scale));
+        Vec3 bladeB = bladeA.add(a.up().scale(-0.55D * scale)).add(a.back().scale(0.14D * scale));
+        prismBetween(pose, v, bladeA, bladeB, a.right(), a.back(), 0.075D * scale, Math.max(0.02D, thickness * 0.30D), secondary, 2);
+    }
+
     private static void renderBackMount(PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a, TopkaConfig cfg) {
         float scale = Math.clamp(cfg.wingsScale, 0.45F, 2.25F);
         int col = color(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, 0.25F, Math.max(150, cfg.wingsOpacity));
@@ -289,7 +327,7 @@ public final class WingCosmeticRenderer {
     }
 
     private static void quad(PoseStack.Pose pose, VertexConsumer v, Vec3 a, Vec3 b, Vec3 c, Vec3 d, int color, int tile) {
-        float[] uv = UV_TILES[Math.floorMod(tile, UV_TILES.length)];
+        float[] uv = UV_TILES[Math.floorMod(tile == 4 ? 2 : tile, UV_TILES.length)];
         vertex(pose, v, a, color, uv[0], uv[1]);
         vertex(pose, v, b, color, uv[2], uv[1]);
         vertex(pose, v, c, color, uv[2], uv[3]);
@@ -315,6 +353,12 @@ public final class WingCosmeticRenderer {
         nx /= len; ny /= len; nz /= len;
         v.addVertex(pose, (float) a.x, (float) a.y, (float) a.z).setColor(color).setNormal(pose, nx, ny, nz).setLineWidth(width);
         v.addVertex(pose, (float) b.x, (float) b.y, (float) b.z).setColor(color).setNormal(pose, nx, ny, nz).setLineWidth(width);
+    }
+
+    private static Vec3 tilted(CosmeticAnchor anchor, double x, double y, double z, double tilt) {
+        double yy = y * Math.cos(tilt) - z * Math.sin(tilt);
+        double zz = y * Math.sin(tilt) + z * Math.cos(tilt);
+        return anchor.local(x, yy, zz);
     }
 
     private static Vec3 lerp(Vec3 a, Vec3 b, double t) {
