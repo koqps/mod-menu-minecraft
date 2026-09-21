@@ -155,6 +155,10 @@ public final class ConfigManager {
             if (config.diamondWeaponTheme == 2) config.diamondWeaponTheme = 1;
             if (config.netheriteWeaponTheme == 2) config.netheriteWeaponTheme = 1;
             if (config.utilityWeaponTheme == 2) config.utilityWeaponTheme = 1;
+            // Uploaded wing geometry now carries a real static material instead
+            // of the old blank white runtime texture.
+            config.importedWingTintArgb = 0xFFFFFFFF;
+            config.wingsOpacity = Math.max(config.wingsOpacity, 230);
             config.armorCosmeticStyle = Math.clamp(config.armorCosmeticStyle, 1, 2);
             config.cosmeticRendererVersion = 6;
         }
