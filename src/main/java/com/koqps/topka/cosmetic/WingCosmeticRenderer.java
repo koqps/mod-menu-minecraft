@@ -1,0 +1,344 @@
+package com.koqps.topka.cosmetic;
+
+import com.koqps.topka.TopkaClient;
+import com.koqps.topka.config.TopkaConfig;
+import com.koqps.topka.hud.CosmeticTextures;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+
+/**
+ * Modeled wing renderer.
+ *
+ * Unlike the old sheet renderer, every visible wing piece is an extruded
+ * double-sided solid with front/back/edge faces. Large single-span wing planes
+ * are intentionally avoided.
+ */
+public final class WingCosmeticRenderer {
+    private static final float[][] UV_TILES = {
+            {0.00F, 0.00F, 0.50F, 0.50F}, // angel
+            {0.50F, 0.00F, 1.00F, 0.50F}, // demon
+            {0.00F, 0.50F, 0.50F, 1.00F}, // crystal
+            {0.50F, 0.50F, 1.00F, 1.00F}  // dragon
+    };
+
+    private WingCosmeticRenderer() { }
+
+    public static void render(LevelRenderContext context, Vec3 camera, Minecraft client) {
+        TopkaConfig cfg = TopkaClient.CONFIG.get();
+
+        for (Entity entity : client.level.entitiesForRendering()) {
+            if (!(entity instanceof Player player) || player.isRemoved()) continue;
+            if (player != client.player && !cfg.wingsShowOthers) continue;
+            if (player == client.player && client.options.getCameraType().isFirstPerson()) continue;
+            if (client.player.distanceToSqr(player) > 4096.0D) continue;
+
+            CosmeticAnchor anchor = CosmeticAnchor.forBack(player, -0.58D, 0.12D);
+            CosmeticAnimation animation = CosmeticAnimation.sample(player, cfg.wingsFlapSpeed, cfg.wingsFlapAmount);
+
+            PoseStack poseStack = context.poseStack();
+            poseStack.pushPose();
+            poseStack.translate(-camera.x, -camera.y, -camera.z);
+
+            context.submitNodeCollector().submitCustomGeometry(
+                    poseStack,
+                    RenderTypes.entityTranslucent(CosmeticTextures.WINGS),
+                    (pose, vertices) -> {
+                        renderSide(pose, vertices, anchor, animation, cfg, -1.0D, 0.0F);
+                        renderSide(pose, vertices, anchor, animation, cfg, 1.0D, 0.5F);
+                        renderBackMount(pose, vertices, anchor, cfg);
+                    }
+            );
+
+            if (cfg.wingsGlow) {
+                context.submitNodeCollector().submitCustomGeometry(
+                        poseStack,
+                        RenderTypes.linesTranslucent(),
+                        (pose, vertices) -> {
+                            renderBones(pose, vertices, anchor, animation, cfg, -1.0D, 0.0F);
+                            renderBones(pose, vertices, anchor, animation, cfg, 1.0D, 0.5F);
+                        }
+                );
+            }
+
+            poseStack.popPose();
+        }
+    }
+
+    private static void renderSide(
+            PoseStack.Pose pose,
+            VertexConsumer vertices,
+            CosmeticAnchor a,
+            CosmeticAnimation anim,
+            TopkaConfig cfg,
+            double side,
+            float hueOffset
+    ) {
+        int style = Math.floorMod(cfg.wingsStyle, 4);
+        float scale = Math.clamp(cfg.wingsScale, 0.45F, 2.25F);
+        float spread = Math.clamp(cfg.wingsSpread, 0.35F, 1.65F) + (float) anim.spreadBoost();
+        float thickness = Math.clamp(cfg.wingsDepth, 0.02F, 0.42F) * scale;
+        int opacity = Math.clamp(cfg.wingsOpacity, 80, 255);
+
+        Vec3 root = a.local(side * 0.07D * scale, 0.05D * scale + anim.sway(), 0.0D);
+        Vec3 shoulder = a.local(side * 0.42D * spread * scale, 0.33D * scale + anim.flap() * 0.24D, thickness * 0.10D);
+        Vec3 elbow = a.local(side * 0.88D * spread * scale, 0.62D * scale + anim.flap() * 0.55D + anim.lift(), thickness * 0.30D);
+        Vec3 outer = a.local(side * 1.38D * spread * scale, 0.66D * scale + anim.flap() * 0.82D + anim.lift(), thickness * 0.58D);
+        Vec3 low = a.local(side * 1.18D * spread * scale, -0.27D * scale + anim.flap() * 0.30D, thickness * 0.95D);
+        Vec3 lowerRoot = a.local(side * 0.14D * scale, -0.54D * scale, thickness * 0.42D);
+
+        int primary = color(cfg.wingsPrimaryColorArgb, cfg.wingsRainbow, hueOffset, opacity);
+        int secondary = color(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, hueOffset + 0.14F, Math.max(80, opacity - 10));
+
+        switch (style) {
+            case 1 -> renderDemon(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
+            case 2 -> renderCrystal(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
+            case 3 -> renderDragon(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
+            default -> renderAngel(pose, vertices, a, root, shoulder, elbow, outer, low, lowerRoot, side, scale, thickness, primary, secondary, cfg);
+        }
+    }
+
+    private static void renderAngel(
+            PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a,
+            Vec3 root, Vec3 shoulder, Vec3 elbow, Vec3 outer, Vec3 low, Vec3 lowerRoot,
+            double side, float scale, float thickness, int primary, int secondary, TopkaConfig cfg
+    ) {
+        // Central shoulder plate and two solid upper bones.
+        prismBetween(pose, v, root, shoulder, a.right(), a.back(), 0.10D * scale, 0.08D * scale, secondary, 0);
+        prismBetween(pose, v, shoulder, elbow, a.right(), a.back(), 0.085D * scale, 0.07D * scale, secondary, 0);
+        prismBetween(pose, v, elbow, outer, a.right(), a.back(), 0.065D * scale, 0.055D * scale, secondary, 0);
+
+        int count = 7 + Math.clamp(cfg.wingsDetail, 1, 5) * 2;
+        for (int i = 0; i < count; i++) {
+            double t = i / (double) Math.max(1, count - 1);
+            Vec3 base = lerp(shoulder, lowerRoot, Math.min(0.95D, t * 0.98D));
+            double reach = scale * (1.15D + (1.0D - t) * 0.62D) * cfg.wingsSpread;
+            Vec3 tip = root
+                    .add(a.right().scale(side * reach))
+                    .add(a.up().scale((0.72D - t * 1.38D) * scale))
+                    .add(a.back().scale((0.16D + t * 0.42D) * scale));
+
+            double width = (0.085D + (1.0D - t) * 0.055D) * scale;
+            Vec3 base2 = base.add(a.right().scale(side * width));
+            Vec3 tip2 = tip.add(a.right().scale(-side * width * 0.55D)).add(a.up().scale(-0.13D * scale));
+
+            int col = (i & 1) == 0 ? primary : secondary;
+            extrudedPanel(pose, v, base, base2, tip2, tip, a.back(), thickness * 0.42D, col, 0);
+        }
+    }
+
+    private static void renderDemon(
+            PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a,
+            Vec3 root, Vec3 shoulder, Vec3 elbow, Vec3 outer, Vec3 low, Vec3 lowerRoot,
+            double side, float scale, float thickness, int primary, int secondary, TopkaConfig cfg
+    ) {
+        // Three actual bone prisms.
+        prismBetween(pose, v, root, shoulder, a.right(), a.back(), 0.095D * scale, 0.075D * scale, secondary, 1);
+        prismBetween(pose, v, shoulder, elbow, a.right(), a.back(), 0.082D * scale, 0.065D * scale, secondary, 1);
+        prismBetween(pose, v, elbow, outer, a.right(), a.back(), 0.060D * scale, 0.050D * scale, secondary, 1);
+
+        int fingers = 3 + Math.clamp(cfg.wingsDetail, 1, 5);
+        Vec3 prevBone = shoulder;
+        for (int i = 0; i < fingers; i++) {
+            double t = (i + 1.0D) / fingers;
+            Vec3 boneEnd = lerp(outer, low, t)
+                    .add(a.right().scale(side * 0.10D * scale * (1.0D - t)))
+                    .add(a.back().scale(0.05D * scale * i));
+            prismBetween(pose, v, elbow, boneEnd, a.right(), a.back(), 0.050D * scale, 0.045D * scale, secondary, 1);
+
+            Vec3 membraneRoot = i == 0 ? shoulder : prevBone;
+            Vec3 membraneLower = lerp(lowerRoot, low, t);
+            extrudedPanel(pose, v, membraneRoot, boneEnd, membraneLower, lowerRoot, a.back(), thickness * 0.24D,
+                    withAlpha(primary, Math.max(95, ((primary >>> 24) & 0xFF) - 22)), 1);
+            prevBone = boneEnd;
+        }
+    }
+
+    private static void renderCrystal(
+            PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a,
+            Vec3 root, Vec3 shoulder, Vec3 elbow, Vec3 outer, Vec3 low, Vec3 lowerRoot,
+            double side, float scale, float thickness, int primary, int secondary, TopkaConfig cfg
+    ) {
+        prismBetween(pose, v, root, shoulder, a.right(), a.back(), 0.085D * scale, 0.065D * scale, secondary, 2);
+
+        int shards = 5 + Math.clamp(cfg.wingsDetail, 1, 5) * 2;
+        for (int i = 0; i < shards; i++) {
+            double t = i / (double) Math.max(1, shards - 1);
+            Vec3 base = lerp(shoulder, lowerRoot, t * 0.92D);
+            Vec3 shardTip = lerp(elbow, outer, Math.min(1.0D, 0.20D + t * 0.90D))
+                    .add(a.up().scale((0.18D - t * 0.34D) * scale))
+                    .add(a.right().scale(side * (0.10D + t * 0.10D) * scale));
+
+            Vec3 tangent = a.right().scale(side);
+            double half = (0.075D + (1.0D - t) * 0.045D) * scale;
+            Vec3 b0 = base.add(tangent.scale(-half));
+            Vec3 b1 = base.add(tangent.scale(half));
+            Vec3 tipL = shardTip.add(tangent.scale(-half * 0.18D));
+            Vec3 tipR = shardTip.add(tangent.scale(half * 0.18D));
+
+            int col = (i & 1) == 0 ? primary : secondary;
+            extrudedPanel(pose, v, b0, b1, tipR, tipL, a.back(), thickness * 0.55D, col, 2);
+        }
+    }
+
+    private static void renderDragon(
+            PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a,
+            Vec3 root, Vec3 shoulder, Vec3 elbow, Vec3 outer, Vec3 low, Vec3 lowerRoot,
+            double side, float scale, float thickness, int primary, int secondary, TopkaConfig cfg
+    ) {
+        prismBetween(pose, v, root, shoulder, a.right(), a.back(), 0.11D * scale, 0.085D * scale, secondary, 3);
+        prismBetween(pose, v, shoulder, elbow, a.right(), a.back(), 0.095D * scale, 0.075D * scale, secondary, 3);
+        prismBetween(pose, v, elbow, outer, a.right(), a.back(), 0.075D * scale, 0.060D * scale, secondary, 3);
+
+        int bands = 4 + Math.clamp(cfg.wingsDetail, 1, 5);
+        for (int i = 0; i < bands; i++) {
+            double t0 = i / (double) bands;
+            double t1 = (i + 1.0D) / bands;
+            Vec3 top0 = lerp(shoulder, outer, t0);
+            Vec3 top1 = lerp(shoulder, outer, t1);
+            Vec3 bot1 = lerp(lowerRoot, low, t1);
+            Vec3 bot0 = lerp(lowerRoot, low, t0);
+            int col = (i & 1) == 0 ? primary : secondary;
+            extrudedPanel(pose, v, top0, top1, bot1, bot0, a.back(), thickness * 0.34D, col, 3);
+        }
+
+        // Small armor scales layered over the membrane.
+        for (int i = 0; i < bands - 1; i++) {
+            double t = (i + 0.5D) / bands;
+            Vec3 c = lerp(shoulder, low, t);
+            Vec3 r = a.right().scale(side * 0.09D * scale);
+            Vec3 u = a.up().scale(0.12D * scale);
+            extrudedPanel(pose, v, c.subtract(r), c.add(r), c.add(r).subtract(u), c.subtract(r).subtract(u),
+                    a.back(), thickness * 0.52D, withAlpha(secondary, 230), 3);
+        }
+    }
+
+    private static void renderBackMount(PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a, TopkaConfig cfg) {
+        float scale = Math.clamp(cfg.wingsScale, 0.45F, 2.25F);
+        int col = color(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, 0.25F, Math.max(150, cfg.wingsOpacity));
+        Vec3 top = a.local(0.0D, 0.22D * scale, 0.01D);
+        Vec3 bottom = a.local(0.0D, -0.28D * scale, 0.02D);
+        prismBetween(pose, v, bottom, top, a.right(), a.back(), 0.11D * scale, 0.075D * scale, col, Math.floorMod(cfg.wingsStyle, 4));
+    }
+
+    private static void renderBones(
+            PoseStack.Pose pose, VertexConsumer v, CosmeticAnchor a, CosmeticAnimation anim,
+            TopkaConfig cfg, double side, float hueOffset
+    ) {
+        float scale = Math.clamp(cfg.wingsScale, 0.45F, 2.25F);
+        float spread = Math.clamp(cfg.wingsSpread, 0.35F, 1.65F) + (float) anim.spreadBoost();
+        Vec3 root = a.local(side * 0.07D * scale, 0.05D * scale + anim.sway(), 0.0D);
+        Vec3 shoulder = a.local(side * 0.42D * spread * scale, 0.33D * scale + anim.flap() * 0.24D, 0.02D);
+        Vec3 elbow = a.local(side * 0.88D * spread * scale, 0.62D * scale + anim.flap() * 0.55D + anim.lift(), 0.05D);
+
+        int col = color(cfg.wingsSecondaryColorArgb, cfg.wingsRainbow, hueOffset + 0.12F, 190);
+        float width = Math.max(1.0F, cfg.wingsBoneWidth * 0.68F);
+        line(pose, v, root, shoulder, col, width);
+        line(pose, v, shoulder, elbow, col, width);
+    }
+
+    private static void prismBetween(
+            PoseStack.Pose pose, VertexConsumer v,
+            Vec3 a, Vec3 b, Vec3 widthAxis, Vec3 depthAxis,
+            double halfWidth, double halfDepth, int color, int tile
+    ) {
+        Vec3 w = widthAxis.normalize().scale(halfWidth);
+        Vec3 d = depthAxis.normalize().scale(halfDepth);
+
+        Vec3 a0 = a.subtract(w).subtract(d);
+        Vec3 a1 = a.add(w).subtract(d);
+        Vec3 a2 = a.add(w).add(d);
+        Vec3 a3 = a.subtract(w).add(d);
+        Vec3 b0 = b.subtract(w).subtract(d);
+        Vec3 b1 = b.add(w).subtract(d);
+        Vec3 b2 = b.add(w).add(d);
+        Vec3 b3 = b.subtract(w).add(d);
+
+        quad(pose, v, a0, a1, b1, b0, color, tile);
+        quad(pose, v, a1, a2, b2, b1, shade(color, 0.88F), tile);
+        quad(pose, v, a2, a3, b3, b2, shade(color, 0.72F), tile);
+        quad(pose, v, a3, a0, b0, b3, shade(color, 0.82F), tile);
+        quad(pose, v, a0, a3, a2, a1, shade(color, 0.78F), tile);
+        quad(pose, v, b0, b1, b2, b3, color, tile);
+    }
+
+    private static void extrudedPanel(
+            PoseStack.Pose pose, VertexConsumer v,
+            Vec3 a, Vec3 b, Vec3 c, Vec3 d,
+            Vec3 depthAxis, double thickness, int color, int tile
+    ) {
+        Vec3 off = depthAxis.normalize().scale(thickness * 0.5D);
+        Vec3 af = a.add(off), bf = b.add(off), cf = c.add(off), df = d.add(off);
+        Vec3 ab = a.subtract(off), bb = b.subtract(off), cb = c.subtract(off), db = d.subtract(off);
+
+        quad(pose, v, af, bf, cf, df, color, tile);
+        quad(pose, v, db, cb, bb, ab, shade(color, 0.72F), tile);
+
+        int edge = shade(color, 0.58F);
+        quad(pose, v, af, ab, bb, bf, edge, tile);
+        quad(pose, v, bf, bb, cb, cf, shade(edge, 0.90F), tile);
+        quad(pose, v, cf, cb, db, df, shade(edge, 0.76F), tile);
+        quad(pose, v, df, db, ab, af, shade(edge, 0.84F), tile);
+    }
+
+    private static void quad(PoseStack.Pose pose, VertexConsumer v, Vec3 a, Vec3 b, Vec3 c, Vec3 d, int color, int tile) {
+        float[] uv = UV_TILES[Math.floorMod(tile, UV_TILES.length)];
+        vertex(pose, v, a, color, uv[0], uv[1]);
+        vertex(pose, v, b, color, uv[2], uv[1]);
+        vertex(pose, v, c, color, uv[2], uv[3]);
+        vertex(pose, v, d, color, uv[0], uv[3]);
+    }
+
+    private static void vertex(PoseStack.Pose pose, VertexConsumer v, Vec3 p, int color, float u, float vv) {
+        v.addVertex(pose, (float) p.x, (float) p.y, (float) p.z)
+                .setColor(color)
+                .setUv(u, vv)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightCoordsUtil.FULL_BRIGHT)
+                .setNormal(pose, 0.0F, 1.0F, 0.0F);
+    }
+
+    private static void line(PoseStack.Pose pose, VertexConsumer v, Vec3 a, Vec3 b, int color, float width) {
+        Vec3 delta = b.subtract(a);
+        float nx = (float) delta.x;
+        float ny = (float) delta.y;
+        float nz = (float) delta.z;
+        float len = (float) Math.sqrt(nx * nx + ny * ny + nz * nz);
+        if (len < 1.0E-5F) return;
+        nx /= len; ny /= len; nz /= len;
+        v.addVertex(pose, (float) a.x, (float) a.y, (float) a.z).setColor(color).setNormal(pose, nx, ny, nz).setLineWidth(width);
+        v.addVertex(pose, (float) b.x, (float) b.y, (float) b.z).setColor(color).setNormal(pose, nx, ny, nz).setLineWidth(width);
+    }
+
+    private static Vec3 lerp(Vec3 a, Vec3 b, double t) {
+        return a.add(b.subtract(a).scale(t));
+    }
+
+    private static int shade(int argb, float multiplier) {
+        int a = (argb >>> 24) & 0xFF;
+        int r = Math.clamp(Math.round(((argb >>> 16) & 0xFF) * multiplier), 0, 255);
+        int g = Math.clamp(Math.round(((argb >>> 8) & 0xFF) * multiplier), 0, 255);
+        int b = Math.clamp(Math.round((argb & 0xFF) * multiplier), 0, 255);
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
+    private static int color(int baseArgb, boolean rainbow, float offset, int alpha) {
+        int rgb = baseArgb & 0x00FFFFFF;
+        if (rainbow) {
+            float hue = (System.currentTimeMillis() / 3200.0F + offset) % 1.0F;
+            rgb = java.awt.Color.HSBtoRGB(hue, 0.72F, 1.0F) & 0x00FFFFFF;
+        }
+        return (Math.clamp(alpha, 0, 255) << 24) | rgb;
+    }
+
+    private static int withAlpha(int argb, int alpha) {
+        return (Math.clamp(alpha, 0, 255) << 24) | (argb & 0x00FFFFFF);
+    }
+}
