@@ -27,7 +27,9 @@ public final class PackedMeshLibrary {
         ONI("oni_pack", 5),
         ENDER("ender_pack", 4),
         WINGS("wing_pack", 1),
-        LITTLE_DEMON("demon_pack", 1);
+        LITTLE_DEMON("demon_pack", 1),
+        VALKYRIE_ARMOR("valkyrie_armor", 1),
+        DEMONIC_ARMOR("demonic_armor", 1);
 
         private final String folder;
         private final int chunks;
