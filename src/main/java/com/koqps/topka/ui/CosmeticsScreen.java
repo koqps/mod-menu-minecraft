@@ -32,6 +32,7 @@ public final class CosmeticsScreen extends Screen {
 
     private enum Section {
         WINGS("Wings"),
+        SETS("Armor Sets"),
         HELMETS("Helmets"),
         CHESTPLATES("Chestplates"),
         LEGGINGS("Leggings"),
@@ -45,6 +46,12 @@ public final class CosmeticsScreen extends Screen {
 
     private static final List<CosmeticEntry> WINGS = List.of(
             new CosmeticEntry("Set Wings", "Uploaded five-piece OBJ wing set.", 0)
+    );
+
+    private static final List<CosmeticEntry> ARMOR_SETS = List.of(
+            new CosmeticEntry("Valkyrie Armor Set", "Equip Valkyrie on all four armor slots.", 1),
+            new CosmeticEntry("Demonic Armor Set", "Equip Demonic on all four armor slots.", 2),
+            new CosmeticEntry("Paladin Armor Set", "Direct OBJ replacement on all four netherite slots.", 3)
     );
 
     private static final List<CosmeticEntry> ARMOR = List.of(
@@ -107,10 +114,11 @@ public final class CosmeticsScreen extends Screen {
     @Override
     protected void init() {
         addSectionTarget(0, Section.WINGS);
-        addSectionTarget(1, Section.HELMETS);
-        addSectionTarget(2, Section.CHESTPLATES);
-        addSectionTarget(3, Section.LEGGINGS);
-        addSectionTarget(4, Section.BOOTS);
+        addSectionTarget(1, Section.SETS);
+        addSectionTarget(2, Section.HELMETS);
+        addSectionTarget(3, Section.CHESTPLATES);
+        addSectionTarget(4, Section.LEGGINGS);
+        addSectionTarget(5, Section.BOOTS);
 
         EditBox previous = searchBox;
         searchBox = new EditBox(
@@ -209,7 +217,7 @@ public final class CosmeticsScreen extends Screen {
         drawBottomButton(g, mx, my, 648, 426, 56, "Reset");
 
         g.text(font, UiFont.text("Armor skins apply to equipped netherite pieces • slots are independent"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Cosmetics 0.12.9"), 616, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Cosmetics 0.13.0"), 616, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
@@ -225,18 +233,19 @@ public final class CosmeticsScreen extends Screen {
 
     private void drawSidebar(GuiGraphicsExtractor g, int mx, int my) {
         drawSection(g, mx, my, 0, Section.WINGS);
-        drawSection(g, mx, my, 1, Section.HELMETS);
-        drawSection(g, mx, my, 2, Section.CHESTPLATES);
-        drawSection(g, mx, my, 3, Section.LEGGINGS);
-        drawSection(g, mx, my, 4, Section.BOOTS);
+        drawSection(g, mx, my, 1, Section.SETS);
+        drawSection(g, mx, my, 2, Section.HELMETS);
+        drawSection(g, mx, my, 3, Section.CHESTPLATES);
+        drawSection(g, mx, my, 4, Section.LEGGINGS);
+        drawSection(g, mx, my, 5, Section.BOOTS);
 
         var c = TopkaClient.CONFIG.get();
-        g.text(font, UiFont.text("CURRENT"), 18, 260, 0xFF646476, false);
-        g.text(font, UiFont.text("Wing: " + wingName(c.wingsStyle)), 18, 278, 0xFFB7B7C4, false);
-        g.text(font, UiFont.text("Helmet: " + armorName(c.armorHelmetStyle)), 18, 294, 0xFFB7B7C4, false);
-        g.text(font, UiFont.text("Chest: " + armorName(c.armorChestStyle)), 18, 310, 0xFFB7B7C4, false);
-        g.text(font, UiFont.text("Legs: " + armorName(c.armorLeggingsStyle)), 18, 326, 0xFFB7B7C4, false);
-        g.text(font, UiFont.text("Boots: " + armorName(c.armorBootsStyle)), 18, 342, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("CURRENT"), 18, 276, 0xFF646476, false);
+        g.text(font, UiFont.text("Wing: " + wingName(c.wingsStyle)), 18, 294, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Helmet: " + armorName(c.armorHelmetStyle)), 18, 310, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Chest: " + armorName(c.armorChestStyle)), 18, 326, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Legs: " + armorName(c.armorLeggingsStyle)), 18, 342, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Boots: " + armorName(c.armorBootsStyle)), 18, 358, 0xFFB7B7C4, false);
 
         g.text(font, UiFont.text("TIP"), 18, 448, 0xFF646476, false);
         g.text(font, UiFont.text("Wear netherite armor, then"), 18, 464, 0xFF686879, false);
@@ -290,7 +299,12 @@ public final class CosmeticsScreen extends Screen {
             return;
         }
 
-        if (section == Section.HELMETS) {
+        if (section == Section.SETS) {
+            g.fill(x + 9, y + 2, x + 29, y + 12, color);
+            g.fill(x + 7, y + 13, x + 31, y + 24, color);
+            g.fill(x + 10, y + 25, x + 18, y + 36, color);
+            g.fill(x + 20, y + 25, x + 28, y + 36, color);
+        } else if (section == Section.HELMETS) {
             g.fill(x + 7, y + 5, x + 31, y + 23, color);
             g.fill(x + 3, y + 12, x + 35, y + 18, color);
         } else if (section == Section.CHESTPLATES) {
@@ -325,7 +339,11 @@ public final class CosmeticsScreen extends Screen {
     }
 
     private List<CosmeticEntry> filteredEntries() {
-        List<CosmeticEntry> source = section == Section.WINGS ? WINGS : ARMOR;
+        List<CosmeticEntry> source = switch (section) {
+            case WINGS -> WINGS;
+            case SETS -> ARMOR_SETS;
+            default -> ARMOR;
+        };
         String query = searchQuery == null ? "" : searchQuery.trim().toLowerCase(Locale.ROOT);
         if (query.isEmpty()) return source;
 
@@ -342,6 +360,10 @@ public final class CosmeticsScreen extends Screen {
         var c = TopkaClient.CONFIG.get();
         return switch (section) {
             case WINGS -> c.wingsStyle;
+            case SETS -> (c.armorHelmetStyle == c.armorChestStyle
+                    && c.armorChestStyle == c.armorLeggingsStyle
+                    && c.armorLeggingsStyle == c.armorBootsStyle)
+                    ? c.armorHelmetStyle : -1;
             case HELMETS -> c.armorHelmetStyle;
             case CHESTPLATES -> c.armorChestStyle;
             case LEGGINGS -> c.armorLeggingsStyle;
@@ -359,6 +381,12 @@ public final class CosmeticsScreen extends Screen {
                 c.importedWingVerticalOffset = 0.0F;
                 c.importedWingBackOffset = 0.10F;
                 TopkaClient.MODULES.byId("wings").setEnabled(true);
+            }
+            case SETS -> {
+                c.armorHelmetStyle = entry.style;
+                c.armorChestStyle = entry.style;
+                c.armorLeggingsStyle = entry.style;
+                c.armorBootsStyle = entry.style;
             }
             case HELMETS -> c.armorHelmetStyle = entry.style;
             case CHESTPLATES -> c.armorChestStyle = entry.style;
@@ -389,7 +417,7 @@ public final class CosmeticsScreen extends Screen {
 
     private void equipWholeSet() {
         var c = TopkaClient.CONFIG.get();
-        int style = section == Section.WINGS ? 0 : selectedStyle();
+        int style = section == Section.WINGS ? 0 : Math.max(1, selectedStyle());
         if (section == Section.WINGS) {
             c.wingsStyle = 0;
             c.importedWingScale = 1.0F;
@@ -433,6 +461,10 @@ public final class CosmeticsScreen extends Screen {
     private String activeSummary() {
         if (section == Section.WINGS) return moduleEnabled() ? "wings on" : "wings off";
         var c = TopkaClient.CONFIG.get();
+        if (section == Section.SETS) {
+            int selected = selectedStyle();
+            return selected > 0 ? armorName(selected) + " full set" : "mixed armor set";
+        }
         int active = 0;
         if (c.armorHelmetStyle != 0) active++;
         if (c.armorChestStyle != 0) active++;
