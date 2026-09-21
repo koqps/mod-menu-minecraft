@@ -194,7 +194,7 @@ public final class CosmeticsScreen extends Screen {
 
         List<CosmeticEntry> entries = filteredEntries();
         if (entries.isEmpty()) {
-            g.centeredText(font, UiFont.text("No cosmetics match "" + searchQuery + """), 440, 224, 0xFF777788);
+            g.centeredText(font, UiFont.text("No cosmetics match \\"" + searchQuery + "\\""), 440, 224, 0xFF777788);
         } else {
             for (int i = 0; i < entries.size(); i++) {
                 int column = i % 2;
