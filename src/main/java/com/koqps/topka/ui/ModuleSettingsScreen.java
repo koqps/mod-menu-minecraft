@@ -77,6 +77,12 @@ public final class ModuleSettingsScreen extends Screen {
             TopkaClient.CONFIG.save();
         });
 
+        if ("weapon_models".equals(module.id())) {
+            addWeaponPickerTargets();
+            addLocalClickTarget(PANEL_W - 196, PANEL_H - 52, 164, 28, this::resetModuleSettings);
+            return;
+        }
+
         clampScroll();
         int first = scrollRow;
         int last = Math.min(rows.size(), first + VISIBLE_ROWS);
@@ -347,6 +353,16 @@ public final class ModuleSettingsScreen extends Screen {
         g.fill(PANEL_W - 126, 45, PANEL_W - 32, 46, toggleColor);
         g.centeredText(font, UiFont.text(module.enabled() ? "ENABLED" : "DISABLED"), PANEL_W - 79, 29, toggleColor);
 
+        if ("weapon_models".equals(module.id())) {
+            drawWeaponPicker(g, mx, my);
+            drawBottomButton(g, mx, my, PANEL_W - 196, PANEL_H - 52, 164, "Reset weapon choices");
+            g.text(font, UiFont.text("Click a card to apply instantly  •  ESC / "
+                    + TopkaClient.openMenuKey().getString() + " to return"), 32, PANEL_H - 18, 0xFF616171, false);
+            g.pose().popMatrix();
+            super.extractRenderState(g, mouseX, mouseY, delta);
+            return;
+        }
+
         g.text(font, UiFont.text("SETTINGS"), 32, 72, 0xFF707082, false);
 
         clampScroll();
@@ -391,6 +407,95 @@ public final class ModuleSettingsScreen extends Screen {
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
+    }
+
+    private void addWeaponPickerTargets() {
+        final int[] xs = {32, 205, 378};
+        final int[] ys = {100, 206, 312};
+        for (int group = 0; group < 3; group++) {
+            for (int theme = 0; theme < 3; theme++) {
+                final int selectedGroup = group;
+                final int selectedTheme = theme;
+                addLocalClickTarget(xs[theme], ys[group], 150, 70,
+                        () -> setWeaponTheme(selectedGroup, selectedTheme));
+            }
+        }
+    }
+
+    private void setWeaponTheme(int group, int theme) {
+        var c = TopkaClient.CONFIG.get();
+        switch (group) {
+            case 0 -> c.diamondWeaponTheme = theme;
+            case 1 -> c.netheriteWeaponTheme = theme;
+            default -> c.utilityWeaponTheme = theme;
+        }
+        TopkaClient.CONFIG.save();
+    }
+
+    private void drawWeaponPicker(GuiGraphicsExtractor g, int mx, int my) {
+        var c = TopkaClient.CONFIG.get();
+        g.text(font, UiFont.text("MODEL PICKER"), 32, 72, 0xFF707082, false);
+        g.text(font, UiFont.text("Choose which visual set replaces each group."), 122, 72, 0xFF858596, false);
+
+        drawWeaponGroup(g, mx, my, "DIAMOND SWORD / AXE / PICKAXE", 82, 100, c.diamondWeaponTheme);
+        drawWeaponGroup(g, mx, my, "NETHERITE SWORD / AXE / PICKAXE", 188, 206, c.netheriteWeaponTheme);
+        drawWeaponGroup(g, mx, my, "BOW / SHIELD / MACE / TRIDENT", 294, 312, c.utilityWeaponTheme);
+    }
+
+    private void drawWeaponGroup(
+            GuiGraphicsExtractor g,
+            int mx,
+            int my,
+            String title,
+            int titleY,
+            int cardY,
+            int selectedTheme
+    ) {
+        g.text(font, UiFont.text(title), 32, titleY, 0xFFB9B9C6, true);
+        drawWeaponCard(g, mx, my, 32, cardY, 0, selectedTheme, "VANILLA", "Minecraft");
+        drawWeaponCard(g, mx, my, 205, cardY, 1, selectedTheme, "ONI", "Animated set");
+        drawWeaponCard(g, mx, my, 378, cardY, 2, selectedTheme, "ENDER EYE", "Animated set");
+    }
+
+    private void drawWeaponCard(
+            GuiGraphicsExtractor g,
+            int mx,
+            int my,
+            int x,
+            int y,
+            int theme,
+            int selectedTheme,
+            String title,
+            String subtitle
+    ) {
+        boolean selected = Math.floorMod(selectedTheme, 3) == theme;
+        boolean hover = mx >= x && mx < x + 150 && my >= y && my < y + 70;
+        int background = selected ? Theme.withAlpha(Theme.accent(), 44)
+                : (hover ? 0xFF282833 : 0xFF181821);
+
+        g.fill(x, y, x + 150, y + 70, background);
+        int border = selected ? Theme.accent() : 0xFF353541;
+        g.fill(x, y, x + 150, y + 2, border);
+        g.fill(x, y + 68, x + 150, y + 70, border);
+        g.fill(x, y, x + 2, y + 70, border);
+        g.fill(x + 148, y, x + 150, y + 70, border);
+
+        int badge = selected ? Theme.accent() : 0xFF4D4D5B;
+        g.fill(x + 12, y + 12, x + 42, y + 42,
+                selected ? Theme.withAlpha(Theme.accent(), 70) : 0xFF23232C);
+        g.centeredText(font, UiFont.text(theme == 0 ? "V" : theme == 1 ? "O" : "E"),
+                x + 27, y + 23, badge);
+
+        g.text(font, UiFont.text(title), x + 50, y + 13,
+                selected ? 0xFFFFFFFF : 0xFFD1D1DC, true);
+        g.text(font, UiFont.text(subtitle), x + 50, y + 31, 0xFF858596, false);
+
+        if (selected) {
+            g.fill(x + 50, y + 50, x + 106, y + 64, Theme.withAlpha(Theme.accent(), 54));
+            g.centeredText(font, UiFont.text("SELECTED"), x + 78, y + 53, Theme.accent());
+        } else if (hover) {
+            g.text(font, UiFont.text("SELECT"), x + 50, y + 52, Theme.accent(), false);
+        }
     }
 
     private void clampScroll() {
