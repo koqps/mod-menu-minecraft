@@ -40,7 +40,7 @@ public final class ImportedCosmeticRenderer {
             double renderX = Mth.lerp(partialTick, player.xo, player.getX());
             double renderY = Mth.lerp(partialTick, player.yo, player.getY());
             double renderZ = Mth.lerp(partialTick, player.zo, player.getZ());
-            double yaw = Math.toRadians(player.getVisualRotationYInDegrees());
+            double yaw = Math.toRadians(Mth.rotLerp(partialTick, player.yBodyRotO, player.yBodyRot));
 
             // Player-local basis. Position is interpolated with the same frame
             // partial tick used by Minecraft entity rendering, so the cosmetic
