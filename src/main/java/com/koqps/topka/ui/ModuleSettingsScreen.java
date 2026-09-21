@@ -474,7 +474,7 @@ public final class ModuleSettingsScreen extends Screen {
             case "wings" -> {
                 c.wingsStyle = 0; c.wingsScale = 1.0F; c.wingsSpread = 0.95F;
                 c.wingsFlapSpeed = 1.0F; c.wingsFlapAmount = 0.16F; c.wingsOpacity = 235;
-                c.wingsPrimaryColorArgb = 0xFF8B5CF6; c.wingsSecondaryColorArgb = 0xFF41C7FF;
+                c.wingsPrimaryColorArgb = 0xFFFFFFFF; c.wingsSecondaryColorArgb = 0xFFC8CDD8;
                 c.wingsRainbow = false; c.wingsGlow = false; c.wingsShowOthers = false;
                 c.wingsDetail = 5; c.wingsDepth = 0.12F; c.wingsBoneWidth = 1.8F;
                 c.wingsVerticalOffset = 0F; c.wingsBackOffset = 0.12F; c.wingsTilt = 0F; c.wingsFold = 0F;
