@@ -1,6 +1,8 @@
 package com.koqps.topka;
 
 import com.koqps.topka.config.ConfigManager;
+import com.koqps.topka.asset.PackedMeshLibrary;
+import com.koqps.topka.asset.PackedTextureRegistry;
 import com.koqps.topka.hud.AmbienceController;
 import com.koqps.topka.hud.ArmorHud;
 import com.koqps.topka.hud.AutoGgController;
@@ -19,6 +21,8 @@ import com.koqps.topka.hud.WorldLabels;
 import com.koqps.topka.hud.WorldVisuals;
 import com.koqps.topka.module.ModuleManager;
 import com.koqps.topka.item.OniWeaponSpecialRenderer;
+import com.koqps.topka.item.WeaponMeshSpecialRenderer;
+import com.koqps.topka.item.WeaponThemeProperty;
 import com.koqps.topka.ui.TopkaScreen;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.fabricmc.api.ClientModInitializer;
@@ -43,6 +47,8 @@ public final class TopkaClient implements ClientModInitializer {
     public void onInitializeClient() {
         CONFIG.load();
         OniWeaponSpecialRenderer.init();
+        WeaponThemeProperty.register();
+        WeaponMeshSpecialRenderer.register();
 
         HealthHud.register();
         ArmorHud.register();
@@ -66,7 +72,10 @@ public final class TopkaClient implements ClientModInitializer {
                 category
         ));
 
-        ClientLifecycleEvents.CLIENT_STARTED.register(CosmeticTextures::register);
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
+            CosmeticTextures.register(client);
+            PackedTextureRegistry.register(client);
+        });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             HitColorController.tick();
@@ -90,6 +99,8 @@ public final class TopkaClient implements ClientModInitializer {
             FullBrightController.restore();
             VisualEffectsController.clear();
             CosmeticTextures.close();
+            PackedTextureRegistry.close();
+            PackedMeshLibrary.clear();
             CONFIG.save();
         });
     }
