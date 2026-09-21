@@ -30,7 +30,7 @@ jobs:
       - name: Build
         run: ./gradlew clean build --stacktrace
 
-      - name: Verify compiled 0.12.2 systems
+      - name: Verify compiled 0.12.4 systems
         shell: bash
         run: |
           JAR=$(find build/libs -maxdepth 1 -type f -name '*.jar' ! -name '*-sources.jar' | head -n 1)
@@ -47,7 +47,22 @@ jobs:
           grep -q '^com/koqps/topka/cosmetic/ImportedCosmeticRenderer.class$' jar-contents.txt
           grep -q '^com/koqps/topka/cosmetic/WingCosmeticRenderer.class$' jar-contents.txt
           grep -q '^com/koqps/topka/cosmetic/CapeCosmeticRenderer.class$' jar-contents.txt
-          grep -q '^com/koqps/topka/cosmetic/CosmeticArmorLayer.class$' jar-contents.txt
+          grep -q '^com/koqps/topka/cosmetic/ArmorCosmeticRenderer.class          grep -q '^com/koqps/topka/ui/CosmeticsScreen.class$' jar-contents.txt
+          grep -q '^assets/minecraft/items/diamond_sword.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/netherite_sword.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/bow.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/shield.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/trident.json$' jar-contents.txt
+          grep -q '^assets/minecraft/items/mace.json$' jar-contents.txt
+
+      - name: Upload normal mod jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: mod-menu-minecraft-26.3
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+ jar-contents.txt
           grep -q '^com/koqps/topka/ui/CosmeticsScreen.class$' jar-contents.txt
           grep -q '^com/koqps/topka/mixin/AvatarRendererCosmeticLayerMixin.class$' jar-contents.txt
           grep -q '^com/koqps/topka/mixin/LivingEntityRendererAccessor.class$' jar-contents.txt
