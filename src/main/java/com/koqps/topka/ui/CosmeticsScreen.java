@@ -3,6 +3,7 @@ package com.koqps.topka.ui;
 import com.koqps.topka.TopkaClient;
 import com.koqps.topka.hud.Theme;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
@@ -15,26 +16,19 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Player cosmetic wardrobe modeled after the familiar Laby-style layout:
- * category rail on the left, cosmetic cards in the middle, player preview and
- * color controls on the right.
- *
- * Click handling intentionally lives in this screen instead of invisible Button
- * widgets so scaled card/category hitboxes exactly match what is drawn.
+ * Cosmetic wardrobe using the exact same visual system and coordinate model as
+ * the main Mod Menu screen. Sidebar/category and bottom controls use the same
+ * real invisible Button widgets as TopkaScreen; cosmetic cards use the same
+ * direct mouse hit testing as module cards.
  */
 public final class CosmeticsScreen extends Screen {
-    private static final int PANEL_W = 980;
-    private static final int PANEL_H = 570;
-    private static final int GRID_X = 204;
-    private static final int GRID_Y = 190;
-    private static final int CARD_W = 136;
-    private static final int CARD_H = 82;
-    private static final int CARD_GAP = 10;
-
-    private static final int[] COLOR_PRESETS = {
-            0xFFFFFFFF, 0xFF111318, 0xFFC62A21, 0xFF36D5E7,
-            0xFF8B5CF6, 0xFFFFC928, 0xFF53E06F, 0xFFFF67CE
-    };
+    private static final int PANEL_W = 730;
+    private static final int PANEL_H = 520;
+    private static final int SIDEBAR_W = 148;
+    private static final int CARD_W = 264;
+    private static final int CARD_H = 70;
+    private static final int CARD_GAP_X = 12;
+    private static final int CARD_GAP_Y = 10;
 
     private enum Section {
         WINGS("Wings"),
@@ -43,27 +37,24 @@ public final class CosmeticsScreen extends Screen {
         LEGGINGS("Leggings"),
         BOOTS("Boots");
 
-        private final String label;
-
-        Section(String label) {
-            this.label = label;
-        }
+        final String label;
+        Section(String label) { this.label = label; }
     }
 
-    private record CosmeticEntry(String name, String subtitle, int style) { }
+    private record CosmeticEntry(String name, String description, int style) { }
 
     private static final List<CosmeticEntry> WINGS = List.of(
-            new CosmeticEntry("Angel Wings", "Feathered", 0),
-            new CosmeticEntry("Demon Wings", "Membrane", 1),
-            new CosmeticEntry("Crystal Wings", "Faceted", 2),
-            new CosmeticEntry("Dragon Wings", "Scaled", 3),
-            new CosmeticEntry("Tech Wings", "Mechanical", 4)
+            new CosmeticEntry("Angel Wings", "Layered feather wings.", 0),
+            new CosmeticEntry("Demon Wings", "Dark membrane wings.", 1),
+            new CosmeticEntry("Crystal Wings", "Sharp faceted wings.", 2),
+            new CosmeticEntry("Dragon Wings", "Scaled dragon profile.", 3),
+            new CosmeticEntry("Tech Wings", "Mechanical neon profile.", 4)
     );
 
     private static final List<CosmeticEntry> ARMOR = List.of(
-            new CosmeticEntry("None", "Hide this slot", 0),
-            new CosmeticEntry("Valkyrie", "Uploaded armor", 1),
-            new CosmeticEntry("Demonic", "Uploaded armor", 2)
+            new CosmeticEntry("None", "Hide this armor slot.", 0),
+            new CosmeticEntry("Valkyrie", "Silver and gold cosmetic armor.", 1),
+            new CosmeticEntry("Demonic", "Black and crimson cosmetic armor.", 2)
     );
 
     private final Screen parent;
@@ -76,329 +67,260 @@ public final class CosmeticsScreen extends Screen {
         this.parent = parent;
     }
 
-    private float uiScale() {
-        float requested = Math.clamp(TopkaClient.CONFIG.get().menuScale, 0.70F, 1.20F);
-        float fitX = (width - 20.0F) / PANEL_W;
-        float fitY = (height - 20.0F) / PANEL_H;
-        return Math.min(requested, Math.min(fitX, fitY));
+    private float scale() {
+        return Math.clamp(TopkaClient.CONFIG.get().menuScale, 0.70F, 1.35F);
+    }
+
+    private int scaledPanelWidth() {
+        return Math.round(PANEL_W * scale());
+    }
+
+    private int scaledPanelHeight() {
+        return Math.round(PANEL_H * scale());
     }
 
     private int panelX() {
-        return (width - Math.round(PANEL_W * uiScale())) / 2;
+        return (width - scaledPanelWidth()) / 2 + TopkaClient.CONFIG.get().menuOffsetX;
     }
 
     private int panelY() {
-        return (height - Math.round(PANEL_H * uiScale())) / 2;
+        return (height - scaledPanelHeight()) / 2 + TopkaClient.CONFIG.get().menuOffsetY;
     }
 
     private int sx(int x) {
-        return panelX() + Math.round(x * uiScale());
+        return panelX() + Math.round(x * scale());
     }
 
     private int sy(int y) {
-        return panelY() + Math.round(y * uiScale());
+        return panelY() + Math.round(y * scale());
     }
 
-    private int ss(int value) {
-        return Math.max(1, Math.round(value * uiScale()));
+    private int sw(int w) {
+        return Math.max(1, Math.round(w * scale()));
     }
 
-    private int localX(double x) {
-        return Math.round((float) ((x - panelX()) / uiScale()));
+    private int localMouseX(double x) {
+        return Math.round((float) ((x - panelX()) / scale()));
     }
 
-    private int localY(double y) {
-        return Math.round((float) ((y - panelY()) / uiScale()));
+    private int localMouseY(double y) {
+        return Math.round((float) ((y - panelY()) / scale()));
     }
 
     @Override
     protected void init() {
+        addSectionTarget(0, Section.WINGS);
+        addSectionTarget(1, Section.HELMETS);
+        addSectionTarget(2, Section.CHESTPLATES);
+        addSectionTarget(3, Section.LEGGINGS);
+        addSectionTarget(4, Section.BOOTS);
+
         EditBox previous = searchBox;
         searchBox = new EditBox(
                 font,
-                sx(204),
-                sy(145),
-                ss(438),
-                ss(24),
+                sx(184),
+                sy(35),
+                sw(316),
+                Math.max(14, sw(17)),
                 previous,
                 UiFont.text("Search cosmetics")
         );
         searchBox.setBordered(false);
         searchBox.setTextShadow(false);
         searchBox.setMaxLength(48);
-        searchBox.setHint(UiFont.text("Search..."));
+        searchBox.setHint(UiFont.text("Search cosmetics..."));
         searchBox.addFormatter((text, index) -> FormattedCharSequence.forward(text, UiFont.STYLE));
         searchBox.setValue(searchQuery);
         searchBox.setResponder(value -> searchQuery = value);
         addRenderableWidget(searchBox);
+
+        addClickTarget(172, 426, 104, 30, this::onClose);
+        addClickTarget(284, 426, 118, 30, this::toggleCurrentModule);
+        addClickTarget(410, 426, 118, 30, this::equipWholeSet);
+        addClickTarget(536, 426, 104, 30, this::clearArmor);
+        addClickTarget(648, 426, 56, 30, this::resetColors);
+    }
+
+    private void addSectionTarget(int index, Section value) {
+        addClickTarget(15, 86 + index * 29, 118, 24, () -> {
+            section = value;
+            searchQuery = "";
+            if (searchBox != null) searchBox.setValue("");
+        });
+    }
+
+    private void addClickTarget(int x, int y, int w, int h, Runnable action) {
+        addWidget(Button.builder(Component.empty(), b -> action.run())
+                .pos(sx(x), sy(y))
+                .size(sw(w), sw(h))
+                .build());
     }
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
-        int mx = localX(mouseX);
-        int my = localY(mouseY);
+        var cfg = TopkaClient.CONFIG.get();
+        int mx = localMouseX(mouseX);
+        int my = localMouseY(mouseY);
 
-        g.fill(0, 0, width, height, 0xB5000000);
+        g.fill(0, 0, width, height, 0x92000000);
 
         g.pose().pushMatrix();
         g.pose().translate(panelX(), panelY());
-        g.pose().scale(uiScale(), uiScale());
+        g.pose().scale(scale(), scale());
 
-        drawShell(g, mx, my);
-        drawCategoryRail(g, mx, my);
-        drawCosmeticGrid(g, mx, my);
-        drawPreviewPanel(g, mx, my);
+        g.fill(0, 0, PANEL_W, PANEL_H, panelColor());
+        g.fill(0, 0, SIDEBAR_W, PANEL_H, sidebarColor());
+        g.fill(SIDEBAR_W, 0, SIDEBAR_W + 1, PANEL_H, dividerColor());
+
+        if (cfg.menuStyle == 1) {
+            g.fill(0, 0, PANEL_W, 2, Theme.accent());
+            g.fill(0, PANEL_H - 2, PANEL_W, PANEL_H, Theme.secondary());
+        } else if (cfg.menuStyle == 2) {
+            g.fill(0, 0, PANEL_W, 1, 0x88FFFFFF);
+            g.fill(0, 0, 1, PANEL_H, 0x44FFFFFF);
+        } else {
+            g.fill(0, 0, PANEL_W, 3, Theme.accent());
+        }
+
+        drawBrand(g);
+        drawSidebar(g, mx, my);
+
+        g.text(font, UiFont.text(section.label.toUpperCase()), 172, 11, 0xFFF7F7FB, true);
+        g.text(font, UiFont.text(activeSummary()), 552, 11, Theme.accent(), true);
+
+        g.fill(168, 28, 522, 58, searchBackground());
+        g.fill(168, 57, 522, 58, cfg.menuStyle == 2 ? 0x44777788 : Theme.accent());
+        g.text(font, UiFont.text("⌕"), 174, 38, Theme.accent(), false);
+
+        List<CosmeticEntry> entries = filteredEntries();
+        if (entries.isEmpty()) {
+            g.centeredText(font, UiFont.text("No cosmetics match "" + searchQuery + """), 440, 224, 0xFF777788);
+        } else {
+            for (int i = 0; i < entries.size(); i++) {
+                int column = i % 2;
+                int row = i / 2;
+                int x = 172 + column * (CARD_W + CARD_GAP_X);
+                int y = 82 + row * (CARD_H + CARD_GAP_Y);
+                drawCard(g, mx, my, x, y, entries.get(i));
+            }
+        }
+
+        drawBottomButton(g, mx, my, 172, 426, 104, "Back");
+        drawBottomButton(g, mx, my, 284, 426, 118, moduleEnabled() ? "Disable" : "Enable");
+        drawBottomButton(g, mx, my, 410, 426, 118, "Whole Set");
+        drawBottomButton(g, mx, my, 536, 426, 104, "Clear Armor");
+        drawBottomButton(g, mx, my, 648, 426, 56, "Reset");
+
+        g.text(font, UiFont.text("Left click selects • Search stays focused • Armor slots are independent"), 172, 477, 0xFF686879, false);
+        g.text(font, UiFont.text("Cosmetics 0.12.4"), 616, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
     }
 
-    private void drawShell(GuiGraphicsExtractor g, int mx, int my) {
-        g.fill(0, 0, PANEL_W, PANEL_H, 0xFF10152A);
-        g.fill(0, 0, PANEL_W, 58, 0xFF0B1030);
-        g.fill(0, 58, PANEL_W, 108, 0xFF1A2253);
-        g.fill(0, 108, PANEL_W, PANEL_H, 0xFF131A37);
-
-        boolean backHover = inside(mx, my, 24, 18, 112, 30);
-        g.fill(24, 18, 136, 48, backHover ? 0xFF263263 : 0xFF151D43);
-        g.text(font, UiFont.text("<  MOD MENU"), 38, 29, 0xFFF2F4FF, true);
-
-        drawTopNav(g, 300, "MOD MENU", false);
-        drawTopNav(g, 424, "ADDONS", false);
-        drawTopNav(g, 536, "WIDGETS", false);
-        drawTopNav(g, 664, "PLAYER", true);
-
-        drawSubTab(g, 202, "COSMETICS", true);
-        drawSubTab(g, 354, "EMOTES", false);
-        drawSubTab(g, 486, "SKIN", false);
-
-        g.fill(26, 124, 660, 544, 0xB9222B5A);
-        g.fill(36, 136, 650, 178, 0xAA121936);
-        g.text(font, UiFont.text("COSMETICS"), 48, 151, 0xFFF5F6FF, true);
-        g.text(font, UiFont.text("Pick a slot, then choose its cosmetic."), 318, 151, 0xFF9AA6D8, false);
-
-        g.fill(198, 139, 648, 175, 0xFF0E1531);
-        g.fill(198, 174, 648, 176, 0xFF46538E);
+    private void drawBrand(GuiGraphicsExtractor g) {
+        g.text(font, UiFont.text("MOD"), 18, 18, 0xFFFFFFFF, true);
+        g.text(font, UiFont.text("COSMETICS"), 50, 18, Theme.accent(), true);
+        g.text(font, UiFont.text(styleName()), 18, 37, 0xFF6E6E80, false);
+        g.fill(18, 59, 128, 60, 0xFF2B2B36);
+        g.fill(18, 59, 76, 60, Theme.accent());
     }
 
-    private void drawTopNav(GuiGraphicsExtractor g, int x, String label, boolean selected) {
-        if (selected) g.fill(x - 18, 56, x + 88, 59, 0xFF55C7FF);
-        g.text(font, UiFont.text(label), x, 28, selected ? 0xFF65D6FF : 0xFFD8DDF5, true);
+    private void drawSidebar(GuiGraphicsExtractor g, int mx, int my) {
+        drawSection(g, mx, my, 0, Section.WINGS);
+        drawSection(g, mx, my, 1, Section.HELMETS);
+        drawSection(g, mx, my, 2, Section.CHESTPLATES);
+        drawSection(g, mx, my, 3, Section.LEGGINGS);
+        drawSection(g, mx, my, 4, Section.BOOTS);
+
+        var c = TopkaClient.CONFIG.get();
+        g.text(font, UiFont.text("CURRENT"), 18, 260, 0xFF646476, false);
+        g.text(font, UiFont.text("Wing: " + wingName(c.wingsStyle)), 18, 278, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Helmet: " + armorName(c.armorHelmetStyle)), 18, 294, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Chest: " + armorName(c.armorChestStyle)), 18, 310, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Legs: " + armorName(c.armorLeggingsStyle)), 18, 326, 0xFFB7B7C4, false);
+        g.text(font, UiFont.text("Boots: " + armorName(c.armorBootsStyle)), 18, 342, 0xFFB7B7C4, false);
+
+        g.text(font, UiFont.text("TIP"), 18, 448, 0xFF646476, false);
+        g.text(font, UiFont.text("Mix Valkyrie + Demonic"), 18, 464, 0xFF686879, false);
+        g.text(font, UiFont.text("pieces independently."), 18, 478, 0xFF686879, false);
     }
 
-    private void drawSubTab(GuiGraphicsExtractor g, int x, String label, boolean selected) {
-        g.fill(x - 16, 70, x + 116, 98, selected ? 0xFF11183A : 0x6634437A);
-        g.centeredText(font, UiFont.text(label), x + 50, 80,
-                selected ? 0xFFFFFFFF : 0xFFC0C8E8);
+    private void drawSection(GuiGraphicsExtractor g, int mx, int my, int index, Section value) {
+        int x = 15;
+        int y = 86 + index * 29;
+        boolean selected = section == value;
+        boolean hover = inside(mx, my, x, y, 118, 24);
+        int color = selected ? Theme.accent() : 0xFFB7B7C4;
+        g.fill(x, y, x + 118, y + 24, selected ? selectedCategoryColor() : (hover ? hoverColor() : 0x00101010));
+        if (selected) g.fill(x, y, x + 3, y + 24, color);
+        g.text(font, UiFont.text(value.label), x + 10, y + 8, color, selected);
     }
 
-    private void drawCategoryRail(GuiGraphicsExtractor g, int mx, int my) {
-        int y = 190;
-        for (Section value : Section.values()) {
-            boolean selected = value == section;
-            boolean hover = inside(mx, my, 42, y, 136, 36);
-            g.fill(42, y, 178, y + 36,
-                    selected ? 0xFF2C376B : (hover ? 0xFF222C59 : 0xB5151C3E));
-            if (selected) g.fill(42, y, 46, y + 36, Theme.accent());
-            g.text(font, UiFont.text(value.label), 56, y + 13,
-                    selected ? 0xFFFFFFFF : 0xFFB6BFDF, selected);
-            y += 44;
-        }
-    }
-
-    private void drawCosmeticGrid(GuiGraphicsExtractor g, int mx, int my) {
-        List<CosmeticEntry> entries = filteredEntries();
-
-        if (entries.isEmpty()) {
-            g.centeredText(font, UiFont.text("No cosmetics match your search."), 420, 312, 0xFF98A3C9);
-            return;
-        }
-
-        for (int i = 0; i < entries.size(); i++) {
-            int column = i % 3;
-            int row = i / 3;
-            int x = GRID_X + column * (CARD_W + CARD_GAP);
-            int y = GRID_Y + row * (CARD_H + CARD_GAP);
-            drawCard(g, mx, my, x, y, entries.get(i));
-        }
-    }
-
-    private void drawCard(
-            GuiGraphicsExtractor g,
-            int mx,
-            int my,
-            int x,
-            int y,
-            CosmeticEntry entry
-    ) {
-        boolean selected = isSelected(entry);
+    private void drawCard(GuiGraphicsExtractor g, int mx, int my, int x, int y, CosmeticEntry entry) {
+        boolean selected = selectedStyle() == entry.style;
         boolean hover = inside(mx, my, x, y, CARD_W, CARD_H);
 
-        g.fill(x, y, x + CARD_W, y + CARD_H,
-                selected ? 0xFF354174 : (hover ? 0xFF2A3565 : 0xC51B244D));
-        g.fill(x, y + CARD_H - 22, x + CARD_W, y + CARD_H, 0xDD0C1230);
+        g.fill(x, y, x + CARD_W, y + CARD_H, cardColor(selected, hover));
+        g.fill(x, y, x + 3, y + CARD_H, selected ? Theme.accent() : 0xFF383846);
 
-        if (selected) {
-            g.fill(x, y, x + CARD_W, y + 3, Theme.accent());
-            g.fill(x + CARD_W - 18, y + CARD_H - 18, x + CARD_W - 8, y + CARD_H - 8, 0xFF67E36F);
-        }
+        int iconColor = previewColor(entry.style);
+        g.fill(x + 12, y + 12, x + 52, y + 52, selected ? Theme.withAlpha(Theme.accent(), 44) : 0x332D2D38);
+        drawIcon(g, x + 18, y + 18, entry.style, iconColor);
 
-        drawCardIcon(g, x + 8, y + 8, entry);
-        g.text(font, UiFont.text(entry.name), x + 8, y + CARD_H - 17, 0xFFF6F7FF, true);
-        g.text(font, UiFont.text(entry.subtitle), x + 64, y + 14, 0xFFA8B2D5, false);
-        g.text(font, UiFont.text(selected ? "ACTIVE" : "SELECT"), x + 64, y + 31,
-                selected ? 0xFF63EA72 : 0xFF65D6FF, false);
+        g.text(font, UiFont.text(entry.name), x + 64, y + 13, TopkaClient.CONFIG.get().textArgb, true);
+        g.text(font, UiFont.trim(font, entry.description, 140), x + 64, y + 32, 0xFF858596, false);
+
+        int pillX = x + CARD_W - 55;
+        g.fill(pillX, y + 13, x + CARD_W - 10, y + 31,
+                selected ? Theme.withAlpha(Theme.accent(), 52) : 0x334F4F5A);
+        g.centeredText(font, UiFont.text(selected ? "ON" : "SELECT"), pillX + 22, y + 18,
+                selected ? Theme.accent() : 0xFF858592);
     }
 
-    private void drawCardIcon(GuiGraphicsExtractor g, int x, int y, CosmeticEntry entry) {
-        g.fill(x, y, x + 48, y + 44, 0xAA10162F);
-
+    private void drawIcon(GuiGraphicsExtractor g, int x, int y, int style, int color) {
         if (section == Section.WINGS) {
-            int primary = wingPreviewColor(entry.style);
-            g.fill(x + 22, y + 8, x + 26, y + 38, 0xFFE9ECFF);
-            g.fill(x + 5, y + 12, x + 22, y + 18, primary);
-            g.fill(x + 1, y + 20, x + 22, y + 26, primary);
-            g.fill(x + 7, y + 28, x + 22, y + 34, primary);
-            g.fill(x + 26, y + 12, x + 43, y + 18, primary);
-            g.fill(x + 26, y + 20, x + 47, y + 26, primary);
-            g.fill(x + 26, y + 28, x + 41, y + 34, primary);
+            g.fill(x + 15, y + 4, x + 19, y + 30, 0xFFE6E8F0);
+            g.fill(x, y + 7, x + 15, y + 13, color);
+            g.fill(x - 3, y + 15, x + 15, y + 21, color);
+            g.fill(x + 19, y + 7, x + 34, y + 13, color);
+            g.fill(x + 19, y + 15, x + 37, y + 21, color);
             return;
         }
 
-        if (entry.style == 0) {
-            g.fill(x + 11, y + 20, x + 37, y + 24, 0xFF6F789B);
+        if (style == 0) {
+            g.fill(x + 4, y + 15, x + 34, y + 19, 0xFF696978);
             return;
         }
 
-        int color = entry.style == 2 ? 0xFF9F2332 : 0xFFE0BA52;
-        switch (section) {
-            case HELMETS -> {
-                g.fill(x + 14, y + 7, x + 34, y + 25, color);
-                g.fill(x + 10, y + 13, x + 38, y + 20, color);
-            }
-            case CHESTPLATES -> {
-                g.fill(x + 12, y + 9, x + 36, y + 35, color);
-                g.fill(x + 5, y + 12, x + 12, y + 34, color);
-                g.fill(x + 36, y + 12, x + 43, y + 34, color);
-            }
-            case LEGGINGS -> {
-                g.fill(x + 13, y + 7, x + 35, y + 18, color);
-                g.fill(x + 13, y + 18, x + 22, y + 39, color);
-                g.fill(x + 26, y + 18, x + 35, y + 39, color);
-            }
-            case BOOTS -> {
-                g.fill(x + 10, y + 19, x + 22, y + 39, color);
-                g.fill(x + 26, y + 19, x + 38, y + 39, color);
-            }
-            default -> { }
+        if (section == Section.HELMETS) {
+            g.fill(x + 7, y + 5, x + 31, y + 23, color);
+            g.fill(x + 3, y + 12, x + 35, y + 18, color);
+        } else if (section == Section.CHESTPLATES) {
+            g.fill(x + 8, y + 5, x + 30, y + 31, color);
+            g.fill(x + 1, y + 8, x + 8, y + 29, color);
+            g.fill(x + 30, y + 8, x + 37, y + 29, color);
+        } else if (section == Section.LEGGINGS) {
+            g.fill(x + 7, y + 5, x + 31, y + 15, color);
+            g.fill(x + 7, y + 15, x + 16, y + 34, color);
+            g.fill(x + 22, y + 15, x + 31, y + 34, color);
+        } else {
+            g.fill(x + 5, y + 15, x + 16, y + 34, color);
+            g.fill(x + 22, y + 15, x + 33, y + 34, color);
         }
     }
 
-    private void drawPreviewPanel(GuiGraphicsExtractor g, int mx, int my) {
-        var cfg = TopkaClient.CONFIG.get();
-
-        g.fill(674, 124, 954, 544, 0xB51C2553);
-        g.fill(686, 136, 942, 432, 0xFF0F1738);
-        g.text(font, UiFont.text("PLAYER"), 696, 148, 0xFFFFFFFF, true);
-        g.text(font, UiFont.text("PREVIEW"), 880, 148, 0xFF7281BB, false);
-
-        int cx = 814;
-        int top = 196;
-
-        if (TopkaClient.MODULES.byId("wings").enabled()) {
-            int wing = cfg.wingsPrimaryColorArgb;
-            drawPreviewWings(g, cx, top + 46, wing);
+    private int previewColor(int style) {
+        if (section == Section.WINGS) {
+            return switch (style) {
+                case 1 -> 0xFFC32D3D;
+                case 2 -> 0xFF71D9F7;
+                case 3 -> 0xFF7243C7;
+                case 4 -> 0xFF38D6D2;
+                default -> 0xFFF2F2F6;
+            };
         }
-
-        // Minecraft-style mannequin.
-        g.fill(cx - 18, top, cx + 18, top + 34, 0xFFE8D1B0);
-        g.fill(cx - 24, top + 36, cx + 24, top + 94, 0xFFF0F2F7);
-        g.fill(cx - 38, top + 38, cx - 24, top + 90, 0xFFE8D1B0);
-        g.fill(cx + 24, top + 38, cx + 38, top + 90, 0xFFE8D1B0);
-        g.fill(cx - 22, top + 94, cx - 3, top + 160, 0xFF22242C);
-        g.fill(cx + 3, top + 94, cx + 22, top + 160, 0xFF22242C);
-
-        if (TopkaClient.MODULES.byId("armor_cosmetic").enabled()) {
-            drawArmorPreviewSlot(g, cx, top, Section.HELMETS, cfg.armorHelmetStyle);
-            drawArmorPreviewSlot(g, cx, top, Section.CHESTPLATES, cfg.armorChestStyle);
-            drawArmorPreviewSlot(g, cx, top, Section.LEGGINGS, cfg.armorLeggingsStyle);
-            drawArmorPreviewSlot(g, cx, top, Section.BOOTS, cfg.armorBootsStyle);
-        }
-
-        g.fill(686, 444, 942, 532, 0xFF111936);
-        g.text(font, UiFont.text(selectedName()), 700, 456, 0xFFFFFFFF, true);
-        g.text(font, UiFont.text(section == Section.WINGS ? "Wing cosmetic" : section.label + " cosmetic"),
-                700, 474, 0xFF98A3CA, false);
-
-        boolean enabled = selectedModuleEnabled();
-        boolean toggleHover = inside(mx, my, 872, 454, 54, 24);
-        g.fill(872, 454, 926, 478,
-                enabled ? 0xFF275F3A : (toggleHover ? 0xFF51566D : 0xFF3C4052));
-        g.centeredText(font, UiFont.text(enabled ? "ON" : "OFF"), 899, 462,
-                enabled ? 0xFF62EC7A : 0xFFADB4CF);
-
-        for (int i = 0; i < COLOR_PRESETS.length; i++) {
-            int x = 700 + i * 27;
-            g.fill(x, 496, x + 20, 516, COLOR_PRESETS[i]);
-            if (inside(mx, my, x, 496, 20, 20)) {
-                g.fill(x - 2, 494, x + 22, 496, 0xFFFFFFFF);
-                g.fill(x - 2, 516, x + 22, 518, 0xFFFFFFFF);
-            }
-        }
-    }
-
-    private void drawArmorPreviewSlot(GuiGraphicsExtractor g, int cx, int top, Section slot, int style) {
-        if (style == 0) return;
-        int base = style == 2 ? 0xFF9F1E2E : 0xFFE0BA52;
-        int color = multiplyRgb(base, TopkaClient.CONFIG.get().armorCosmeticTintArgb);
-
-        switch (slot) {
-            case HELMETS -> {
-                g.fill(cx - 21, top - 5, cx + 21, top + 34, color);
-                if (style == 2) {
-                    g.fill(cx - 29, top - 16, cx - 20, top + 3, color);
-                    g.fill(cx + 20, top - 16, cx + 29, top + 3, color);
-                }
-            }
-            case CHESTPLATES -> {
-                g.fill(cx - 28, top + 34, cx + 28, top + 96, color);
-                g.fill(cx - 42, top + 36, cx - 25, top + 91, color);
-                g.fill(cx + 25, top + 36, cx + 42, top + 91, color);
-            }
-            case LEGGINGS -> {
-                g.fill(cx - 24, top + 91, cx + 24, top + 108, color);
-                g.fill(cx - 24, top + 104, cx - 2, top + 142, color);
-                g.fill(cx + 2, top + 104, cx + 24, top + 142, color);
-            }
-            case BOOTS -> {
-                g.fill(cx - 24, top + 136, cx - 2, top + 164, color);
-                g.fill(cx + 2, top + 136, cx + 24, top + 164, color);
-            }
-            default -> { }
-        }
-    }
-
-    private void drawPreviewWings(GuiGraphicsExtractor g, int cx, int y, int color) {
-        int c = 0xFF000000 | (color & 0x00FFFFFF);
-        for (int i = 0; i < 4; i++) {
-            int yy = y + i * 13;
-            g.fill(cx - 72 - i * 8, yy, cx - 20, yy + 9, c);
-            g.fill(cx + 20, yy, cx + 72 + i * 8, yy + 9, c);
-        }
-    }
-
-    private int wingPreviewColor(int style) {
-        return switch (style) {
-            case 1 -> 0xFFB62937;
-            case 2 -> 0xFF7DD9FF;
-            case 3 -> 0xFF6B2CC5;
-            case 4 -> 0xFF42D4DB;
-            case 5 -> 0xFFECECF4;
-            case 6 -> 0xFFCF5E43;
-            case 7 -> 0xFF8D7AF2;
-            case 8 -> 0xFF5CD7CA;
-            default -> 0xFFF3F3F6;
-        };
+        return style == 2 ? 0xFF9B2135 : 0xFFE5C45C;
     }
 
     private List<CosmeticEntry> filteredEntries() {
@@ -407,72 +329,52 @@ public final class CosmeticsScreen extends Screen {
         if (query.isEmpty()) return source;
 
         List<CosmeticEntry> result = new ArrayList<>();
-        for (CosmeticEntry entry : source) {
-            if ((entry.name + " " + entry.subtitle).toLowerCase(Locale.ROOT).contains(query)) {
-                result.add(entry);
+        for (CosmeticEntry e : source) {
+            if ((e.name + " " + e.description).toLowerCase(Locale.ROOT).contains(query)) {
+                result.add(e);
             }
         }
         return result;
     }
 
-    private boolean isSelected(CosmeticEntry entry) {
-        var cfg = TopkaClient.CONFIG.get();
-        return selectedStyle(cfg) == entry.style;
-    }
-
-    private int selectedStyle(com.koqps.topka.config.TopkaConfig cfg) {
+    private int selectedStyle() {
+        var c = TopkaClient.CONFIG.get();
         return switch (section) {
-            case WINGS -> cfg.wingsStyle;
-            case HELMETS -> cfg.armorHelmetStyle;
-            case CHESTPLATES -> cfg.armorChestStyle;
-            case LEGGINGS -> cfg.armorLeggingsStyle;
-            case BOOTS -> cfg.armorBootsStyle;
+            case WINGS -> c.wingsStyle;
+            case HELMETS -> c.armorHelmetStyle;
+            case CHESTPLATES -> c.armorChestStyle;
+            case LEGGINGS -> c.armorLeggingsStyle;
+            case BOOTS -> c.armorBootsStyle;
         };
     }
 
-    private String selectedName() {
-        int selected = selectedStyle(TopkaClient.CONFIG.get());
-        List<CosmeticEntry> source = section == Section.WINGS ? WINGS : ARMOR;
-        for (CosmeticEntry entry : source) {
-            if (entry.style == selected) return entry.name;
-        }
-        return "None";
-    }
-
-    private boolean selectedModuleEnabled() {
-        if (section == Section.WINGS) {
-            return TopkaClient.MODULES.byId("wings").enabled();
-        }
-        return TopkaClient.MODULES.byId("armor_cosmetic").enabled();
-    }
-
-    private void apply(CosmeticEntry entry) {
-        var cfg = TopkaClient.CONFIG.get();
+    private void select(CosmeticEntry entry) {
+        var c = TopkaClient.CONFIG.get();
 
         switch (section) {
             case WINGS -> {
-                cfg.wingsStyle = entry.style;
+                c.wingsStyle = entry.style;
                 TopkaClient.MODULES.byId("wings").setEnabled(true);
             }
-            case HELMETS -> cfg.armorHelmetStyle = entry.style;
-            case CHESTPLATES -> cfg.armorChestStyle = entry.style;
-            case LEGGINGS -> cfg.armorLeggingsStyle = entry.style;
-            case BOOTS -> cfg.armorBootsStyle = entry.style;
+            case HELMETS -> c.armorHelmetStyle = entry.style;
+            case CHESTPLATES -> c.armorChestStyle = entry.style;
+            case LEGGINGS -> c.armorLeggingsStyle = entry.style;
+            case BOOTS -> c.armorBootsStyle = entry.style;
         }
 
         if (section != Section.WINGS) {
             TopkaClient.MODULES.byId("armor_cosmetic").setEnabled(
-                    cfg.armorHelmetStyle != 0
-                            || cfg.armorChestStyle != 0
-                            || cfg.armorLeggingsStyle != 0
-                            || cfg.armorBootsStyle != 0
+                    c.armorHelmetStyle != 0
+                            || c.armorChestStyle != 0
+                            || c.armorLeggingsStyle != 0
+                            || c.armorBootsStyle != 0
             );
         }
 
         TopkaClient.CONFIG.save();
     }
 
-    private void toggleSelectedModule() {
+    private void toggleCurrentModule() {
         if (section == Section.WINGS) {
             TopkaClient.MODULES.byId("wings").toggle();
         } else {
@@ -481,79 +383,95 @@ public final class CosmeticsScreen extends Screen {
         TopkaClient.CONFIG.save();
     }
 
-    private void applyColor(int color) {
-        var cfg = TopkaClient.CONFIG.get();
+    private void equipWholeSet() {
+        var c = TopkaClient.CONFIG.get();
+        int style = section == Section.WINGS ? 1 : Math.max(1, selectedStyle());
         if (section == Section.WINGS) {
-            cfg.wingsPrimaryColorArgb = color;
-            cfg.importedWingTintArgb = color;
+            c.wingsStyle = style;
+            TopkaClient.MODULES.byId("wings").setEnabled(true);
         } else {
-            cfg.armorCosmeticTintArgb = color;
+            c.armorHelmetStyle = style;
+            c.armorChestStyle = style;
+            c.armorLeggingsStyle = style;
+            c.armorBootsStyle = style;
+            TopkaClient.MODULES.byId("armor_cosmetic").setEnabled(true);
         }
         TopkaClient.CONFIG.save();
     }
 
+    private void clearArmor() {
+        var c = TopkaClient.CONFIG.get();
+        c.armorHelmetStyle = 0;
+        c.armorChestStyle = 0;
+        c.armorLeggingsStyle = 0;
+        c.armorBootsStyle = 0;
+        TopkaClient.MODULES.byId("armor_cosmetic").setEnabled(false);
+        TopkaClient.CONFIG.save();
+    }
+
+    private void resetColors() {
+        var c = TopkaClient.CONFIG.get();
+        c.wingsPrimaryColorArgb = 0xFFFFFFFF;
+        c.wingsSecondaryColorArgb = 0xFFC8CDD8;
+        c.armorCosmeticTintArgb = 0xFFFFFFFF;
+        TopkaClient.CONFIG.save();
+    }
+
+    private boolean moduleEnabled() {
+        return section == Section.WINGS
+                ? TopkaClient.MODULES.byId("wings").enabled()
+                : TopkaClient.MODULES.byId("armor_cosmetic").enabled();
+    }
+
+    private String activeSummary() {
+        if (section == Section.WINGS) return moduleEnabled() ? "wings on" : "wings off";
+        var c = TopkaClient.CONFIG.get();
+        int active = 0;
+        if (c.armorHelmetStyle != 0) active++;
+        if (c.armorChestStyle != 0) active++;
+        if (c.armorLeggingsStyle != 0) active++;
+        if (c.armorBootsStyle != 0) active++;
+        return active + "/4 armor slots";
+    }
+
+    private String wingName(int style) {
+        return switch (style) {
+            case 1 -> "Demon";
+            case 2 -> "Crystal";
+            case 3 -> "Dragon";
+            case 4 -> "Tech";
+            default -> "Angel";
+        };
+    }
+
+    private String armorName(int style) {
+        return switch (style) {
+            case 1 -> "Valkyrie";
+            case 2 -> "Demonic";
+            default -> "None";
+        };
+    }
+
     @Override
     public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (click.button() != 0) return super.mouseClicked(click, doubled);
+        int mx = localMouseX(click.x());
+        int my = localMouseY(click.y());
 
-        int mx = localX(click.x());
-        int my = localY(click.y());
-
-        if (inside(mx, my, 24, 18, 112, 30)) {
-            onClose();
-            return true;
-        }
-
-        int categoryY = 190;
-        for (Section value : Section.values()) {
-            if (inside(mx, my, 42, categoryY, 136, 36)) {
-                section = value;
-                searchQuery = "";
-                if (searchBox != null) searchBox.setValue("");
-                return true;
-            }
-            categoryY += 44;
-        }
-
-        List<CosmeticEntry> entries = filteredEntries();
-        for (int i = 0; i < entries.size(); i++) {
-            int column = i % 3;
-            int row = i / 3;
-            int x = GRID_X + column * (CARD_W + CARD_GAP);
-            int y = GRID_Y + row * (CARD_H + CARD_GAP);
-            if (inside(mx, my, x, y, CARD_W, CARD_H)) {
-                apply(entries.get(i));
-                return true;
-            }
-        }
-
-        if (inside(mx, my, 872, 454, 54, 24)) {
-            toggleSelectedModule();
-            return true;
-        }
-
-        if (my >= 496 && my < 516) {
-            for (int i = 0; i < COLOR_PRESETS.length; i++) {
-                int x = 700 + i * 27;
-                if (inside(mx, my, x, 496, 20, 20)) {
-                    applyColor(COLOR_PRESETS[i]);
+        if (click.button() == 0) {
+            List<CosmeticEntry> entries = filteredEntries();
+            for (int i = 0; i < entries.size(); i++) {
+                int column = i % 2;
+                int row = i / 2;
+                int x = 172 + column * (CARD_W + CARD_GAP_X);
+                int y = 82 + row * (CARD_H + CARD_GAP_Y);
+                if (inside(mx, my, x, y, CARD_W, CARD_H)) {
+                    select(entries.get(i));
                     return true;
                 }
             }
         }
 
         return super.mouseClicked(click, doubled);
-    }
-
-    private static boolean inside(int mx, int my, int x, int y, int w, int h) {
-        return mx >= x && mx < x + w && my >= y && my < y + h;
-    }
-
-    private static int multiplyRgb(int base, int tint) {
-        int r = ((base >> 16) & 255) * ((tint >> 16) & 255) / 255;
-        int g = ((base >> 8) & 255) * ((tint >> 8) & 255) / 255;
-        int b = (base & 255) * (tint & 255) / 255;
-        return 0xFF000000 | (r << 16) | (g << 8) | b;
     }
 
     @Override
@@ -569,5 +487,72 @@ public final class CosmeticsScreen extends Screen {
     public void onClose() {
         TopkaClient.CONFIG.save();
         minecraft.gui.setScreen(parent);
+    }
+
+    private static boolean inside(int mx, int my, int x, int y, int w, int h) {
+        return mx >= x && mx < x + w && my >= y && my < y + h;
+    }
+
+    private String styleName() {
+        return switch (TopkaClient.CONFIG.get().menuStyle) {
+            case 1 -> "NEON CLIENT";
+            case 2 -> "GLASS CLIENT";
+            case 3 -> "MINIMAL CLIENT";
+            default -> "PRO CLIENT";
+        };
+    }
+
+    private int panelColor() {
+        var c = TopkaClient.CONFIG.get();
+        return switch (c.menuStyle) {
+            case 1 -> 0xF5090B12;
+            case 2 -> (Math.clamp((c.panelArgb >>> 24) & 0xFF, 130, 220) << 24) | 0x00131824;
+            case 3 -> 0xFA101014;
+            default -> c.panelArgb;
+        };
+    }
+
+    private int sidebarColor() {
+        return switch (TopkaClient.CONFIG.get().menuStyle) {
+            case 1 -> 0xFA07080D;
+            case 2 -> 0xB9121822;
+            case 3 -> 0xFF0B0B0D;
+            default -> 0xFF111116;
+        };
+    }
+
+    private int dividerColor() {
+        return TopkaClient.CONFIG.get().menuStyle == 2 ? 0x44777788 : 0xFF2B2B36;
+    }
+
+    private int searchBackground() {
+        return TopkaClient.CONFIG.get().menuStyle == 2 ? 0x551A2230 : 0xFF1A1A23;
+    }
+
+    private int hoverColor() {
+        return TopkaClient.CONFIG.get().menuStyle == 2 ? 0x553A4658 : 0xFF292936;
+    }
+
+    private int buttonColor() {
+        return TopkaClient.CONFIG.get().menuStyle == 2 ? 0x55202A38 : 0xFF20202A;
+    }
+
+    private int selectedCategoryColor() {
+        return Theme.withAlpha(Theme.accent(), TopkaClient.CONFIG.get().menuStyle == 2 ? 50 : 38);
+    }
+
+    private int cardColor(boolean selected, boolean hover) {
+        if (selected) return TopkaClient.CONFIG.get().menuStyle == 2
+                ? Theme.withAlpha(Theme.accent(), 36)
+                : 0xFF232231;
+        if (hover) return hoverColor();
+        return TopkaClient.CONFIG.get().menuStyle == 2 ? 0x44171D28 : 0xFF181820;
+    }
+
+    private void drawBottomButton(GuiGraphicsExtractor g, int mx, int my, int x, int y, int w, String label) {
+        boolean hover = inside(mx, my, x, y, w, 30);
+        g.fill(x, y, x + w, y + 30, hover ? hoverColor() : buttonColor());
+        g.fill(x, y + 29, x + w, y + 30, Theme.accent());
+        g.centeredText(font, UiFont.text(label), x + w / 2, y + 10, 0xFFEDEDF4);
     }
 }
