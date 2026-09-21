@@ -155,29 +155,37 @@ public final class CosmeticTextures {
             return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
         }
 
-        // Demonic reference: charcoal forged metal, deep red trim and
-        // sparse copper/orange gem-like highlights.
-        boolean copper = luma >= 188
-                || (((x * 13 + y * 17) % 71) == 0 && luma > 115);
+        // Demonic reference: layered charcoal/gunmetal armor with red
+        // horn/trim pieces and only a handful of copper-orange gems. Do not
+        // turn every bright vanilla netherite pixel red; that flattened the
+        // whole suit into one black/red slab in-game.
+        boolean copper = luma >= 214
+                || (((x * 13 + y * 17) % 83) == 0 && luma > 130);
         if (copper) {
-            int rr = Math.clamp(154 + luma / 3, 0, 245);
-            int gg = Math.clamp(54 + luma / 4, 0, 170);
-            int bb = Math.clamp(30 + luma / 8, 0, 105);
+            int rr = Math.clamp(166 + luma / 3, 0, 248);
+            int gg = Math.clamp(58 + luma / 4, 0, 176);
+            int bb = Math.clamp(28 + luma / 9, 0, 96);
             return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
         }
 
-        boolean crimson = luma >= 118
-                || (((x * 5 + y * 7) % 31) == 0 && luma > 65);
+        boolean crimson = ((x * 5 + y * 7) % 29) <= 1 && luma > 54;
         if (crimson) {
-            int rr = Math.clamp(72 + luma / 2, 0, 205);
-            int gg = Math.clamp(10 + luma / 14, 0, 62);
-            int bb = Math.clamp(14 + luma / 16, 0, 68);
+            int rr = Math.clamp(76 + luma / 2, 0, 190);
+            int gg = Math.clamp(12 + luma / 16, 0, 55);
+            int bb = Math.clamp(14 + luma / 18, 0, 58);
             return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
         }
 
-        int rr = Math.clamp(18 + luma / 4, 0, 82);
-        int gg = Math.clamp(19 + luma / 4, 0, 84);
-        int bb = Math.clamp(23 + luma / 4, 0, 92);
+        if (luma >= 100) {
+            int rr = Math.clamp(42 + luma / 2, 0, 150);
+            int gg = Math.clamp(43 + luma / 2, 0, 152);
+            int bb = Math.clamp(48 + luma / 2, 0, 162);
+            return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
+        }
+
+        int rr = Math.clamp(22 + luma / 3, 0, 92);
+        int gg = Math.clamp(23 + luma / 3, 0, 94);
+        int bb = Math.clamp(27 + luma / 3, 0, 104);
         return (alpha << 24) | (rr << 16) | (gg << 8) | bb;
     }
 
