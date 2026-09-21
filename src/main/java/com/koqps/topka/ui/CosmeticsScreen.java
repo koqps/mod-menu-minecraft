@@ -218,7 +218,7 @@ public final class CosmeticsScreen extends Screen {
         drawBottomButton(g, mx, my, 648, 426, 56, "Reset");
 
         g.text(font, UiFont.text("Armor skins apply to equipped netherite pieces • slots are independent"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Cosmetics 0.14.0"), 616, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Cosmetics 0.14.1"), 616, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
         super.extractRenderState(g, mouseX, mouseY, delta);
