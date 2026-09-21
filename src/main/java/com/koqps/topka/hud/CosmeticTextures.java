@@ -14,9 +14,11 @@ import net.minecraft.resources.Identifier;
  */
 public final class CosmeticTextures {
     public static final Identifier WINGS = Identifier.fromNamespaceAndPath("topka", "dynamic/wings_atlas");
+    public static final Identifier ARMOR = Identifier.fromNamespaceAndPath("topka", "dynamic/armor_atlas");
     public static final Identifier ANGEL_BASE = Identifier.fromNamespaceAndPath("topka", "textures/cosmetic/angel_wings.png");
 
     private static DynamicTexture wingsTexture;
+    private static DynamicTexture armorTexture;
     private static boolean registered;
 
     private CosmeticTextures() { }
@@ -29,6 +31,12 @@ public final class CosmeticTextures {
 
         wingsTexture = new DynamicTexture(() -> "Mod Menu wing atlas", image);
         client.getTextureManager().register(WINGS, wingsTexture);
+
+        NativeImage armor = new NativeImage(128, 64, false);
+        paintArmorAtlas(armor);
+        armorTexture = new DynamicTexture(() -> "Mod Menu armor atlas", armor);
+        client.getTextureManager().register(ARMOR, armorTexture);
+
         registered = true;
     }
 
@@ -36,6 +44,10 @@ public final class CosmeticTextures {
         if (wingsTexture != null) {
             wingsTexture.close();
             wingsTexture = null;
+        }
+        if (armorTexture != null) {
+            armorTexture.close();
+            armorTexture = null;
         }
         registered = false;
     }
@@ -78,6 +90,33 @@ public final class CosmeticTextures {
                 int x = 66 + offset + col * 10;
                 drawScale(image, x, y);
             }
+        }
+    }
+
+    private static void paintArmorAtlas(NativeImage image) {
+        clear(image);
+
+        // Left half: Valkyrie — cool steel with warm gold trim.
+        for (int y = 0; y < 64; y++) {
+            for (int x = 0; x < 64; x++) {
+                boolean trim = x < 4 || x > 59 || y < 4 || y > 59 || ((x + y) % 19 == 0);
+                image.setPixel(x, y, trim ? 0xFFE5C45C : 0xFFD6D9E3);
+            }
+        }
+        for (int y = 8; y < 56; y += 12) {
+            drawLine(image, 4, y, 59, y + 5, 0xFF8E96AA, 2);
+        }
+
+        // Right half: Demonic — blackened metal with crimson/purple trim.
+        for (int y = 0; y < 64; y++) {
+            for (int x = 64; x < 128; x++) {
+                int lx = x - 64;
+                boolean trim = lx < 4 || lx > 59 || y < 4 || y > 59 || ((lx * 3 + y * 2) % 23 == 0);
+                image.setPixel(x, y, trim ? 0xFF9B2135 : 0xFF252233);
+            }
+        }
+        for (int y = 10; y < 56; y += 13) {
+            drawLine(image, 68, y, 123, 54 - (y / 2), 0xFF6B3C9C, 2);
         }
     }
 
