@@ -25,6 +25,7 @@ public final class ModuleManager {
         new Module("back_weapon", "Back Weapon", "Modeled sword, katana, crystal blade or scythe on your back.", "⚔", Module.Category.VISUAL, false),
         new Module("weapon_models", "Weapon Models", "Replace Diamond/Netherite and utility weapons with uploaded Oni or Ender Eye sets.", "⚒", Module.Category.VISUAL, true),
         new Module("head_cosmetic", "Head Cosmetic", "Crown, horns, antlers or arcane crest.", "♛", Module.Category.VISUAL, false),
+        new Module("little_demon", "Little Demon Set", "Full uploaded Little Demon cosmetic OBJ set.", "♠", Module.Category.VISUAL, false),
 
         new Module("drop_protection", "Drop Protection", "Press Drop twice before protected items leave your hand.", "⛨", Module.Category.PLAYER, false),
 
