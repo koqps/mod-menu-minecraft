@@ -31,6 +31,7 @@ public record WeaponThemeProperty() implements SelectItemModelProperty<WeaponThe
             int seed,
             ItemDisplayContext displayContext
     ) {
+        if (!TopkaClient.MODULES.byId("weapon_models").enabled()) return Theme.VANILLA;
         var cfg = TopkaClient.CONFIG.get();
 
         if (isDiamond(stack)) return Theme.fromConfig(cfg.diamondWeaponTheme);
