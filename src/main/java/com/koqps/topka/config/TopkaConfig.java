@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class TopkaConfig {
-    public int cosmeticRendererVersion = 7;
+    public int cosmeticRendererVersion = 8;
     public Map<String, Boolean> modules = new HashMap<>();
     public List<WaypointConfig> waypoints = new ArrayList<>();
     public List<String> highlightedItems = new ArrayList<>(List.of(
