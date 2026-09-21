@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class TopkaConfig {
-    public int cosmeticRendererVersion = 4;
+    public int cosmeticRendererVersion = 5;
     public Map<String, Boolean> modules = new HashMap<>();
     public List<WaypointConfig> waypoints = new ArrayList<>();
     public List<String> highlightedItems = new ArrayList<>(List.of(
@@ -147,6 +147,28 @@ public final class TopkaConfig {
     public float wingsBackOffset = 0.12F;
     public float wingsTilt = 0.0F;
     public float wingsFold = 0.0F;
+
+    // Uploaded weapon model replacements
+    // 0 = vanilla, 1 = Oni, 2 = Ender Eye
+    public int diamondWeaponTheme = 2;
+    public int netheriteWeaponTheme = 1;
+    public int utilityWeaponTheme = 1;
+
+    // Imported cosmetics
+    public float importedWingScale = 1.0F;
+    public float importedWingVerticalOffset = 0.0F;
+    public float importedWingBackOffset = 0.10F;
+    public int importedWingTintArgb = 0xFFFFFFFF;
+
+    public float importedHaloScale = 1.0F;
+    public float importedHaloHeight = 0.18F;
+    public int importedHaloTintArgb = 0xFFFFFFFF;
+
+    public float littleDemonScale = 1.0F;
+    public float littleDemonVerticalOffset = 0.0F;
+    public float littleDemonBackOffset = 0.08F;
+    public int littleDemonTintArgb = 0xFFFFFFFF;
+    public boolean littleDemonShowOthers = false;
 
     // Back weapon
     public int backWeaponStyle = 0;
