@@ -436,10 +436,10 @@ public final class ModuleSettingsScreen extends Screen {
     }
 
     private void addWeaponPickerTargets() {
-        final int[] xs = {120, 320};
+        final int[] xs = {42, 220, 398};
         final int[] ys = {100, 206, 312};
         for (int group = 0; group < 3; group++) {
-            for (int theme = 0; theme < 2; theme++) {
+            for (int theme = 0; theme < 3; theme++) {
                 final int selectedGroup = group;
                 final int selectedTheme = theme;
                 addLocalClickTarget(xs[theme], ys[group], 150, 70,
@@ -465,7 +465,7 @@ public final class ModuleSettingsScreen extends Screen {
 
         drawWeaponGroup(g, mx, my, "DIAMOND SWORD / AXE / PICKAXE", 82, 100, c.diamondWeaponTheme);
         drawWeaponGroup(g, mx, my, "NETHERITE SWORD / AXE / PICKAXE", 188, 206, c.netheriteWeaponTheme);
-        drawWeaponGroup(g, mx, my, "BOW / SHIELD / MACE / TRIDENT", 294, 312, c.utilityWeaponTheme);
+        drawWeaponGroup(g, mx, my, "BOW / CROSSBOW / SHIELD / MACE / TRIDENT + EXTRAS", 294, 312, c.utilityWeaponTheme);
     }
 
     private void drawWeaponGroup(
@@ -478,8 +478,9 @@ public final class ModuleSettingsScreen extends Screen {
             int selectedTheme
     ) {
         g.text(font, UiFont.text(title), 32, titleY, 0xFFB9B9C6, true);
-        drawWeaponCard(g, mx, my, 120, cardY, 0, selectedTheme, "VANILLA", "Minecraft");
-        drawWeaponCard(g, mx, my, 320, cardY, 1, selectedTheme, "ONI", "Uploaded set");
+        drawWeaponCard(g, mx, my, 42, cardY, 0, selectedTheme, "VANILLA", "Minecraft");
+        drawWeaponCard(g, mx, my, 220, cardY, 1, selectedTheme, "ONI", "Uploaded set");
+        drawWeaponCard(g, mx, my, 398, cardY, 2, selectedTheme, "VALENTINE", "Animated pack");
     }
 
     private void drawWeaponCard(
@@ -493,7 +494,7 @@ public final class ModuleSettingsScreen extends Screen {
             String title,
             String subtitle
     ) {
-        boolean selected = Math.floorMod(selectedTheme, 2) == theme;
+        boolean selected = Math.floorMod(selectedTheme, 3) == theme;
         boolean hover = mx >= x && mx < x + 150 && my >= y && my < y + 70;
         int background = selected ? Theme.withAlpha(Theme.accent(), 44)
                 : (hover ? 0xFF282833 : 0xFF181821);
@@ -508,8 +509,12 @@ public final class ModuleSettingsScreen extends Screen {
         int badge = selected ? Theme.accent() : 0xFF4D4D5B;
         g.fill(x + 12, y + 12, x + 42, y + 42,
                 selected ? Theme.withAlpha(Theme.accent(), 70) : 0xFF23232C);
-        g.centeredText(font, UiFont.text(theme == 0 ? "V" : "O"),
-                x + 27, y + 23, badge);
+        String badgeText = switch (theme) {
+            case 1 -> "O";
+            case 2 -> "♥";
+            default -> "V";
+        };
+        g.centeredText(font, UiFont.text(badgeText), x + 27, y + 23, badge);
 
         g.text(font, UiFont.text(title), x + 50, y + 13,
                 selected ? 0xFFFFFFFF : 0xFFD1D1DC, true);
@@ -792,7 +797,11 @@ public final class ModuleSettingsScreen extends Screen {
     }
 
     private static String weaponThemeName(int theme) {
-        return theme == 1 ? "ONI" : "VANILLA";
+        return switch (Math.floorMod(theme, 3)) {
+            case 1 -> "ONI";
+            case 2 -> "VALENTINE";
+            default -> "VANILLA";
+        };
     }
 
     private static String crosshairStyleName(int style) {
