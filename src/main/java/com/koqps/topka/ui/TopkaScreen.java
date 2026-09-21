@@ -117,28 +117,9 @@ public final class TopkaScreen extends Screen {
             if (!value.equals(searchQuery)) {
                 searchQuery = value;
                 scrollRow = 0;
-                rebuildWidgets();
             }
         });
         addRenderableWidget(searchBox);
-
-        List<Module> filtered = filteredModules();
-        clampScroll(filtered);
-        int first = scrollRow * 2;
-        int last = Math.min(filtered.size(), first + VISIBLE_ROWS * 2);
-
-        for (int i = first; i < last; i++) {
-            Module module = filtered.get(i);
-            int visibleIndex = i - first;
-            int column = visibleIndex % 2;
-            int row = visibleIndex / 2;
-            int cardX = 172 + column * (CARD_W + CARD_GAP_X);
-            int cardY = 82 + row * (CARD_H + CARD_GAP_Y);
-            addClickTarget(cardX, cardY, CARD_W, CARD_H, () -> {
-                module.toggle();
-                TopkaClient.CONFIG.save();
-            });
-        }
 
         addClickTarget(172, 426, 104, 30, () -> minecraft.gui.setScreen(new ThemeScreen(this)));
         addClickTarget(284, 426, 118, 30, () -> minecraft.gui.setScreen(new HudEditorScreen(this)));
@@ -233,7 +214,7 @@ public final class TopkaScreen extends Screen {
         drawBottomButton(g, localMx, localMy, 648, 426, 56, "Off");
 
         g.text(font, UiFont.text("Left click toggles • Right click settings • Mouse wheel scrolls"), 172, 477, 0xFF686879, false);
-        g.text(font, UiFont.text("Mod Menu 0.11.0"), 618, 477, 0xFF686879, true);
+        g.text(font, UiFont.text("Mod Menu 0.11.4"), 618, 477, 0xFF686879, true);
 
         g.pose().popMatrix();
 
@@ -347,7 +328,6 @@ public final class TopkaScreen extends Screen {
     private void setCategory(Module.Category category) {
         selectedCategory = category;
         scrollRow = 0;
-        rebuildWidgets();
     }
 
     private void resetWindowPosition() {
@@ -387,6 +367,30 @@ public final class TopkaScreen extends Screen {
                 int cardY = 82 + row * (CARD_H + CARD_GAP_Y);
                 if (inside(mx, my, cardX, cardY, CARD_W, CARD_H)) {
                     minecraft.gui.setScreen(new ModuleSettingsScreen(this, filtered.get(i)));
+                    return true;
+                }
+            }
+        }
+
+        if (click.button() == InputConstants.MOUSE_BUTTON_LEFT) {
+            List<Module> filtered = filteredModules();
+            clampScroll(filtered);
+            int first = scrollRow * 2;
+            int last = Math.min(filtered.size(), first + VISIBLE_ROWS * 2);
+            for (int i = first; i < last; i++) {
+                int visibleIndex = i - first;
+                int column = visibleIndex % 2;
+                int row = visibleIndex / 2;
+                int cardX = 172 + column * (CARD_W + CARD_GAP_X);
+                int cardY = 82 + row * (CARD_H + CARD_GAP_Y);
+                if (inside(mx, my, cardX, cardY, CARD_W, CARD_H)) {
+                    Module selected = filtered.get(i);
+                    if ("weapon_models".equals(selected.id())) {
+                        minecraft.gui.setScreen(new ModuleSettingsScreen(this, selected));
+                    } else {
+                        selected.toggle();
+                        TopkaClient.CONFIG.save();
+                    }
                     return true;
                 }
             }
@@ -447,7 +451,6 @@ public final class TopkaScreen extends Screen {
             if (scrollY < 0) scrollRow = Math.min(max, scrollRow + 1);
             if (scrollY > 0) scrollRow = Math.max(0, scrollRow - 1);
             if (before != scrollRow) {
-                rebuildWidgets();
                 return true;
             }
         }
