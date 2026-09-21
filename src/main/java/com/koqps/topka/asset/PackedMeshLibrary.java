@@ -133,6 +133,11 @@ public final class PackedMeshLibrary {
             addArmorParts(models, "valkyrie");
         } else if (pack == Pack.DEMONIC_ARMOR) {
             addArmorParts(models, "demonic");
+        } else if (pack == Pack.PALADIN_ARMOR) {
+            // Paladin is stored as the untouched source OBJ. Split/re-center
+            // it here so every generated section is local to the Minecraft
+            // body bone it will animate with.
+            addArmorParts(models, "paladin");
         }
 
         return Map.copyOf(models);
