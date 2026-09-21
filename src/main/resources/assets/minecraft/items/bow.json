@@ -7,7 +7,7 @@
         "when": "oni",
         "model": {
           "type": "minecraft:special",
-          "base": "minecraft:item/bow",
+          "base": "topka:item/oni_weapon_base",
           "model": {
             "type": "topka:weapon_mesh",
             "pack": "oni",
@@ -23,7 +23,7 @@
         "when": "ender",
         "model": {
           "type": "minecraft:special",
-          "base": "minecraft:item/bow",
+          "base": "topka:item/oni_weapon_base",
           "model": {
             "type": "topka:weapon_mesh",
             "pack": "ender",
