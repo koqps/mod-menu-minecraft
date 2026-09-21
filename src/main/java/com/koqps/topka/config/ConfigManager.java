@@ -175,7 +175,7 @@ public final class ConfigManager {
         config.capeStyle = Math.clamp(config.capeStyle, 0, 3);
         config.capeOpacity = Math.clamp(config.capeOpacity, 30, 235);
 
-        config.wingsStyle = Math.clamp(config.wingsStyle, 0, 3);
+        config.wingsStyle = Math.clamp(config.wingsStyle, 0, 4);
         config.wingsScale = Math.clamp(config.wingsScale, 0.45F, 2.25F);
         config.wingsSpread = Math.clamp(config.wingsSpread, 0.35F, 1.65F);
         config.wingsFlapSpeed = Math.clamp(config.wingsFlapSpeed, 0.10F, 3.0F);
@@ -184,6 +184,10 @@ public final class ConfigManager {
         config.wingsDetail = Math.clamp(config.wingsDetail, 1, 5);
         config.wingsDepth = Math.clamp(config.wingsDepth, 0.02F, 0.42F);
         config.wingsBoneWidth = Math.clamp(config.wingsBoneWidth, 1.0F, 8.0F);
+        config.wingsVerticalOffset = Math.clamp(config.wingsVerticalOffset, -0.75F, 0.75F);
+        config.wingsBackOffset = Math.clamp(config.wingsBackOffset, -0.20F, 0.75F);
+        config.wingsTilt = Math.clamp(config.wingsTilt, -35.0F, 35.0F);
+        config.wingsFold = Math.clamp(config.wingsFold, 0.0F, 0.70F);
 
         config.backWeaponStyle = Math.clamp(config.backWeaponStyle, 0, 3);
         config.backWeaponScale = Math.clamp(config.backWeaponScale, 0.45F, 2.25F);
