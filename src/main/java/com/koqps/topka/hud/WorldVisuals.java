@@ -5,7 +5,6 @@ import com.koqps.topka.config.WaypointConfig;
 import com.koqps.topka.cosmetic.WingCosmeticRenderer;
 import com.koqps.topka.cosmetic.CapeCosmeticRenderer;
 import com.koqps.topka.cosmetic.ImportedCosmeticRenderer;
-import com.koqps.topka.cosmetic.ArmorCosmeticRenderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
@@ -61,7 +60,6 @@ public final class WorldVisuals {
         if (TopkaClient.MODULES.byId("back_weapon").enabled()) renderBackWeapon(context, camera, client);
         if (TopkaClient.MODULES.byId("head_cosmetic").enabled()) renderHeadCosmetic(context, camera, client);
         if (TopkaClient.MODULES.byId("little_demon").enabled()) ImportedCosmeticRenderer.renderLittleDemon(context, camera, client);
-        if (TopkaClient.MODULES.byId("armor_cosmetic").enabled()) ArmorCosmeticRenderer.render(context, camera, client);
     }
 
     private static void renderHitboxes(LevelRenderContext context, Vec3 camera, Minecraft client) {
