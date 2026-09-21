@@ -139,6 +139,9 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Line width", () -> String.format("%.1f", c.haloLineWidth), () -> c.haloLineWidth = Math.max(1F, c.haloLineWidth - 0.25F), () -> c.haloLineWidth = Math.min(7F, c.haloLineWidth + 0.25F));
                 row("Color", () -> hex(c.haloColorArgb), () -> c.haloColorArgb = previousColor(c.haloColorArgb), () -> c.haloColorArgb = nextColor(c.haloColorArgb));
                 row("Rainbow", () -> c.haloRainbow ? "ON" : "OFF", () -> c.haloRainbow = !c.haloRainbow, () -> c.haloRainbow = !c.haloRainbow);
+                row("Pack scale", () -> String.format("%.2f", c.importedHaloScale), () -> c.importedHaloScale = Math.max(0.35F, c.importedHaloScale - 0.05F), () -> c.importedHaloScale = Math.min(2.5F, c.importedHaloScale + 0.05F));
+                row("Pack height", () -> String.format("%.2f", c.importedHaloHeight), () -> c.importedHaloHeight = Math.max(-0.5F, c.importedHaloHeight - 0.05F), () -> c.importedHaloHeight = Math.min(1.5F, c.importedHaloHeight + 0.05F));
+                row("Pack tint", () -> hex(c.importedHaloTintArgb), () -> c.importedHaloTintArgb = previousColor(c.importedHaloTintArgb), () -> c.importedHaloTintArgb = nextColor(c.importedHaloTintArgb));
             }
             case "trails" -> {
                 row("Style", () -> trailStyleName(c.trailStyle), () -> c.trailStyle = Math.floorMod(c.trailStyle - 1, 4), () -> c.trailStyle = Math.floorMod(c.trailStyle + 1, 4));
