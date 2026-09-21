@@ -261,9 +261,10 @@ public final class ModuleSettingsScreen extends Screen {
                 row("Show others", () -> c.littleDemonShowOthers ? "ON" : "OFF", () -> c.littleDemonShowOthers = !c.littleDemonShowOthers, () -> c.littleDemonShowOthers = !c.littleDemonShowOthers);
             }
             case "armor_cosmetic" -> {
-                row("Set", () -> c.armorCosmeticStyle == 2 ? "DEMONIC" : "VALKYRIE",
-                        () -> c.armorCosmeticStyle = c.armorCosmeticStyle == 2 ? 1 : 2,
-                        () -> c.armorCosmeticStyle = c.armorCosmeticStyle == 2 ? 1 : 2);
+                row("Whole set", () -> c.armorHelmetStyle == 2 && c.armorChestStyle == 2
+                                && c.armorLeggingsStyle == 2 && c.armorBootsStyle == 2 ? "DEMONIC" : "VALKYRIE",
+                        () -> applyArmorWholeSet(c, c.armorHelmetStyle == 2 ? 1 : 2),
+                        () -> applyArmorWholeSet(c, c.armorHelmetStyle == 2 ? 1 : 2));
                 row("Scale", () -> String.format("%.2f", c.armorCosmeticScale),
                         () -> c.armorCosmeticScale = Math.max(0.70F, c.armorCosmeticScale - 0.05F),
                         () -> c.armorCosmeticScale = Math.min(1.35F, c.armorCosmeticScale + 0.05F));
@@ -335,6 +336,14 @@ public final class ModuleSettingsScreen extends Screen {
                 if (isHudModule()) row("HUD position", () -> "OPEN EDITOR BELOW", () -> { }, () -> { });
             }
         }
+    }
+
+    private static void applyArmorWholeSet(com.koqps.topka.config.TopkaConfig c, int style) {
+        c.armorCosmeticStyle = style;
+        c.armorHelmetStyle = style;
+        c.armorChestStyle = style;
+        c.armorLeggingsStyle = style;
+        c.armorBootsStyle = style;
     }
 
     private void row(String label, ValueText value, Runnable minus, Runnable plus) {
@@ -630,7 +639,9 @@ public final class ModuleSettingsScreen extends Screen {
                 c.littleDemonTintArgb = 0xFFFFFFFF; c.littleDemonShowOthers = false;
             }
             case "armor_cosmetic" -> {
-                c.armorCosmeticStyle = 1; c.armorCosmeticScale = 1F; c.armorCosmeticVerticalOffset = 0F;
+                c.armorCosmeticStyle = 1;
+                c.armorHelmetStyle = 1; c.armorChestStyle = 1; c.armorLeggingsStyle = 1; c.armorBootsStyle = 1;
+                c.armorCosmeticScale = 1F; c.armorCosmeticVerticalOffset = 0F;
                 c.armorCosmeticTintArgb = 0xFFFFFFFF; c.armorCosmeticShowOthers = false;
             }
             case "back_weapon" -> {
