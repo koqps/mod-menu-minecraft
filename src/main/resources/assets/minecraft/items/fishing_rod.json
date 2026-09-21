@@ -6,23 +6,48 @@
       {
         "when": "valentine",
         "model": {
-          "type": "minecraft:special",
-          "base": "topka:item/valentine_rod_base",
-          "model": {
-            "type": "topka:weapon_mesh",
-            "pack": "valentine",
-            "model": "rod",
-            "scale": 1,
-            "rx": 0,
-            "ry": 0,
-            "rz": 0
+          "type": "minecraft:condition",
+          "property": "minecraft:fishing_rod/cast",
+          "on_false": {
+            "type": "minecraft:special",
+            "base": "topka:item/valentine_rod_base",
+            "model": {
+              "type": "topka:weapon_mesh",
+              "pack": "valentine",
+              "model": "rod",
+              "scale": 1,
+              "rx": 0,
+              "ry": 0,
+              "rz": 0
+            }
+          },
+          "on_true": {
+            "type": "minecraft:special",
+            "base": "topka:item/valentine_rod_base",
+            "model": {
+              "type": "topka:weapon_mesh",
+              "pack": "valentine",
+              "model": "rod_cast",
+              "scale": 1,
+              "rx": 0,
+              "ry": 0,
+              "rz": 0
+            }
           }
         }
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "minecraft:item/fishing_rod"
+      "type": "minecraft:condition",
+      "property": "minecraft:fishing_rod/cast",
+      "on_false": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/fishing_rod"
+      },
+      "on_true": {
+        "type": "minecraft:model",
+        "model": "minecraft:item/fishing_rod_cast"
+      }
     }
   }
 }
