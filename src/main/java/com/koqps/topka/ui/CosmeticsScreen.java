@@ -458,6 +458,40 @@ public final class CosmeticsScreen extends Screen {
         int my = localMouseY(click.y());
 
         if (click.button() == 0) {
+            // Direct fallback hit-testing for every control. These mirror the
+            // real Button widgets created in init(), so clicks still work even
+            // if a scaled/invisible widget misses an event on a client build.
+            Section[] sections = Section.values();
+            for (int i = 0; i < sections.length; i++) {
+                if (inside(mx, my, 15, 86 + i * 29, 118, 24)) {
+                    section = sections[i];
+                    searchQuery = "";
+                    if (searchBox != null) searchBox.setValue("");
+                    return true;
+                }
+            }
+
+            if (inside(mx, my, 172, 426, 104, 30)) {
+                onClose();
+                return true;
+            }
+            if (inside(mx, my, 284, 426, 118, 30)) {
+                toggleCurrentModule();
+                return true;
+            }
+            if (inside(mx, my, 410, 426, 118, 30)) {
+                equipWholeSet();
+                return true;
+            }
+            if (inside(mx, my, 536, 426, 104, 30)) {
+                clearArmor();
+                return true;
+            }
+            if (inside(mx, my, 648, 426, 56, 30)) {
+                resetColors();
+                return true;
+            }
+
             List<CosmeticEntry> entries = filteredEntries();
             for (int i = 0; i < entries.size(); i++) {
                 int column = i % 2;
