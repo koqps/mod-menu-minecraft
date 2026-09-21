@@ -34,6 +34,22 @@
             "rz": 0
           }
         }
+      },
+      {
+        "when": "valentine",
+        "model": {
+          "type": "minecraft:special",
+          "base": "topka:item/valentine_bow_base",
+          "model": {
+            "type": "topka:weapon_mesh",
+            "pack": "valentine",
+            "model": "bow",
+            "scale": 1,
+            "rx": 0,
+            "ry": 0,
+            "rz": 0
+          }
+        }
       }
     ],
     "fallback": {
