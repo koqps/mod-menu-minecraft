@@ -11,6 +11,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.util.Mth;
+import net.minecraft.Util;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
@@ -34,26 +36,31 @@ public final class ImportedCosmeticRenderer {
             if (player == client.player && client.options.getCameraType().isFirstPerson()) continue;
             if (client.player.distanceToSqr(player) > 4096.0D) continue;
 
-            AABB box = player.getBoundingBox();
+            float partialTick = client.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+            double renderX = Mth.lerp(partialTick, player.xo, player.getX());
+            double renderY = Mth.lerp(partialTick, player.yo, player.getY());
+            double renderZ = Mth.lerp(partialTick, player.zo, player.getZ());
             double yaw = Math.toRadians(player.getVisualRotationYInDegrees());
 
-            // Explicit player-space basis. This avoids the old issue where the
-            // broad XY wing plane could end up nearly edge-on depending on yaw.
+            // Player-local basis. Position is interpolated with the same frame
+            // partial tick used by Minecraft entity rendering, so the cosmetic
+            // stays glued to the body instead of trailing one game tick behind.
             Vec3 right = new Vec3(Math.cos(yaw), 0.0D, Math.sin(yaw));
             Vec3 back = new Vec3(Math.sin(yaw), 0.0D, -Math.cos(yaw));
             Vec3 up = new Vec3(0.0D, 1.0D, 0.0D);
 
             Vec3 origin = new Vec3(
-                    (box.minX + box.maxX) * 0.5D,
-                    box.minY + (player.isCrouching() ? 1.18D : 1.30D) + cfg.importedWingVerticalOffset,
-                    (box.minZ + box.maxZ) * 0.5D
+                    renderX,
+                    renderY + (player.isCrouching() ? 1.18D : 1.30D) + cfg.importedWingVerticalOffset,
+                    renderZ
             );
 
-            // Keep the supplied five-piece wing set clearly behind the armor
-            // and a little tighter to the player. In 0.13.2 its near-camera
-            // panels visually merged into the Paladin shoulder silhouette.
             float sourceScale = 0.50F * cfg.importedWingScale * cfg.wingsScale;
-            double backOffset = 0.26D + cfg.importedWingBackOffset;
+            // Keep only a small body clearance. User-configured back offset is
+            // intentionally damped so old configs cannot push the rig far away.
+            double backOffset = 0.075D + cfg.importedWingBackOffset * 0.20D;
+            float flap = (float) Math.sin(Util.getMillis() * 0.001D * Math.max(0.05F, cfg.wingsFlapSpeed) * 3.0D)
+                    * Math.clamp(cfg.wingsFlapAmount, 0.0F, 1.0F) * 0.075F;
             int tint = multiplyAlpha(cfg.wingsPrimaryColorArgb, cfg.wingsOpacity);
 
             PoseStack poseStack = context.poseStack();
@@ -67,7 +74,7 @@ public final class ImportedCosmeticRenderer {
                         (pose, vertices) -> emitWingTriangles(
                                 pose, vertices, subMesh,
                                 origin, right, up, back,
-                                sourceScale, backOffset, tint
+                                sourceScale, backOffset, flap, tint
                         )
                 );
             }
@@ -86,6 +93,7 @@ public final class ImportedCosmeticRenderer {
             Vec3 back,
             float scale,
             double backOffset,
+            float flap,
             int color
     ) {
         var source = mesh.vertices();
@@ -120,15 +128,27 @@ public final class ImportedCosmeticRenderer {
             Vec3 back,
             float scale,
             double backOffset,
+            float flap,
             int color
     ) {
-        // Source bounds are approximately:
-        // X -2.25..2.24, Y 0..2.45, Z 0.32..0.84.
-        // Re-center Y/Z around the supplied complete set before mapping it to
-        // the player's animated body basis.
         double lx = source.x() * scale;
         double ly = (source.y() - 1.20D) * scale;
         double lz = (source.z() - 0.58D) * scale + backOffset;
+
+        // Mechanical in-plane flex around the two center mounts. This changes
+        // shape without translating the complete rig away from the player.
+        double side = Math.signum(lx);
+        if (side != 0.0D) {
+            double pivotX = side * 0.18D;
+            double pivotY = 0.08D;
+            double angle = -side * flap;
+            double cos = Math.cos(angle);
+            double sin = Math.sin(angle);
+            double dx = lx - pivotX;
+            double dy = ly - pivotY;
+            lx = pivotX + dx * cos - dy * sin;
+            ly = pivotY + dx * sin + dy * cos;
+        }
 
         Vec3 p = origin
                 .add(right.scale(lx))
