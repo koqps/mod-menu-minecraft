@@ -6,23 +6,164 @@
       {
         "when": "valentine",
         "model": {
-          "type": "minecraft:special",
-          "base": "topka:item/valentine_crossbow_base",
-          "model": {
-            "type": "topka:weapon_mesh",
-            "pack": "valentine",
-            "model": "crossbow",
-            "scale": 1,
-            "rx": 0,
-            "ry": 0,
-            "rz": 0
+          "type": "minecraft:select",
+          "property": "minecraft:charge_type",
+          "cases": [
+            {
+              "when": "arrow",
+              "model": {
+                "type": "minecraft:special",
+                "base": "topka:item/valentine_crossbow_base",
+                "model": {
+                  "type": "topka:weapon_mesh",
+                  "pack": "valentine",
+                  "model": "crossbow_2_charged",
+                  "scale": 1,
+                  "rx": 0,
+                  "ry": 0,
+                  "rz": 0
+                }
+              }
+            },
+            {
+              "when": "rocket",
+              "model": {
+                "type": "minecraft:special",
+                "base": "topka:item/valentine_crossbow_base",
+                "model": {
+                  "type": "topka:weapon_mesh",
+                  "pack": "valentine",
+                  "model": "crossbow_charged",
+                  "scale": 1,
+                  "rx": 0,
+                  "ry": 0,
+                  "rz": 0
+                }
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:condition",
+            "property": "minecraft:using_item",
+            "on_false": {
+              "type": "minecraft:special",
+              "base": "topka:item/valentine_crossbow_base",
+              "model": {
+                "type": "topka:weapon_mesh",
+                "pack": "valentine",
+                "model": "crossbow",
+                "scale": 1,
+                "rx": 0,
+                "ry": 0,
+                "rz": 0
+              }
+            },
+            "on_true": {
+              "type": "minecraft:range_dispatch",
+              "property": "minecraft:crossbow/pull",
+              "entries": [
+                {
+                  "threshold": 0.58,
+                  "model": {
+                    "type": "minecraft:special",
+                    "base": "topka:item/valentine_crossbow_base",
+                    "model": {
+                      "type": "topka:weapon_mesh",
+                      "pack": "valentine",
+                      "model": "crossbow_1",
+                      "scale": 1,
+                      "rx": 0,
+                      "ry": 0,
+                      "rz": 0
+                    }
+                  }
+                },
+                {
+                  "threshold": 1,
+                  "model": {
+                    "type": "minecraft:special",
+                    "base": "topka:item/valentine_crossbow_base",
+                    "model": {
+                      "type": "topka:weapon_mesh",
+                      "pack": "valentine",
+                      "model": "crossbow_2",
+                      "scale": 1,
+                      "rx": 0,
+                      "ry": 0,
+                      "rz": 0
+                    }
+                  }
+                }
+              ],
+              "fallback": {
+                "type": "minecraft:special",
+                "base": "topka:item/valentine_crossbow_base",
+                "model": {
+                  "type": "topka:weapon_mesh",
+                  "pack": "valentine",
+                  "model": "crossbow_0",
+                  "scale": 1,
+                  "rx": 0,
+                  "ry": 0,
+                  "rz": 0
+                }
+              }
+            }
           }
         }
       }
     ],
     "fallback": {
-      "type": "minecraft:model",
-      "model": "minecraft:item/crossbow"
+      "type": "minecraft:select",
+      "property": "minecraft:charge_type",
+      "cases": [
+        {
+          "when": "arrow",
+          "model": {
+            "type": "minecraft:model",
+            "model": "minecraft:item/crossbow_arrow"
+          }
+        },
+        {
+          "when": "rocket",
+          "model": {
+            "type": "minecraft:model",
+            "model": "minecraft:item/crossbow_firework"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:condition",
+        "property": "minecraft:using_item",
+        "on_false": {
+          "type": "minecraft:model",
+          "model": "minecraft:item/crossbow"
+        },
+        "on_true": {
+          "type": "minecraft:range_dispatch",
+          "property": "minecraft:crossbow/pull",
+          "entries": [
+            {
+              "threshold": 0.58,
+              "model": {
+                "type": "minecraft:model",
+                "model": "minecraft:item/crossbow_pulling_1"
+              }
+            },
+            {
+              "threshold": 1,
+              "model": {
+                "type": "minecraft:model",
+                "model": "minecraft:item/crossbow_pulling_2"
+              }
+            }
+          ],
+          "fallback": {
+            "type": "minecraft:model",
+            "model": "minecraft:item/crossbow_pulling_0"
+          }
+        }
+      }
     }
   }
 }
